@@ -1,15 +1,19 @@
 import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/dashboard";
+import LeftSidebar from './components/leftsidebar';
+import RightSidebar from './components/rightsidebar';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p className="text-2xl font-bold text-[#1F27A6]">
-          baho bilat
-        </p>
-      </header>
-    </div>
+    <BrowserRouter>
+      <LeftSidebar />
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+      </Routes>
+      <RightSidebar />
+    </BrowserRouter>
   );
 }
 
