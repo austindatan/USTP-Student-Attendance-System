@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
+import { useNavigate } from 'react-router-dom';
+
 
 export default function Teacher_Dashboard({ selectedDate }) {
+
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login-instructor');
+    };
+
     const [presentStudents, setPresentStudents] = useState([]);
 
     // Simulated attendance DB (for demo)
@@ -43,11 +52,21 @@ export default function Teacher_Dashboard({ selectedDate }) {
         );
     };
 
-    return (
-        <div
-            className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
-            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
-        >
+return (
+    <div
+        className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
+        style={{ backgroundImage: "url('assets/forest_theme.png')" }}
+    >
+        {/* LOGOUT BUTTON NI, SARIE FRONTEND YUTS WAKO KABALO ASA NI IBUTANG. PA ADJUST NALNG KO FLS TENKS*/}
+        <div className="absolute top-4 right-4 z-50">
+            <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
+            >
+                Logout
+            </button>
+        </div>
+
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 <div className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6"
                     style={{
