@@ -24,6 +24,25 @@
     font-family: 'Courier Prime', monospace;
 }
 
+.fixed-bg {
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+}
+
+html, body {
+  height: 100%;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
 .App {
   text-align: center;
 }
