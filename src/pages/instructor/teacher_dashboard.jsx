@@ -3,10 +3,9 @@ import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
 
-
 export default function Teacher_Dashboard({ selectedDate }) {
-
     const navigate = useNavigate();
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login-instructor');
@@ -14,7 +13,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const [presentStudents, setPresentStudents] = useState([]);
 
-    // Simulated attendance DB (for demo)
     const fakeAttendance = {
         '2025-05-20': ['Jean Grey', 'Pearl Pangan', 'Ghost'],
         '2025-05-21': ['Luna Snow'],
@@ -40,8 +38,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     useEffect(() => {
         const dateKey = format(selectedDate || new Date(), 'yyyy-MM-dd');
-        const present = fakeAttendance[dateKey] || [];
-        setPresentStudents(present);
+        setPresentStudents(fakeAttendance[dateKey] || []);
     }, [selectedDate]);
 
     const toggleAttendance = (studentName) => {
@@ -52,29 +49,32 @@ export default function Teacher_Dashboard({ selectedDate }) {
         );
     };
 
-return (
-    <div
-        className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
-        style={{ backgroundImage: "url('assets/forest_theme.png')" }}
-    >
-        {/* LOGOUT BUTTON NI, SARIE FRONTEND YUTS WAKO KABALO ASA NI IBUTANG. PA ADJUST NALNG KO FLS TENKS*/}
-        <div className="absolute top-4 right-4 z-50">
-            <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
-            >
-                Logout
-            </button>
-        </div>
+    return (
+        <div
+            className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
+            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
+        >
+            {/* LOGOUT BUTTON */}
+            <div className="absolute top-4 right-4 z-50">
+                <button
+                    onClick={handleLogout}
+                    className="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
+                >
+                    Logout
+                </button>
+            </div>
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
-                <div className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6"
+                {/* Header */}
+                <div
+                    className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6"
                     style={{
                         backgroundImage: "url('assets/classes_vector_2.png')",
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "right 50px center",
                         backgroundSize: "contain"
-                    }}>
+                    }}
+                >
                     <div className="flex justify-between items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             strokeWidth="1.5" stroke="currentColor" className="size-4">
@@ -93,6 +93,7 @@ return (
                     </div>
                 </div>
 
+                {/* Search */}
                 <div className="relative">
                     <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -109,6 +110,7 @@ return (
                     />
                 </div>
 
+                {/* Student Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
                     {students.map((student, index) => {
                         const isPresent = presentStudents.includes(student.name);
@@ -120,32 +122,34 @@ return (
                                     bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
                                     ${isPresent ? 'opacity-100' : 'opacity-60'}`}
                             >
-                                <div className="overflow-hidden rounded-t-[20px]">
-                                    <img src={student.img}
-                                        className={`w-36 h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
-                                        alt={student.name} />
+                                <div className="overflow-hidden rounded-t-[20px] flex justify-center">
+                                    <img
+                                        src={student.img}
+                                        className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
+                                        alt={student.name}
+                                    />
                                 </div>
                                 <div className="pl-3 pr-4 pt-2 pb-4 items-center">
-                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px] 
+                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
                                         ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
                                         {isPresent ? 'Present' : 'Absent'}
                                     </p>
                                     <div className="flex items-center justify-between">
-                                        <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">
-                                        {student.name.includes(" ") ? (
-                                            <>
-                                            {student.name.split(" ")[0]} <br /> {student.name.split(" ")[1]}
-                                            </>
-                                        ) : student.name}
+                                        <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
+                                            {student.name.includes(" ") ? (
+                                                <>
+                                                    {student.name.split(" ")[0]} <br /> {student.name.split(" ")[1]}
+                                                </>
+                                            ) : student.name}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         );
                     })}
-                    
                 </div>
             </section>
         </div>
     );
 }
+
