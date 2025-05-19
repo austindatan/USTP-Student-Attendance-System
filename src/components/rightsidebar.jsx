@@ -1,0 +1,133 @@
+import React, { useState } from "react";
+import {
+    format,
+    startOfMonth,
+    endOfMonth,
+    startOfWeek,
+    addDays,
+    addMonths,
+    subMonths,
+    isSameMonth,
+    isSameDay,
+} from "date-fns";
+import { FiSettings } from "react-icons/fi";
+
+const RightSidebar = () => {
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
+    const renderHeader = () => (
+        <div className="flex justify-between items-center mb-2">
+            <h2 className="text-base font-semibold text-gray-700">
+                {format(currentMonth, "MMMM yyyy")}
+            </h2>
+            
+            <div className="gap-4 flex items-center">
+                <button
+                    className="text-xl text-gray-500 hover:text-purple-600"
+                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                >
+                    &lt;
+                </button>
+
+                <button
+                    className="text-xl text-gray-500 hover:text-purple-600"
+                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                >
+                    &gt;
+                </button>
+            </div>
+        </div>
+    );
+
+    const renderDays = () => {
+        const days = [];
+        const dateFormat = "EE";
+        const startDate = startOfWeek(currentMonth);
+
+        for (let i = 0; i < 7; i++) {
+            days.push(
+                <div
+                    className="text-[12px] font-medium text-center text-gray-400"
+                    key={i}
+                >
+                    {format(addDays(startDate, i), dateFormat)}
+                </div>
+            );
+        }
+
+        return <div className="grid grid-cols-7 mb-1">{days}</div>;
+    };
+
+    const renderCells = () => {
+        const monthStart = startOfMonth(currentMonth);
+        const monthEnd = endOfMonth(monthStart);
+        const startDate = startOfWeek(monthStart);
+        const endDate = addDays(startDate, 41); // ensures 6 full weeks are shown
+
+        const rows = [];
+        let days = [];
+        let day = startDate;
+
+        while (day <= endDate) {
+            for (let i = 0; i < 7; i++) {
+                const cloneDay = day;
+                const isToday = isSameDay(day, new Date());
+                const isSelected = isSameDay(day, selectedDate);
+                const isCurrentMonth = isSameMonth(day, monthStart);
+
+                days.push(
+                    <div
+                        key={day}
+                        className={`text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150
+                            ${isSelected ? "bg-purple-500 text-white"
+                                : isToday ? "border border-purple-400 text-purple-500"
+                                : isCurrentMonth ? "text-gray-700"
+                                : "text-gray-300"
+                            }`}
+                        onClick={() => setSelectedDate(cloneDay)}
+                    >
+                        {format(day, "d")}
+                    </div>
+                );
+                day = addDays(day, 1);
+            }
+            rows.push(<div className="grid grid-cols-7 mb-1" key={day}>{days}</div>);
+            days = [];
+        }
+
+            return <div>{rows}</div>;
+    };
+
+
+    return (
+        <aside className="fixed right-0 top-0 h-full w-[23%] bg-white shadow-lg flex flex-col p-4
+         border-l border-gray-200 z-40">
+            {/* Profile Header */}
+            <div className="flex items-center justify-between mb-5">
+                <FiSettings className="text-xl text-gray-500 cursor-pointer" />
+                <div className="flex items-center space-x-3">
+                    <div className="text-right">
+                        <div className="font-semibold text-sm text-gray-800">Austin Dilan Datan</div>
+                        <div className="text-xs text-gray-500">austindatan@gmail.com</div>
+                    </div>
+                    <img src="assets/Luna_Snow_Uniform_III.png" alt="avatar" className="w-10 h-10 rounded-full border" />
+                </div>
+            </div>
+
+            {/* Selected Date Label */}
+            <div className="text-xs text-gray-500 mb-3">
+                {format(selectedDate, "MMMM d, yyyy - EEEE")}
+            </div>
+
+            {/* Calendar */}
+            <div className="bg-white">
+                {renderHeader()}
+                {renderDays()}
+                {renderCells()}
+            </div>
+        </aside>
+    );
+};
+
+export default RightSidebar;
