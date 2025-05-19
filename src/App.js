@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Teacher_Dashboard from "./pages/teacher_dashboard";
+import Teacher_Dashboard from "./pages/instructor/teacher_dashboard";
 import LeftSidebar from './components/leftsidebar';
 import RightSidebar from './components/rightsidebar';
 import Admin_Students from './pages/admin_side/students';
