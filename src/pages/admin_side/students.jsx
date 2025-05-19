@@ -6,7 +6,7 @@ export default function Admin_Students() {
             className="h-full min-h-screen flex bg-cover bg-center"
             style={{ backgroundImage: "url('assets/white_theme.png')" }}
         >
-            <section className="max-w-[1200px] mx-auto pt-12 px-4 sm:px-6 md:px-[60px] lg:px-[100px]">
+            <section className="max-w-[2000px] mx-auto pt-12 px-4 sm:px-6 md:px-[60px] lg:px-[100px]">
                 <main className="flex-1 px-4 py-6 sm:p-8 text-left text-base sm:text-lg mt-[20px] mb-[20px] bg-white border-2 border-[#E55182] rounded-lg shadow-lg">
                     <h1 className="text-2xl font-bold text-[#E55182] mb-4">Employee List</h1>
 
