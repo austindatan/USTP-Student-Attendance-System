@@ -24,14 +24,14 @@ const RightSidebar = () => {
             
             <div className="gap-4 flex items-center">
                 <button
-                    className="text-xl text-gray-500 hover:text-purple-600"
+                    className="text-xl text-gray-500 hover:text-[#7685fc]"
                     onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
                 >
                     &lt;
                 </button>
 
                 <button
-                    className="text-xl text-gray-500 hover:text-purple-600"
+                    className="text-xl text-gray-500 hover:text-[#7685fc]"
                     onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
                 >
                     &gt;
@@ -75,14 +75,15 @@ const RightSidebar = () => {
                 const isToday = isSameDay(day, new Date());
                 const isSelected = isSameDay(day, selectedDate);
                 const isCurrentMonth = isSameMonth(day, monthStart);
+                const isSunday = day.getDay() === 0;
 
                 days.push(
                     <div
                         key={day}
-                        className={`text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150
-                            ${isSelected ? "bg-purple-500 text-white"
-                                : isToday ? "border border-purple-400 text-purple-500"
-                                : isCurrentMonth ? "text-gray-700"
+                        className={`font-dm-sans text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150
+                            ${isSelected ? "bg-[#7685fc] text-white"
+                                : isToday ? "border border-[#7685fc] text-[#7685fc]"
+                                : isCurrentMonth ? (isSunday ? "text-red-500" : "text-gray-700")
                                 : "text-gray-300"
                             }`}
                         onClick={() => setSelectedDate(cloneDay)}
@@ -101,10 +102,10 @@ const RightSidebar = () => {
 
 
     return (
-        <aside className="fixed right-0 top-0 h-full w-[23%] bg-white shadow-lg flex flex-col p-4
+        <aside className="font-dm-sans right-0 top-0 h-full w-[23%] bg-white shadow-lg flex flex-col p-4
          border-l border-gray-200 z-40">
             {/* Profile Header */}
-            <div className="flex items-center justify-between mb-5">
+            <div className="font-dm-sans flex items-center justify-between mb-5">
                 <FiSettings className="text-xl text-gray-500 cursor-pointer" />
                 <div className="flex items-center space-x-3">
                     <div className="text-right">
@@ -116,7 +117,7 @@ const RightSidebar = () => {
             </div>
 
             {/* Selected Date Label */}
-            <div className="text-xs text-gray-500 mb-3">
+            <div className="font-dm-sans text-xs text-gray-500 mb-3">
                 {format(selectedDate, "MMMM d, yyyy - EEEE")}
             </div>
 
