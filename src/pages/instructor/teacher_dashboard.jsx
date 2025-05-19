@@ -93,7 +93,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         </div>
 
         {/* Student Cards */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 w-full mt-6 mb-6">
+        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 lg:grid-cols-6 gap-4 w-full mt-6 mb-6">
           {students.map((student, index) => {
             const isPresent = presentStudents.includes(student.name);
             return (
