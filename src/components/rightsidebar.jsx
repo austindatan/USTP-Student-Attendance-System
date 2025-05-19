@@ -108,7 +108,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
                         <div className="font-semibold text-sm text-gray-800">Austin Dilan Datan</div>
                         <div className="text-xs text-gray-500">austindatan@gmail.com</div>
                     </div>
-                    <img src="assets/Luna_Snow_Uniform_III.png" alt="avatar" className="w-10 h-10 rounded-full border" />
+                    <img src="assets/student_files/Luna_Snow_Uniform_III.png" alt="avatar" className="w-10 h-10 rounded-full border" />
                 </div>
             </div>
 
