@@ -12,9 +12,10 @@ function App() {
         <LeftSidebar />
         <div className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Admin_Students />} />
+            <Route path="/" element={<Teacher_Dashboard />} />
           </Routes>
         </div>
+        <RightSidebar />
       </div>
     </BrowserRouter>
   );

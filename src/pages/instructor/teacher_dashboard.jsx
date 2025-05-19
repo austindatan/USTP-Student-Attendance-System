@@ -1,4 +1,5 @@
 import React from 'react';
+import { FiSettings } from "react-icons/fi";
 
 export default function Teacher_Dashboard() {
     return (
@@ -6,23 +7,111 @@ export default function Teacher_Dashboard() {
             className="h-full min-h-screen flex bg-cover bg-center"
             style={{ backgroundImage: "url('assets/white_theme.png')" }}
         >
-            <section class="max-w-[1200px] mx-auto pt-12 px-4 sm:px-6 md:px-[60px] lg:px-[100px]">
+            <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
 
-                <div class="flex justify-between items-center w-full mb-7">
-                <h4 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1F27A6] font-[Poppins]">
-                    Tasty Treats
-                </h4>
-                <img src="assets/ustp_logo.png" alt="Sabrosa Logo" class="w-[80px] sm:w-[100px] md:w-[120px] object-contain" />
+                <div className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6" style={{ backgroundImage: "url('assets/classes_vector_2.png')", backgroundRepeat: "no-repeat", backgroundPosition: "right 50px center", backgroundSize: "contain"}} >
+                    <div className="flex justify-between items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                        <FiSettings className="text-xl text-white cursor-pointer" />
+                    </div>
+                    <div className="mt-12">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-xl font-semibold">IT 221</h2>                   
+                            <p className="text-sm">T 7:30 AM - 9:00 AM</p>
+                        </div>
+                        <h1 className="text-2xl font-bold">Information Management</h1>
+                        <p className="text-sm">2R12</p>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input
+                    type="text"
+                    id="table-search"
+                    className="font-poppins block w-80 ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+                    placeholder="Search for items"
+                    />
+                </div>
 
-                    <div class="bg-[#FDC0D0] border-2 border-[#E55182] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
-                        <div class="aspect-[3/2] overflow-hidden rounded-t-[20px]">
-                        <img src="assets/Jean_Grey_Uniform_III.png" class="w-full h-full object-cover" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6">
+
+                    <div class="opacity-60 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Jean_Grey_Uniform_III.png" className="w-36 h-36 object-cover grayscale" />
                         </div>
-                        <div class="bg-white p-4 flex items-center justify-between rounded-b-[20px]">
-                        <p class="font-[Barlow] text-sm sm:text-base text-black font-medium ml-[5px]">Title</p>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#737373] ml-[5px]">Absent</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">The <br />Pheonix</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opacity-100 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Wave_Uniform_I.png" className="w-36 h-36 object-cover" />
+                        </div>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#0097b2] ml-[5px]">Present</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">Pearl <br />Pangan</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opacity-100 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Luna_Snow_Uniform_III.png" className="w-36 h-36 object-cover" />
+                        </div>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#0097b2] ml-[5px]">Present</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">Luna <br />Snow</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opacity-100 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Invisible_Woman_Uniform_III.png" className="w-36 h-36 object-cover" />
+                        </div>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#0097b2] ml-[5px]">Present</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">Invisible <br />Woman</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opacity-100 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Ghost_Uniform_II.png" className="w-36 h-36 object-cover" />
+                        </div>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#0097b2] ml-[5px]">Present</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">  <br />Ghost</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opacity-60 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Sentry_Uniform_II.png" className="w-36 h-36 object-cover grayscale" />
+                        </div>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#737373] ml-[5px]">Absent</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">The <br />Sentry</p>
+                            </div>
                         </div>
                     </div>
                 </div>
