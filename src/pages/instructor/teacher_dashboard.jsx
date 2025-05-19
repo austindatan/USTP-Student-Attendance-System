@@ -4,8 +4,8 @@ import { FiSettings } from "react-icons/fi";
 export default function Teacher_Dashboard() {
     return (
         <div
-            className="h-full min-h-screen flex bg-cover bg-center"
-            style={{ backgroundImage: "url('assets/white_theme.png')" }}
+            className="bg-cover bg-center bg-fixed min-h-screen flex"
+            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
         >
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
 
@@ -69,6 +69,18 @@ export default function Teacher_Dashboard() {
 
                     <div class="opacity-100 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
                         <div className="overflow-hidden rounded-t-[20px]">
+                        <img src="assets/student_files/Wave_Uniform_I.png" className="w-36 h-36 object-cover" />
+                        </div>
+                        <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                            <p className="font-[Barlow] text-xs  font-poppins font-bold text-[#0097b2] ml-[5px]">Present</p>
+                            <div className="flex items-center justify-between">
+                                <p className="font-[Barlow] text-base text-[#737373] ml-[5px] leading-[1]">Pearl <br />Pangan</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opacity-100 bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]">
+                        <div className="overflow-hidden rounded-t-[20px]">
                         <img src="assets/student_files/Luna_Snow_Uniform_III.png" className="w-36 h-36 object-cover" />
                         </div>
                         <div className="pl-3 pr-4 pt-2 pb-4 items-center">
@@ -114,6 +126,7 @@ export default function Teacher_Dashboard() {
                             </div>
                         </div>
                     </div>
+                    
                 </div>
             </section>
         </div>

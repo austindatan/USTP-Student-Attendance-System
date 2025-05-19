@@ -24,6 +24,16 @@
     font-family: 'Courier Prime', monospace;
 }
 
+.fixed-bg {
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+}
+
+html, body {
+  height: 100%;
+}
+
 .App {
   text-align: center;
 }
