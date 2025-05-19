@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 function LeftSidebar() {
     return (
-        <aside id="mobile-slide-menu" className="font-dm-sans top-0 left-0 h-full bg-white text-white transform md:transform-none -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col w-[80px] md:w-[9%] shadow-lg md:z-auto">
+        <aside id="mobile-slide-menu" className="font-dm-sans top-0 left-0 h-full bg-white text-white transform md:transform-none -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col w-[80px] md:w-[9%] shadow-lg md:z-auto z-100">
 
             <div className="flex justify-center items-center p-4">
                 <img src="assets/ustp_logo.png" className="w-20 h-auto" />
