@@ -1,37 +1,103 @@
 import React, { useState } from "react";
 
-function LeftSidebar() {
+const LeftSidebar = () => {
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
-        <aside id="mobile-slide-menu" className="font-dm-sans top-0 left-0 h-full bg-white text-white transform md:transform-none -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col w-[80px] md:w-[9%] shadow-lg md:z-auto z-100">
+        <>
+            {/* Hamburger Button for Mobile */}
+            <button
+                onClick={() => setIsOpen(true)}
+                className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow"
+                aria-label="Open sidebar"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6 text-[#1F27A6]"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
+                </svg>
+            </button>
 
-            <div className="flex justify-center items-center p-4">
-                <img src="assets/ustp_logo.png" className="w-20 h-auto" />
-                <button id="close-menu" className="md:hidden text-[#1F27A6] text-3xl font-bold absolute top-2 right-2">&times;</button>
-            </div>
+            {/* Mobile Overlay */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-30 z-40"
+                    onClick={() => setIsOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
 
-            <nav className="flex flex-col items-center gap-6 mt-5 text-sm text-[#1F27A6]">
+            {/* Sidebar */}
+            <aside
+                className={`font-dm-sans fixed md:static top-0 left-0 h-full bg-white shadow-lg transition-transform duration-300
+                    w-[30%] md:w-[9%] z-50 md:z-auto
+                    ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+                aria-label="Main sidebar"
+            >
+                {/* Sidebar Header */}
+                <div className="flex justify-center items-center p-4 relative">
+                    <img
+                        src="assets/ustp_logo.png"
+                        alt="USTP Logo"
+                        className="w-20 h-auto"
+                    />
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="md:hidden absolute top-2 right-2 text-[#1F27A6] text-3xl font-bold"
+                        aria-label="Close sidebar"
+                    >
+                        &times;
+                    </button>
+                </div>
 
-                <a 
-                    href="." 
-                    className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center
-                    {{ request()->routeIs('admin.dashboard') ? 'bg-purple-200 text-[#737373] font-semibold' : 'text-[#1F27A6]' }}">
-                    <img src="assets/dashboard.png" className="w-8 h-8 mb-1 block group-hover:hidden" />
-                    <img src="assets/dashboard-active.png" className="w-8 h-8 mb-1 hidden group-hover:block" />
-                    <span className="text-xs">Dashboard</span>
-                </a>
+                {/* Navigation */}
+                <nav className="flex flex-col items-center gap-6 mt-5 text-sm text-[#1F27A6]">
+                    <a
+                        href="."
+                        className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center"
+                    >
+                        <img
+                            src="assets/dashboard.png"
+                            alt="Dashboard"
+                            className="w-8 h-8 mb-1 block group-hover:hidden"
+                        />
+                        <img
+                            src="assets/dashboard-active.png"
+                            alt="Dashboard Active"
+                            className="w-8 h-8 mb-1 hidden group-hover:block"
+                        />
+                        <span className="text-xs">Dashboard</span>
+                    </a>
 
-                <a 
-                    href="." 
-                    className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center
-                    {{ request()->routeIs('admin.dashboard') ? 'bg-purple-200 text-[#737373] font-semibold' : 'text-[#1F27A6]' }}">
-                    <img src="assets/classes.png" className="w-6 h-8 mb-1 block group-hover:hidden" />
-                    <img src="assets/classes-active.png" className="w-6 h-8 mb-1 hidden group-hover:block" />
-                    <span className="text-xs">Classes</span>
-                </a>
-            </nav>
-
-        </aside>
+                    <a
+                        href="."
+                        className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center"
+                    >
+                        <img
+                            src="assets/classes.png"
+                            alt="Classes"
+                            className="w-6 h-8 mb-1 block group-hover:hidden"
+                        />
+                        <img
+                            src="assets/classes-active.png"
+                            alt="Classes Active"
+                            className="w-6 h-8 mb-1 hidden group-hover:block"
+                        />
+                        <span className="text-xs">Classes</span>
+                    </a>
+                </nav>
+            </aside>
+        </>
     );
-}
+};
 
 export default LeftSidebar;
