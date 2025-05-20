@@ -1,27 +1,41 @@
 import React, { useState } from "react";
 import './App.css';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+
 import TeacherDashboard from "./pages/instructor/teacher_dashboard";
 import EditProfile from "./pages/instructor/EditProfile"; // ✅ IMPORTED HERE
 import LeftSidebar from './components/leftsidebar';
 import RightSidebar from './components/rightsidebar';
+
 import LoginStudent from "./pages/login/LoginStudent";
 import LoginAdmin from "./pages/login/LoginAdmin";
-import StudentDashboard from './pages/student/StudentDashboard';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ProtectedRoute from "./components/ProtectedRoute";
 import LoginInstructor from "./pages/login/LoginInstructor";
 import RegisterInstructor from "./pages/login/RegisterInstructor";
 
-// Layout wrapper for sidebar pages only
+import StudentDashboard from './pages/student/StudentDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import Admin_Students from './pages/admin/students';  // <-- Added import for student page
+
+import ProtectedRoute from "./components/ProtectedRoute";
+
+import DropRequests from './pages/admin/drop_requests';
+
+// Wrapper for routes that use sidebars
 function DashboardLayout({ children, selectedDate, setSelectedDate }) {
+  const location = useLocation();
+
+  // RightSidebar is hidden only on "/drop_requests"
+  const showRightSidebar = location.pathname !== "/drop_requests";
+
   return (
     <div className="flex h-screen w-full">
       <LeftSidebar />
       <div className="flex-1 overflow-y-auto">
         {children}
       </div>
-      <RightSidebar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+      {showRightSidebar && (
+        <RightSidebar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+      )}
     </div>
   );
 }
@@ -32,7 +46,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login Pages (NO sidebar) */}
+        {/* Login Routes (without layout) */}
         <Route path="/" element={<LoginStudent />} />
         <Route path="/login-student" element={<LoginStudent />} />
         <Route path="/login-admin" element={<LoginAdmin />} />
@@ -51,7 +65,7 @@ function App() {
           }
         />
 
-        {/* Protected Teacher Dashboard */}
+        {/* Protected Instructor Dashboard */}
         <Route
           path="/teacher-dashboard"
           element={
@@ -82,6 +96,30 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']}>
               <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
                 <AdminDashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Students Page for Admin - NEW */}
+        <Route
+          path="/admin-students"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+                <Admin_Students />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Drop Requests Page for Admin */}
+        <Route
+          path="/drop_requests"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+                <DropRequests />
               </DashboardLayout>
             </ProtectedRoute>
           }
