@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   format,
   startOfMonth,
@@ -11,10 +11,14 @@ import {
   isSameDay,
 } from "date-fns";
 import { FiSettings } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const instructor = JSON.parse(localStorage.getItem("instructor"));
 
@@ -23,14 +27,29 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
     : "Instructor Name";
   const email = instructor?.email || "instructor@email.com";
 
-const imagePath = instructor?.image
-  ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace('uploads/', '')}`
-  : "/assets/blank.jpeg";
-
+  const imagePath = instructor?.image
+    ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace('uploads/', '')}`
+    : "/assets/blank.jpeg";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("instructor");
+    navigate("/login-instructor");
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const renderHeader = () => (
     <div className="flex justify-between items-center mb-2">
@@ -155,8 +174,37 @@ const imagePath = instructor?.image
           </button>
         </div>
 
-        <div className="flex items-center justify-between mb-5">
-          <FiSettings className="text-xl text-gray-500 cursor-pointer" />
+        {/* Top Info with Dropdown */}
+        <div className="flex items-center justify-between mb-5 relative">
+          <div className="relative" ref={dropdownRef}>
+            <FiSettings
+              className="text-xl text-gray-500 cursor-pointer"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            />
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow-md border z-50">
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    navigate("/edit-profile");
+                  }}
+                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    handleLogout();
+                  }}
+                  className="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 text-left"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center space-x-3">
             <div className="text-right">
               <div className="font-semibold text-sm text-gray-800">{fullName}</div>
