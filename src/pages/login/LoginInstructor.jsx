@@ -14,7 +14,7 @@ const LoginInstructor = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
-      
+
       const text = await res.text();
       let result;
       try {
@@ -24,14 +24,16 @@ const LoginInstructor = () => {
         alert("Server returned an invalid response.");
         return;
       }
-      
+
       console.log("Login response:", result);
-      
+
       if (result.success) {
+        // ✅ Store instructor info and role in localStorage
         localStorage.setItem("instructor", JSON.stringify(result.instructor));
         localStorage.setItem("userRole", "instructor");
-        navigate("/teacher-dashboard");
 
+        // ✅ Redirect to instructor dashboard
+        navigate("/teacher-dashboard");
       } else {
         alert(result.message);
       }
@@ -67,7 +69,10 @@ const LoginInstructor = () => {
       </form>
       <p className="mt-4 text-sm">
         Don't have an account?{" "}
-        <span className="text-blue-500 cursor-pointer" onClick={() => navigate('/register-instructor')}>
+        <span
+          className="text-blue-500 cursor-pointer"
+          onClick={() => navigate('/register-instructor')}
+        >
           Register here
         </span>
       </p>

@@ -55,7 +55,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             style={{ backgroundImage: "url('assets/forest_theme.png')" }}
         >
             {/* LOGOUT BUTTON */}
-            <div className="absolute top-4 right-4 z-50">
+            <div className="absolute top-2 left-150 z-50">
                 <button
                     onClick={handleLogout}
                     className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
