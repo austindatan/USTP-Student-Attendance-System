@@ -28,12 +28,12 @@ const LoginInstructor = () => {
       console.log("Login response:", result);
 
       if (result.success) {
-        // ✅ Store instructor info and role in localStorage
+        
         localStorage.setItem("instructor", JSON.stringify(result.instructor));
         localStorage.setItem("userRole", "instructor");
 
-        // ✅ Redirect to instructor dashboard
         navigate("/teacher-dashboard");
+
       } else {
         alert(result.message);
       }
@@ -63,7 +63,7 @@ const LoginInstructor = () => {
           className="p-2 border rounded"
           required
         />
-        <button type="submit" className="bg-green-600 text-white py-2 rounded">
+        <button type="submit" className="bg-blue-600 text-white py-2 rounded">
           Login
         </button>
       </form>

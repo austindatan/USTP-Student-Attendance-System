@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import TeacherDashboard from "./pages/instructor/teacher_dashboard";
+import EditProfile from "./pages/instructor/EditProfile"; // ✅ IMPORTED HERE
 import LeftSidebar from './components/leftsidebar';
 import RightSidebar from './components/rightsidebar';
 
@@ -71,6 +72,18 @@ function App() {
             <ProtectedRoute allowedRoles={['instructor']}>
               <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
                 <TeacherDashboard selectedDate={selectedDate} />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ Protected Edit Profile Page for Instructor */}
+        <Route
+          path="/edit-profile"
+          element={
+            <ProtectedRoute allowedRoles={['instructor']}>
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+                <EditProfile />
               </DashboardLayout>
             </ProtectedRoute>
           }
