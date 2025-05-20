@@ -54,15 +54,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
             style={{ backgroundImage: "url('assets/forest_theme.png')" }}
         >
-            {/* LOGOUT BUTTON */}
-            <div className="absolute top-2 left-150 z-50">
-                <button
-                    onClick={handleLogout}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
-                >
-                    Logout
-                </button>
-            </div>
+            
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
@@ -111,7 +103,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 </div>
 
                 {/* Student Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
                     {students.map((student, index) => {
                         const isPresent = presentStudents.includes(student.name);
                         return (
@@ -148,6 +140,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         );
                     })}
                 </div>
+
+                
             </section>
         </div>
     );

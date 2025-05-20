@@ -24,7 +24,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const email = instructor?.email || "instructor@email.com";
 
 const imagePath = instructor?.image
-  ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace('uploads/', '')}`
+  ? `http://localhost/ustp-student-attendance/api/uploads/${instructor.image.replace('uploads/', '')}`
   : "/assets/blank.jpeg";
 
 
