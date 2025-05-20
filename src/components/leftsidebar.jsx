@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 const LeftSidebar = () => {
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+
+    const handleBack = () => {
+        navigate("/classes-dashboard");
+    };
 
     return (
         <>
@@ -61,8 +67,8 @@ const LeftSidebar = () => {
 
                 {/* Navigation */}
                 <nav className="flex flex-col items-center gap-6 mt-5 text-sm text-[#737373]">
-                    <a
-                        href="."
+                    <button
+                        type="button" 
                         className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center"
                     >
                         <img
@@ -76,10 +82,11 @@ const LeftSidebar = () => {
                             className="w-8 h-8 mb-1 hidden group-hover:block"
                         />
                         <span className="text-xs">Dashboard</span>
-                    </a>
+                    </button>
 
-                    <a
-                        href="."
+                    <button
+                        type="button" 
+                        onClick={handleBack} 
                         className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center"
                     >
                         <img
@@ -93,7 +100,7 @@ const LeftSidebar = () => {
                             className="w-6 h-8 mb-1 hidden group-hover:block"
                         />
                         <span className="text-xs">Classes</span>
-                    </a>
+                    </button>
                 </nav>
             </aside>
         </>

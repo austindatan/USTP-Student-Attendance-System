@@ -31,17 +31,22 @@ const EditProfile = () => {
             return;
         }
 
-        fetch(`http://localhost/USTP-Student-Attendance-System/api/get_instructor.php?id=${storedInstructor.instructor_id}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setFormData(data.instructor);
-                    setPreviewURL(`http://localhost/USTP-Student-Attendance-System/api/uploads/${data.instructor.image}`);
+        fetch(`http://localhost/ustp-student-attendance/api/get_instructor.php?id=${storedInstructor.instructor_id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setFormData(data.instructor);
+                
+                if (data.instructor.image) {
+                    setPreviewURL(`http://localhost/ustp-student-attendance/api/uploads/${data.instructor.image}`);
                 } else {
-                    setMessage("Failed to fetch instructor info.");
+                    setPreviewURL("http://localhost/ustp-student-attendance/api/${data.instructor.image}");
                 }
-            })
-            .catch(() => setMessage("Server error while loading profile."));
+            } else {
+                setMessage("Failed to fetch instructor info.");
+            }
+        })
+        .catch(() => setMessage("Server error while loading profile."));
     }, []);
 
     const handleChange = (e) => {
@@ -67,7 +72,7 @@ const EditProfile = () => {
             formPayload.append("image", selectedFile);
         }
 
-        const res = await fetch("http://localhost/USTP-Student-Attendance-System/api/edit_profile.php", {
+        const res = await fetch("http://localhost/ustp-student-attendance/api/edit_profile.php", {
             method: "POST",
             body: formPayload,
         });
@@ -76,6 +81,7 @@ const EditProfile = () => {
         if (result.success) {
             alert("Profile updated successfully.");
             localStorage.setItem("instructor", JSON.stringify(result.instructor));
+            navigate("/teacher-dashboard");
         } else {
             alert("Update failed: " + result.message);
         }
@@ -86,23 +92,29 @@ const EditProfile = () => {
     };
 
     return (
-        <div className="max-w-xl mx-auto mt-10 bg-white p-6 shadow-md rounded relative">
-    <div className="mb-8">
-        <button 
-            type="button" 
-            onClick={handleBack} 
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-        >
-            <img 
-                src="https://cdn-icons-png.flaticon.com/512/271/271220.png" 
-                alt="Back" 
-                className="w-5 h-5"
-            />
-            <span>Back</span>
-        </button>
-    </div>
+        <div
+  className="bg-cover bg-center bg-fixed flex justify-center items-center min-h-screen w-full overflow-auto"
+  style={{ backgroundImage: "url('assets/forest_theme.png')" }}
+>
 
-    <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+            
+        <div className="font-dm-sans px-4 py-6 sm:p-8 text-left max-w-6xl mx-auto text-base sm:text-lg mt-10 mb-10 bg-white rounded-lg shadow-lg w-fit">
+            <div className="mb-8">
+                <button 
+                    type="button" 
+                    onClick={handleBack} 
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+                >
+                    <img 
+                        src="https://cdn-icons-png.flaticon.com/512/271/271220.png" 
+                        alt="Back" 
+                        className="w-5 h-5"
+                    />
+                    <span>Back</span>
+                </button>
+            </div>
+
+            <h2 className="text-2xl text-center font-bold mb-4">Edit Profile</h2>
 
             {message && <p className="mb-4 text-red-500">{message}</p>}
             <form onSubmit={handleSubmit} encType="multipart/form-data" className="grid gap-4">
@@ -113,24 +125,37 @@ const EditProfile = () => {
                         className="w-32 h-32 rounded-full object-cover mx-auto"
                     />
                 )}
-                <input type="file" name="image" accept="image/*" onChange={handleFileChange} />
+                <input type="file" name="image" accept="image/*" className="text-center" onChange={handleFileChange} />
 
-                <input type="text" name="firstname" value={formData.firstname} onChange={handleChange} placeholder="First Name" className="p-2 border rounded" />
-                <input type="text" name="middlename" value={formData.middlename} onChange={handleChange} placeholder="Middle Name" className="p-2 border rounded" />
-                <input type="text" name="lastname" value={formData.lastname} onChange={handleChange} placeholder="Last Name" className="p-2 border rounded" />
-                <input type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} className="p-2 border rounded" />
-                <input type="text" name="contact_number" value={formData.contact_number} onChange={handleChange} placeholder="Contact Number" className="p-2 border rounded" />
+                <div class="flex flex-row gap-5">
+                    <input type="text" name="firstname" value={formData.firstname} onChange={handleChange} placeholder="First Name" className="p-2 border rounded" />
+                    <input type="text" name="middlename" value={formData.middlename} onChange={handleChange} placeholder="Middle Name" className="p-2 border rounded" />
+                    <input type="text" name="lastname" value={formData.lastname} onChange={handleChange} placeholder="Last Name" className="p-2 border rounded" />
+                </div>
+
+                <div class="flex flex-row gap-5">
+                    <input type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} className="p-2 border rounded flex-1" />
+                    <input type="text" name="contact_number" value={formData.contact_number} onChange={handleChange} placeholder="Contact Number" className="p-2 border rounded flex-1" />
+                </div>
+
                 <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className="p-2 border rounded" />
                 <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Password" className="p-2 border rounded" />
-                <input type="text" name="street" value={formData.street} onChange={handleChange} placeholder="Street" className="p-2 border rounded" />
-                <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="City" className="p-2 border rounded" />
-                <input type="text" name="province" value={formData.province} onChange={handleChange} placeholder="Province" className="p-2 border rounded" />
-                <input type="text" name="zipcode" value={formData.zipcode} onChange={handleChange} placeholder="Zipcode" className="p-2 border rounded" />
-                <input type="text" name="country" value={formData.country} onChange={handleChange} placeholder="Country" className="p-2 border rounded" />
+                
+                <div class="flex flex-row gap-5">
+                    <input type="text" name="street" value={formData.street} onChange={handleChange} placeholder="Street" className="p-2 border rounded flex-1" />
+                    <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="City" className="p-2 border rounded flex-1" />
+                </div>
+                
+                <div class="flex flex-row gap-5">
+                    <input type="text" name="province" value={formData.province} onChange={handleChange} placeholder="Province" className="p-2 border rounded flex-1" />
+                    <input type="text" name="zipcode" value={formData.zipcode} onChange={handleChange} placeholder="Zipcode" className="p-2 border rounded flex-1" />
+                    <input type="text" name="country" value={formData.country} onChange={handleChange} placeholder="Country" className="p-2 border rounded flex-1" />
+                </div>
 
-                <button type="submit" className="bg-blue-600 text-white py-2 rounded">Update Profile</button>
+                <button type="submit" className="bg-[#7685fc] text-white py-2 rounded">Update Profile</button>
             </form>
         </div>
+    </div>
     );
 };
 

@@ -2,17 +2,25 @@ import React, { useState } from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
-import TeacherDashboard from "./pages/instructor/teacher_dashboard";
+// COMPONENTS
 import EditProfile from "./pages/instructor/EditProfile"; // ✅ IMPORTED HERE
 import LeftSidebar from './components/leftsidebar';
 import RightSidebar from './components/rightsidebar';
 
+// AUTH
 import LoginStudent from "./pages/login/LoginStudent";
 import LoginAdmin from "./pages/login/LoginAdmin";
 import LoginInstructor from "./pages/login/LoginInstructor";
 import RegisterInstructor from "./pages/login/RegisterInstructor";
 
+// INSTRUCTOR
+import TeacherDashboard from "./pages/instructor/teacher_dashboard";
+import Classes_Dashboard from "./pages/instructor/classes_dashboard";
+
+// STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
+
+// ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';  // <-- Added import for student page
 
@@ -65,7 +73,20 @@ function App() {
           }
         />
 
+        
+
         {/* Protected Instructor Dashboard */}
+        <Route
+          path="/classes-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['instructor']}>
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+                <Classes_Dashboard selectedDate={selectedDate} />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/teacher-dashboard"
           element={

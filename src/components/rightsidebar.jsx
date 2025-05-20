@@ -27,9 +27,9 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
     : "Instructor Name";
   const email = instructor?.email || "instructor@email.com";
 
-  const imagePath = instructor?.image
-    ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace('uploads/', '')}`
-    : "/assets/blank.jpeg";
+const imagePath = instructor?.image
+  ? `http://localhost/ustp-student-attendance/api/uploads/${instructor.image.replace('uploads/', '')}`
+  : "/assets/blank.jpeg";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

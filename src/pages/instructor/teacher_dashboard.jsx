@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
-import { useNavigate } from 'react-router-dom';
+import '../../App.css';
 
 export default function Teacher_Dashboard({ selectedDate }) {
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/login-instructor');
-    };
 
     const [presentStudents, setPresentStudents] = useState([]);
 
@@ -54,7 +48,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
             className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
             style={{ backgroundImage: "url('assets/forest_theme.png')" }}
         >
-            
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
