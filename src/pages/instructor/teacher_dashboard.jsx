@@ -58,7 +58,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             <div className="absolute top-4 right-4 z-50">
                 <button
                     onClick={handleLogout}
-                    className="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
                 >
                     Logout
                 </button>
