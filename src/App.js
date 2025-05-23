@@ -16,6 +16,7 @@ import RegisterInstructor from "./pages/login/RegisterInstructor";
 // INSTRUCTOR
 import TeacherDashboard from "./pages/instructor/teacher_dashboard";
 import Classes_Dashboard from "./pages/instructor/classes_dashboard";
+import SectionDashboard from "./pages/instructor/section_dashboard";
 
 // STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -29,7 +30,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DropRequests from './pages/admin/drop_requests';
 
 // Wrapper for routes that use sidebars
-function DashboardLayout({ children, selectedDate, setSelectedDate }) {
+function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
+
   const location = useLocation();
 
   // RightSidebar is hidden only on "/drop_requests"
@@ -37,7 +39,7 @@ function DashboardLayout({ children, selectedDate, setSelectedDate }) {
 
   return (
     <div className="flex h-screen w-full">
-      <LeftSidebar />
+      <LeftSidebar setBgImage={setBgImage}/>
       <div className="flex-1 overflow-y-auto">
         {children}
       </div>
@@ -50,6 +52,7 @@ function DashboardLayout({ children, selectedDate, setSelectedDate }) {
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [bgImage, setBgImage] = useState("url('assets/forest_theme.png')"); 
 
   return (
     <BrowserRouter>
@@ -73,15 +76,22 @@ function App() {
           }
         />
 
-        
-
-        {/* Protected Instructor Dashboard */}
         <Route
           path="/classes-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
-                <Classes_Dashboard selectedDate={selectedDate} />
+              <DashboardLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
+                <div
+                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                  style={{ backgroundImage: bgImage }}
+                >
+                  <Classes_Dashboard selectedDate={selectedDate} />
+                </div>
               </DashboardLayout>
             </ProtectedRoute>
           }
@@ -93,6 +103,17 @@ function App() {
             <ProtectedRoute allowedRoles={['instructor']}>
               <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
                 <TeacherDashboard selectedDate={selectedDate} />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/section-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['instructor']}>
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+                <SectionDashboard selectedDate={selectedDate} />
               </DashboardLayout>
             </ProtectedRoute>
           }

@@ -2,14 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import '../../App.css';
+import { useNavigate } from 'react-router-dom';
+import ClassCard from './components/class_card';
 
 export default function Classes_Dashboard({ selectedDate }) {
+    const [presentStudents, setPresentStudents] = useState([]);
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+
+    const section_dashboard = () => {
+        navigate("/section-dashboard");
+    };
+
+    useEffect(() => {
+        // Simulate loading for 1.5 seconds
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
-        <div
-            className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
-            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
-        >
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
 
@@ -31,118 +45,34 @@ export default function Classes_Dashboard({ selectedDate }) {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 w-full mt-6 mb-6">
+                
+                    <ClassCard 
+                        isLoading={isLoading} 
+                        onClick={section_dashboard} 
+                        code="IT 221" 
+                        title="Information Management" 
+                        room="2R12" 
+                        schedule="T 7:30 AM – 9:00 AM"
+                        bgImage="assets/classes_vector_2.png"
+                        bgClass="bg-[#0097b2]"
+                    />
 
-                    <div className="w-full max-w-xs bg-white rounded-2xl shadow-md overflow-hidden shadow-lg">
-                        <div className="bg-[#0097b2] p-4 flex items-start justify-between rounded-t-xl relative"
-                        style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 5px bottom ",
-                        backgroundSize: "160px"
-                        }}>
-                            <div className="font-poppins">
-                            <p className="text-white text-sm font-semibold">IT 221</p>
-                            <h2 className="text-white text-lg font-bold leading-tight">Information <br />Management</h2>
-                            <p className="text-white text-sm mt-1">2R12</p>
-                            </div>
-                            </div>
-
-                        <div className="px-4 pt-4 mb-24">
-                            <p className="text-[#737373] text-sm font-bold font-dm-sans">Upcoming Class</p>
-                            <p className="text-[#737373] text-base font-dm-sans">T 7:30 AM – 9:00 AM</p>
-                        </div>
-                    </div>
-
-                    <div className="w-full max-w-xs bg-white rounded-2xl shadow-md overflow-hidden shadow-lg">
-                        <div className="bg-[#0097b2] p-4 flex items-start justify-between rounded-t-xl relative"
-                        style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 5px bottom ",
-                        backgroundSize: "160px"
-                        }}>
-                            <div className="font-poppins">
-                            <p className="text-white text-sm font-semibold">IT 221</p>
-                            <h2 className="text-white text-lg font-bold leading-tight">Information <br />Management</h2>
-                            <p className="text-white text-sm mt-1">2R12</p>
-                            </div>
-                            </div>
-
-                        <div className="px-4 pt-4 mb-24">
-                            <p className="text-[#737373] text-sm font-bold font-dm-sans">Upcoming Class</p>
-                            <p className="text-[#737373] text-base font-dm-sans">T 7:30 AM – 9:00 AM</p>
-                        </div>
-                    </div>
-
-                    <div className="w-full max-w-xs bg-white rounded-2xl shadow-md overflow-hidden shadow-lg">
-                        <div className="bg-[#0097b2] p-4 flex items-start justify-between rounded-t-xl relative"
-                        style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 5px bottom ",
-                        backgroundSize: "160px"
-                        }}>
-                            <div className="font-poppins">
-                            <p className="text-white text-sm font-semibold">IT 221</p>
-                            <h2 className="text-white text-lg font-bold leading-tight">Information <br />Management</h2>
-                            <p className="text-white text-sm mt-1">2R12</p>
-                            </div>
-                            </div>
-
-                        <div className="px-4 pt-4 mb-24">
-                            <p className="text-[#737373] text-sm font-bold font-dm-sans">Upcoming Class</p>
-                            <p className="text-[#737373] text-base font-dm-sans">T 7:30 AM – 9:00 AM</p>
-                        </div>
-                    </div>
-
-                    <div className="w-full max-w-xs bg-white rounded-2xl shadow-md overflow-hidden shadow-lg">
-                        <div className="bg-[#0097b2] p-4 flex items-start justify-between rounded-t-xl relative"
-                        style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 5px bottom ",
-                        backgroundSize: "160px"
-                        }}>
-                            <div className="font-poppins">
-                            <p className="text-white text-sm font-semibold">IT 221</p>
-                            <h2 className="text-white text-lg font-bold leading-tight">Information <br />Management</h2>
-                            <p className="text-white text-sm mt-1">2R12</p>
-                            </div>
-                            </div>
-
-                        <div className="px-4 pt-4 mb-24">
-                            <p className="text-[#737373] text-sm font-bold font-dm-sans">Upcoming Class</p>
-                            <p className="text-[#737373] text-base font-dm-sans">T 7:30 AM – 9:00 AM</p>
-                        </div>
-                    </div>
-
-                    <div className="w-full max-w-xs bg-white rounded-2xl shadow-md overflow-hidden shadow-lg">
-                        <div className="bg-[#0097b2] p-4 flex items-start justify-between rounded-t-xl relative"
-                        style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 5px bottom ",
-                        backgroundSize: "160px"
-                        }}>
-                            <div className="font-poppins">
-                            <p className="text-white text-sm font-semibold">IT 221</p>
-                            <h2 className="text-white text-lg font-bold leading-tight">Information <br />Management</h2>
-                            <p className="text-white text-sm mt-1">2R12</p>
-                            </div>
-                            </div>
-
-                        <div className="px-4 pt-4 mb-24">
-                            <p className="text-[#737373] text-sm font-bold font-dm-sans">Upcoming Class</p>
-                            <p className="text-[#737373] text-base font-dm-sans">T 7:30 AM – 9:00 AM</p>
-                        </div>
-                    </div>
+                    <ClassCard 
+                        isLoading={isLoading} 
+                        onClick={section_dashboard} 
+                        code="IT 221" 
+                        title="Web Systems and Technologies" 
+                        room="2R12" 
+                        schedule="T 7:30 AM – 9:00 AM"
+                        bgImage="assets/classes_vector_3.png"
+                        bgClass="bg-[#cda49d]"
+                    />
 
                     
                 </div>
 
                 
             </section>
-        </div>
     );
 }
 

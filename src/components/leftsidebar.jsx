@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ setBgImage }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleBack = () => {
+    const Classes_Dashboard = () => {
         navigate("/classes-dashboard");
     };
+
+    const Teacher_Dashboard = () => {
+        navigate("/teacher-dashboard");
+    };
+
+    const dashboard_active = location.pathname === '/teacher-dashboard';
+    const classes_active = location.pathname === '/classes-dashboard';
 
     return (
         <>
@@ -67,41 +76,93 @@ const LeftSidebar = () => {
 
                 {/* Navigation */}
                 <nav className="flex flex-col items-center gap-6 mt-5 text-sm text-[#737373]">
+
                     <button
-                        type="button" 
-                        className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center"
+                        type="button"
+                        onClick={Teacher_Dashboard}
+                        className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
+                            dashboard_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
+                        }`}
                     >
                         <img
                             src="assets/dashboard.png"
                             alt="Dashboard"
-                            className="w-8 h-8 mb-1 block group-hover:hidden"
+                            className={`w-8 h-8 mb-1 block ${dashboard_active ? 'hidden' : 'group-hover:hidden'}`}
                         />
                         <img
                             src="assets/dashboard-active.png"
                             alt="Dashboard Active"
-                            className="w-8 h-8 mb-1 hidden group-hover:block"
+                            className={`w-8 h-8 mb-1 ${dashboard_active ? 'block' : 'hidden group-hover:block'}`}
                         />
                         <span className="text-xs">Dashboard</span>
                     </button>
 
                     <button
-                        type="button" 
-                        onClick={handleBack} 
-                        className="group flex flex-col items-center hover:text-[#7685fc] px-3 py-2 rounded-lg transition-all duration-200 w-full text-center"
+                        type="button"
+                        onClick={Classes_Dashboard}
+                        className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
+                            classes_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
+                        }`}
                     >
                         <img
                             src="assets/classes.png"
                             alt="Classes"
-                            className="w-6 h-8 mb-1 block group-hover:hidden"
+                            className={`w-6 h-8 mb-1 block ${classes_active ? 'hidden' : 'group-hover:hidden'}`}
                         />
                         <img
                             src="assets/classes-active.png"
                             alt="Classes Active"
-                            className="w-6 h-8 mb-1 hidden group-hover:block"
+                            className={`w-6 h-8 mb-1 ${classes_active ? 'block' : 'hidden group-hover:block'}`}
                         />
                         <span className="text-xs">Classes</span>
                     </button>
                 </nav>
+
+                <div className="absolute bottom-4 w-full flex justify-center">
+                    <div className="relative group">
+                        <button
+                            type="button"
+                            className="group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center text-[#737373] hover:text-[#7685fc]"
+                            >
+                            <div className="relative w-8 h-8 mb-1">
+                                <img
+                                src="assets/palette.png"
+                                alt="Default Theme Icon"
+                                className="absolute inset-0 w-8 h-8 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                                />
+                                <img
+                                src="assets/palette-active.png"
+                                alt="Active Theme Icon"
+                                className="absolute inset-0 w-8 h-8 transition-opacity duration-200 opacity-100 group-hover:opacity-0"
+                                />
+                            </div>
+
+                            <span className="text-xs">Wallpapers</span>
+                        </button>
+
+                        <div className="absolute bottom-full font-dm-sans text-sm left-1 bg-white border rounded-md shadow-md hidden group-hover:block z-50">
+                            <button
+                                className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                                onClick={() => setBgImage("url('assets/water_theme.png')")}
+                            >
+                                Water
+                            </button>
+                            <button
+                                className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                                onClick={() => setBgImage("url('assets/forest_theme.png')")}
+                            >
+                                Forest
+                            </button>
+                            <button
+                                className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                                onClick={() => setBgImage("url('assets/white_theme.png')")}
+                            >
+                                Default
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </aside>
         </>
     );
