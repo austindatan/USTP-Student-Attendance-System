@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
-import '../../App.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function Teacher_Dashboard({ selectedDate }) {
-
-    const [presentStudents, setPresentStudents] = useState([]);
     const navigate = useNavigate();
     const [students, setStudents] = useState([]);
+    const [presentStudents, setPresentStudents] = useState([]);
 
     const handleLogout = () => {
         localStorage.clear();
@@ -51,7 +49,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const attendanceData = {
             student_id: student.student_id,
-            instructor_id: 19,
+            instructor_id: 21,
             section_id: 2,
             program_details_id: 1,
             admin_id: 1,
@@ -76,8 +74,18 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     return (
         <div
-           className="min-h-screen flex hide-scrollbar overflow-scroll"
+            className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
+            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
         >
+            {/* Logout Button */}
+            <div className="absolute top-4 right-4 z-50">
+                <button
+                    onClick={handleLogout}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
+                >
+                    Logout
+                </button>
+            </div>
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
@@ -124,7 +132,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         placeholder="Search for students."
                     />
                 </div>
-                
 
                 {/* Student Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
