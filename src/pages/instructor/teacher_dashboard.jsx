@@ -79,16 +79,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
            className="min-h-screen flex hide-scrollbar overflow-scroll"
         >
 
-            {/* Logout Button */}
-            <div className="absolute top-4 right-4 z-50">
-                <button
-                    onClick={handleLogout}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
-                >
-                    Logout
-                </button>
-            </div>
-
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
                 <div
