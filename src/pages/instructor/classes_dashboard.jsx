@@ -14,6 +14,13 @@ export default function Classes_Dashboard({ selectedDate }) {
         navigate("/section-dashboard");
     };
 
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setLoaded(true), 100); // delay to allow transition
+        return () => clearTimeout(timeout);
+    }, []);
+
     useEffect(() => {
         // Simulate loading for 1.5 seconds
         const timer = setTimeout(() => {

@@ -155,8 +155,18 @@ function App() {
           path="/edit-profile"
           element={
             <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <DashboardLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
+                <div
+                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                  style={{ backgroundImage: bgImage }}
+                >
                 <EditProfile />
+                </div>
               </DashboardLayout>
             </ProtectedRoute>
           }

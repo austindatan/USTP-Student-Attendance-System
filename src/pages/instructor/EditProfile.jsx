@@ -93,11 +93,9 @@ const EditProfile = () => {
 
     return (
         <div
-  className="bg-cover bg-center bg-fixed flex justify-center items-center min-h-screen w-full overflow-auto"
-  style={{ backgroundImage: "url('assets/forest_theme.png')" }}
->
+        className="bg-cover bg-center bg-fixed flex justify-center items-center min-h-screen w-full overflow-auto"
+        >
 
-            
         <div className="font-dm-sans px-4 py-6 sm:p-8 text-left max-w-6xl mx-auto text-base sm:text-lg mt-10 mb-10 bg-white rounded-lg shadow-lg w-fit">
             <div className="mb-8">
                 <button 

@@ -50,55 +50,87 @@ export default function Teacher_Dashboard({ selectedDate }) {
         );
     };
 
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
-                <div
-                    className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6"
-                    style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 50px center",
-                        backgroundSize: "contain"
-                    }}
-                >
-                    <div className="flex justify-between items-center">
-                        <button type="button" onClick={teacher_dashboard}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                strokeWidth="1.5" stroke="currentColor" className="size-4">
-                                <path strokeLinecap="round" strokeLinejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5" />
-                            </svg>
-                        </button>
-                        <FiSettings className="text-xl text-white cursor-pointer" />
-                    </div>
-                    <div className="mt-12">
-                        <div className="flex items-center gap-4">
-                            <h2 className="text-xl font-semibold">IT 221</h2>
-                            <p className="text-sm">T 7:30 AM - 9:00 AM</p>
+                {isLoading ? (
+                    <div className="bg-white rounded-lg p-6 text-white font-poppins mb-6 animate-pulse">
+                        <div className="flex justify-between items-center">
+                            <div className="bg-gray-200 rounded-full w-6 h-6"></div>
+                            <div className="bg-gray-200 rounded-full w-6 h-6"></div>
                         </div>
-                        <h1 className="text-2xl font-bold">Information Management</h1>
-                        <p className="text-sm">2R12</p>
+                        <div className="mt-12 space-y-2">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-gray-200 rounded w-20 h-5"></div>
+                                <div className="bg-gray-200 rounded w-28 h-4"></div>
+                            </div>
+                            <div className="bg-gray-200 rounded w-60 h-6"></div>
+                            <div className="bg-gray-200 rounded w-16 h-4"></div>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div
+                        className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6"
+                        style={{
+                            backgroundImage: "url('assets/classes_vector_2.png')",
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "right 50px center",
+                            backgroundSize: "contain"
+                        }}
+                    >
+                        <div className="flex justify-between items-center">
+                            <button type="button" onClick={teacher_dashboard}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    strokeWidth="1.5" stroke="currentColor" className="size-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                        d="M15.75 19.5 8.25 12l7.5-7.5" />
+                                </svg>
+                            </button>
+                            <FiSettings className="text-xl text-white cursor-pointer" />
+                        </div>
+                        <div className="mt-12">
+                            <div className="flex items-center gap-4">
+                                <h2 className="text-xl font-semibold">IT 221</h2>
+                                <p className="text-sm">T 7:30 AM - 9:00 AM</p>
+                            </div>
+                            <h1 className="text-2xl font-bold">Information Management</h1>
+                            <p className="text-sm">2R12</p>
+                        </div>
+                    </div>
+                )}
+
 
                 {/* Search */}
-                <div className="relative">
-                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                        </svg>
+                {isLoading ? (
+                    <div className="relative w-80 h-10 rounded-lg bg-white animate-pulse mb-4"></div>
+                ) : (
+                    <div className="relative">
+                        <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            id="table-search"
+                            className="font-poppins block w-80 ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+                            placeholder="Search for students."
+                        />
                     </div>
-                    <input
-                        type="text"
-                        id="table-search"
-                        className="font-poppins block w-80 ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
-                        placeholder="Search for students."
-                    />
-                </div>
+                )}
+
 
                 {/* Student Cards */}
                 <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
