@@ -8,29 +8,34 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [students, setStudents] = useState([]);
     const [presentStudents, setPresentStudents] = useState([]);
 
+    // Get instructor from localStorage
+    const instructor = JSON.parse(localStorage.getItem('instructor'));
+
+    useEffect(() => {
+        if (!instructor) {
+            // Redirect to login if not authenticated
+            navigate('/login-instructor');
+        }
+    }, [instructor, navigate]);
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login-instructor');
     };
 
-    // Fetch students and attendance status for the selected date
+    // Fetch students and attendance status
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                // Format the date to yyyy-MM-dd
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
-
                 const response = await fetch(`http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/backend/get_students.php?date=${dateStr}`);
                 const data = await response.json();
-
                 setStudents(data);
 
-                // Initialize presentStudents array from students with status 'Present'
                 const presentIds = data
                     .filter(student => student.status === 'Present')
                     .map(student => student.student_id);
                 setPresentStudents(presentIds);
-
             } catch (error) {
                 console.error("Error fetching students:", error);
             }
@@ -39,7 +44,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
         fetchStudents();
     }, [selectedDate]);
 
-    // Toggle attendance and save to DB
     const toggleAttendance = async (student) => {
         const updatedList = presentStudents.includes(student.student_id)
             ? presentStudents.filter(id => id !== student.student_id)
@@ -49,14 +53,13 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const attendanceData = {
             student_id: student.student_id,
-            instructor_id: 21,
-            section_id: 2,
-            program_details_id: 1,
-            admin_id: 1,
+            instructor_id: instructor.instructor_id,
+            section_id: student.section_id || 2, // default/fallback
+            program_details_id: student.program_details_id || 1,
+            admin_id: student.admin_id || 1,
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
             status: updatedList.includes(student.student_id) ? 'Present' : 'Absent',
         };
-        
 
         try {
             const res = await fetch('http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/backend/save_attendance.php', {
