@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import '../../App.css';
 import { useNavigate } from 'react-router-dom';
+import StudentCard from './components/student_card';
 
 export default function Teacher_Dashboard({ selectedDate }) {
 
@@ -23,16 +24,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
         { name: 'Jean Grey', img: 'assets/student_files/Jean_Grey_Uniform_III.png' },
         { name: 'Pearl Pangan', img: 'assets/student_files/Wave_Uniform_I.png' },
         { name: 'Luna Snow', img: 'assets/student_files/Luna_Snow_Uniform_III.png' },
-        { name: 'Invisible Woman', img: 'assets/student_files/Invisible_Woman_Uniform_III.png' },
-        { name: 'Ghost', img: 'assets/student_files/Ghost_Uniform_II.png' },
-        { name: 'Sentry', img: 'assets/student_files/Sentry_Uniform_II.png' },
-        { name: 'Captain Marvel', img: 'assets/student_files/Captain_Marvel_Uniform_IIIIII.png' },
+        { name: 'Susan Storm', img: 'assets/student_files/Invisible_Woman_Uniform_III.png' },
+        { name: 'Ava Starr', img: 'assets/student_files/Ghost_Uniform_II.png' },
+        { name: 'Robert Reynolds', img: 'assets/student_files/Sentry_Uniform_II.png' },
+        { name: 'Carol Danvers', img: 'assets/student_files/Captain_Marvel_Uniform_IIIIII.png' },
         { name: 'Emma Frost', img: 'assets/student_files/Emma_Frost_Uniform_III.png' },
-        { name: 'Human Torch', img: 'assets/student_files/Human_Torch_Uniform_III.png' },
-        { name: 'Scarlet Witch', img: 'assets/student_files/Scarlet_Witch_Uniform_III.png' },
+        { name: 'Johnny Storm', img: 'assets/student_files/Human_Torch_Uniform_III.png' },
+        { name: 'Wanda Maximoff', img: 'assets/student_files/Scarlet_Witch_Uniform_III.png' },
         { name: 'Yelena Belova', img: 'assets/student_files/Yelena_Belova_Uniform_III.png' },
-        { name: 'Sister Grimm', img: 'assets/student_files/Sister_Grimm_Uniform_II.png' },
-        { name: 'Doctor Strange', img: 'assets/student_files/Doctor_Strange_Uniform_IIIII.png' },
+        { name: 'Nico Minoru', img: 'assets/student_files/Sister_Grimm_Uniform_II.png' },
+        { name: 'Stephen Strange', img: 'assets/student_files/Doctor_Strange_Uniform_IIIII.png' },
         { name: 'Kamala Khan', img: 'assets/student_files/Ms._Marvel__28Kamala_Khan_29_Uniform_IIII.png' },
     ];
 
@@ -50,11 +51,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     return (
-        <div
-           className="min-h-screen flex hide-scrollbar overflow-scroll"
-        >
-
-
+        <div className="min-h-screen flex hide-scrollbar overflow-scroll">
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
                 <div
@@ -67,12 +64,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     }}
                 >
                     <div className="flex justify-between items-center">
-                        <button type="button" onClick={teacher_dashboard} >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            strokeWidth="1.5" stroke="currentColor" className="size-4">
-                            <path strokeLinecap="round" strokeLinejoin="round"
-                                d="M15.75 19.5 8.25 12l7.5-7.5" />
-                        </svg>
+                        <button type="button" onClick={teacher_dashboard}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                strokeWidth="1.5" stroke="currentColor" className="size-4">
+                                <path strokeLinecap="round" strokeLinejoin="round"
+                                    d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
                         </button>
                         <FiSettings className="text-xl text-white cursor-pointer" />
                     </div>
@@ -105,46 +102,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                 {/* Student Cards */}
                 <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
-                    {students.map((student, index) => {
-                        const isPresent = presentStudents.includes(student.name);
-                        return (
-                            <div
-                                key={index}
-                                onClick={() => toggleAttendance(student.name)}
-                                className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                    bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
-                                    ${isPresent ? 'opacity-100' : 'opacity-60'}`}
-                            >
-                                <div className="overflow-hidden rounded-t-[20px] flex justify-center">
-                                    <img
-                                        src={student.img}
-                                        className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
-                                        alt={student.name}
-                                    />
-                                </div>
-                                <div className="pl-3 pr-4 pt-2 pb-4 items-center">
-                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
-                                        ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
-                                        {isPresent ? 'Present' : 'Absent'}
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
-                                            {student.name.includes(" ") ? (
-                                                <>
-                                                    {student.name.split(" ")[0]} <br /> {student.name.split(" ")[1]}
-                                                </>
-                                            ) : student.name}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                    {students.map((student, index) => (
+                        <StudentCard
+                            key={index}
+                            student={student}
+                            isPresent={presentStudents.includes(student.name)}
+                            onToggle={toggleAttendance}
+                        />
+                    ))}
                 </div>
-
-                
             </section>
         </div>
     );
 }
-
