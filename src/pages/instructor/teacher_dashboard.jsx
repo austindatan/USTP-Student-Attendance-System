@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import '../../App.css';
@@ -6,12 +7,87 @@ import '../../App.css';
 export default function Teacher_Dashboard({ selectedDate }) {
 
     const [presentStudents, setPresentStudents] = useState([]);
+    const navigate = useNavigate();
+    const [students, setStudents] = useState([]);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login-instructor');
+    };
+
+    // Fetch students and attendance status for the selected date
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                // Format the date to yyyy-MM-dd
+                const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
+
+                const response = await fetch(`http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/backend/get_students.php?date=${dateStr}`);
+                const data = await response.json();
+
+                setStudents(data);
+
+                // Initialize presentStudents array from students with status 'Present'
+                const presentIds = data
+                    .filter(student => student.status === 'Present')
+                    .map(student => student.student_id);
+                setPresentStudents(presentIds);
+
+            } catch (error) {
+                console.error("Error fetching students:", error);
+            }
+        };
+
+        fetchStudents();
+    }, [selectedDate]);
+
+    // Toggle attendance and save to DB
+    const toggleAttendance = async (student) => {
+        const updatedList = presentStudents.includes(student.student_id)
+            ? presentStudents.filter(id => id !== student.student_id)
+            : [...presentStudents, student.student_id];
+
+        setPresentStudents(updatedList);
+
+        const attendanceData = {
+            student_id: student.student_id,
+            instructor_id: 19,
+            section_id: 2,
+            program_details_id: 1,
+            admin_id: 1,
+            date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+            status: updatedList.includes(student.student_id) ? 'Present' : 'Absent',
+        };
+        
+
+        try {
+            const res = await fetch('http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/backend/save_attendance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData)
+            });
+
+            const result = await res.json();
+            console.log('Attendance saved:', result);
+        } catch (error) {
+            console.error('Error saving attendance:', error);
+        }
+    };
 
     return (
         <div
            className="min-h-screen flex hide-scrollbar overflow-scroll"
         >
 
+            {/* Logout Button */}
+            <div className="absolute top-4 right-4 z-50">
+                <button
+                    onClick={handleLogout}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
+                >
+                    Logout
+                </button>
+            </div>
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
@@ -59,8 +135,47 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     />
                 </div>
                 
+
+                {/* Student Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
+                    {students.map((student, index) => {
+                        const isPresent = presentStudents.includes(student.student_id);
+                        const name = student.name || 'No Name';
+                        return (
+                            <div
+                                key={index}
+                                onClick={() => toggleAttendance(student)}
+                                className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
+                                    bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
+                                    ${isPresent ? 'opacity-100' : 'opacity-60'}`}
+                            >
+                                <div className="overflow-hidden rounded-t-[20px] flex justify-center">
+                                    <img
+                                        src={student.image || 'default_image_url_here'}
+                                        className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
+                                        alt={name}
+                                    />
+                                </div>
+                                <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
+                                        ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
+                                        {isPresent ? 'Present' : 'Absent'}
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
+                                            {name.includes(" ") ? (
+                                                <>
+                                                    {name.split(" ")[0]} <br /> {name.split(" ")[1]}
+                                                </>
+                                            ) : name}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </section>
         </div>
     );
 }
-
