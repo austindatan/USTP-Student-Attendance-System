@@ -10,7 +10,7 @@ const LoginAdmin = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch("http://localhost/ustp-student-attendance/api/auth/login-admin.php", { // Changed URL
+        const response = await fetch("http://localhost/USTP-Student-Attendance-System/api/auth/login-admin.php", { // Changed URL
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

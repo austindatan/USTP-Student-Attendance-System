@@ -9,9 +9,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     return (
         <div
-            className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
-            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
+           className="min-h-screen flex hide-scrollbar overflow-scroll"
         >
+
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}

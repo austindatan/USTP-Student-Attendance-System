@@ -3,8 +3,9 @@ import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 // COMPONENTS
-import EditProfile from "./pages/instructor/EditProfile"; // ✅ IMPORTED HERE
+import EditProfile from "./pages/instructor/EditProfile";
 import LeftSidebar from './components/leftsidebar';
+import AdminLeftSidebar from './components/AdminLeftSidebar';
 import RightSidebar from './components/rightsidebar';
 
 // AUTH
@@ -23,29 +24,39 @@ import StudentDashboard from './pages/student/StudentDashboard';
 
 // ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
-import Admin_Students from './pages/admin/students';  // <-- Added import for student page
+import Admin_Students from './pages/admin/students';
+import DropRequests from './pages/admin/drop_requests';
+import InstructorAdminPage from './pages/admin/instructorAdminpage';
 
+// ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
 
-import DropRequests from './pages/admin/drop_requests';
-
-// Wrapper for routes that use sidebars
+// Wrapper for Instructor & Student routes
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
-
   const location = useLocation();
-
-  // RightSidebar is hidden only on "/drop_requests"
   const showRightSidebar = location.pathname !== "/drop_requests";
 
   return (
     <div className="flex h-screen w-full">
-      <LeftSidebar setBgImage={setBgImage}/>
+      <LeftSidebar setBgImage={setBgImage} />
       <div className="flex-1 overflow-y-auto">
         {children}
       </div>
       {showRightSidebar && (
         <RightSidebar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
       )}
+    </div>
+  );
+}
+
+// Wrapper for Admin routes
+function AdminLayout({ children }) {
+  return (
+    <div className="flex h-screen w-full">
+      <AdminLeftSidebar />
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }
@@ -57,14 +68,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login Routes (without layout) */}
+        {/* Login Routes */}
         <Route path="/" element={<LoginStudent />} />
         <Route path="/login-student" element={<LoginStudent />} />
         <Route path="/login-admin" element={<LoginAdmin />} />
         <Route path="/login-instructor" element={<LoginInstructor />} />
         <Route path="/register-instructor" element={<RegisterInstructor />} />
 
-        {/* Protected Student Dashboard */}
+        {/* Student Protected Route */}
         <Route
           path="/student-dashboard"
           element={
@@ -76,6 +87,7 @@ function App() {
           }
         />
 
+        {/* Instructor Protected Routes */}
         <Route
           path="/classes-dashboard"
           element={
@@ -101,8 +113,18 @@ function App() {
           path="/teacher-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <DashboardLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
+                <div
+                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                  style={{ backgroundImage: bgImage }}
+                >        
                 <TeacherDashboard selectedDate={selectedDate} />
+                </div> 
               </DashboardLayout>
             </ProtectedRoute>
           }
@@ -112,14 +134,23 @@ function App() {
           path="/section-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <DashboardLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
+                <div
+                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                  style={{ backgroundImage: bgImage }}
+                >
                 <SectionDashboard selectedDate={selectedDate} />
+                </div>
               </DashboardLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* ✅ Protected Edit Profile Page for Instructor */}
         <Route
           path="/edit-profile"
           element={
@@ -131,42 +162,56 @@ function App() {
           }
         />
 
-        {/* Protected Admin Dashboard */}
+        {/* Admin Protected Routes */}
         <Route
           path="/admin-dashboard"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <AdminLayout>
                 <AdminDashboard />
-              </DashboardLayout>
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* Protected Students Page for Admin - NEW */}
         <Route
           path="/admin-students"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <AdminLayout>
                 <Admin_Students />
-              </DashboardLayout>
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* Protected Drop Requests Page for Admin */}
         <Route
           path="/drop_requests"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <AdminLayout>
                 <DropRequests />
-              </DashboardLayout>
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
+
+
+        <Route
+          path="/admin-instructor"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <InstructorAdminPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+
+
       </Routes>
+
     </BrowserRouter>
   );
 }
