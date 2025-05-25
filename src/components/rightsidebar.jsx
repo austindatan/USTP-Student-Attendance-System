@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   format,
   startOfMonth,
@@ -14,9 +14,11 @@ import { FiSettings } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 const RightSidebar = ({ selectedDate, setSelectedDate }) => {
-  const [currentMonth, setCurrentMonth] = React.useState(new Date());
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -24,12 +26,15 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
 
   const fullName = instructor
     ? `${instructor.firstname} ${instructor.middlename} ${instructor.lastname}`
-    : "Instructor Name";
-  const email = instructor?.email || "instructor@email.com";
+    : "";
+  const email = instructor?.email || "";
 
-const imagePath = instructor?.image
-  ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace('uploads/', '')}`
-  : "/assets/blank.jpeg";
+  const imagePath = instructor?.image
+    ? `http://localhost/ustp-student-attendance/api/uploads/${instructor.image.replace(
+        "uploads/",
+        ""
+      )}`
+    : "/assets/blank.jpeg";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -40,7 +45,6 @@ const imagePath = instructor?.image
     navigate("/login-instructor");
   };
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -48,7 +52,13 @@ const imagePath = instructor?.image
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500); // Simulate load
+    return () => clearTimeout(timer);
   }, []);
 
   const renderHeader = () => (
@@ -113,10 +123,17 @@ const imagePath = instructor?.image
           <div
             key={day}
             className={`text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150
-              ${isSelected ? "bg-[#7685fc] text-white"
-                : isToday ? "border border-[#7685fc] text-[#7685fc]"
-                  : isCurrentMonth ? (isSunday ? "text-red-500" : "text-gray-700")
-                    : "text-gray-300"}`}
+              ${
+                isSelected
+                  ? "bg-[#7685fc] text-white"
+                  : isToday
+                  ? "border border-[#7685fc] text-[#7685fc]"
+                  : isCurrentMonth
+                  ? isSunday
+                    ? "text-red-500"
+                    : "text-gray-700"
+                  : "text-gray-300"
+              }`}
             onClick={() => setSelectedDate(cloneDay)}
           >
             {format(day, "d")}
@@ -125,7 +142,11 @@ const imagePath = instructor?.image
 
         day = addDays(day, 1);
       }
-      rows.push(<div className="grid grid-cols-7 mb-1" key={day}>{days}</div>);
+      rows.push(
+        <div className="grid grid-cols-7 mb-1" key={day}>
+          {days}
+        </div>
+      );
       days = [];
     }
 
@@ -160,10 +181,11 @@ const imagePath = instructor?.image
       )}
 
       {/* Sidebar */}
-      <aside className={`font-dm-sans fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col p-4 border-l border-gray-200 z-40 transition-transform duration-300 
+      <aside
+        className={`font-dm-sans fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col p-4 border-l border-gray-200 z-40 transition-transform duration-300 
         ${isSidebarOpen ? "translate-x-0" : "translate-x-full"} 
-        lg:translate-x-0 lg:relative lg:flex`}>
-
+        lg:translate-x-0 lg:relative lg:flex`}
+      >
         {/* X button for mobile */}
         <div className="lg:hidden flex justify-start mb-2">
           <button
@@ -177,10 +199,15 @@ const imagePath = instructor?.image
         {/* Top Info with Dropdown */}
         <div className="flex items-center justify-between mb-5 relative">
           <div className="relative" ref={dropdownRef}>
-            <FiSettings
-              className="text-xl text-gray-500 cursor-pointer"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            />
+            {isLoading ? (
+              <div className="w-5 h-5 rounded-full bg-gray-200 animate-pulse" />
+            ) : (
+              <FiSettings
+                className="text-xl text-gray-500 cursor-pointer"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              />
+            )}
+
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow-md border z-50">
                 <button
@@ -206,26 +233,74 @@ const imagePath = instructor?.image
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <div className="font-semibold text-sm text-gray-800">{fullName}</div>
-              <div className="text-xs text-gray-500">{email}</div>
-            </div>
-            <img
-              src={imagePath}
-              alt="avatar"
-              className="w-10 h-10 rounded-full border object-cover"
-            />
+            {isLoading ? (
+              <>
+                <div className="space-y-1">
+                  <div className="w-24 h-3 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-32 h-2 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+              </>
+            ) : (
+              <>
+                <div className="text-right">
+                  <div className="font-semibold text-sm text-gray-800">
+                    {fullName}
+                  </div>
+                  <div className="text-xs text-gray-500">{email}</div>
+                </div>
+                <img
+                  src={imagePath}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full border object-cover"
+                />
+              </>
+            )}
           </div>
         </div>
 
+        {/* Selected Date Text */}
         <div className="text-xs text-gray-500 mb-3">
-          {selectedDate ? format(selectedDate, "MMMM d, yyyy - EEEE") : "No date selected"}
+          {isLoading ? (
+            <div className="w-40 h-3 bg-gray-200 rounded animate-pulse" />
+          ) : selectedDate ? (
+            format(selectedDate, "MMMM d, yyyy - EEEE")
+          ) : (
+            "No date selected"
+          )}
         </div>
 
+        {/* Calendar */}
         <div className="bg-white">
-          {renderHeader()}
-          {renderDays()}
-          {renderCells()}
+          {isLoading ? (
+            <div className="space-y-2">
+              <div className="w-32 h-4 bg-gray-200 rounded animate-pulse mb-3" />
+              <div className="grid grid-cols-7 gap-1 mb-1">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-3 bg-gray-200 rounded animate-pulse"
+                  />
+                ))}
+              </div>
+              {Array.from({ length: 6 }).map((_, rowIndex) => (
+                <div className="grid grid-cols-7 gap-1 mb-1" key={rowIndex}>
+                  {Array.from({ length: 7 }).map((_, cellIndex) => (
+                    <div
+                      key={cellIndex}
+                      className="w-8 h-8 rounded-full bg-gray-200 mx-auto animate-pulse"
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {renderHeader()}
+              {renderDays()}
+              {renderCells()}
+            </>
+          )}
         </div>
       </aside>
     </>

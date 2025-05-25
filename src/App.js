@@ -93,27 +93,6 @@ function App() {
 
         {/* Instructor Protected Routes */}
         <Route
-          path="/classes-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
-                <div
-                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                  style={{ backgroundImage: bgImage }}
-                >
-                  <Classes_Dashboard selectedDate={selectedDate} />
-                </div>
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/teacher-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']}>
@@ -149,6 +128,27 @@ function App() {
                   style={{ backgroundImage: bgImage }}
                 >
                 <SectionDashboard selectedDate={selectedDate} />
+                </div>
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/classes-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['instructor']}>
+              <DashboardLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
+                <div
+                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                  style={{ backgroundImage: bgImage }}
+                >
+                  <Classes_Dashboard selectedDate={selectedDate} />
                 </div>
               </DashboardLayout>
             </ProtectedRoute>
