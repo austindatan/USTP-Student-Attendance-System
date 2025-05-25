@@ -10,10 +10,26 @@ include __DIR__ . '/../src/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $query = "
-        SELECT DISTINCT student.student_id, student.firstname, student.middlename, student.lastname, student.date_of_birth, student.contact_number, student.street, student.city, student.province, student.zipcode FROM drop_request 
-        INNER JOIN attendance ON attendance.attendance_id = drop_request.attendance_id
-        INNER JOIN student ON student.student_id = attendance.student_id
-        WHERE (drop_request.status != 'Dropped')
+        SELECT 
+            s.student_id, 
+            s.firstname, 
+            s.middlename, 
+            s.lastname, 
+            s.date_of_birth, 
+            s.contact_number, 
+            s.street, 
+            s.city, 
+            s.province, 
+            s.zipcode 
+        FROM student s
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM attendance a
+            INNER JOIN drop_request d ON d.attendance_id = a.attendance_id
+            INNER JOIN student_details sd ON a.student_details_id = sd.student_details_id
+            WHERE sd.student_id = s.student_id
+            AND d.status = 'Dropped'
+        )
     ";
 
     $result = $conn->query($query);

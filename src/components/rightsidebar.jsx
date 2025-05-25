@@ -52,12 +52,11 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500); // Simulate load
+    const timer = setTimeout(() => setIsLoading(false), 1500); // Simulate loading
     return () => clearTimeout(timer);
   }, []);
 
@@ -105,7 +104,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const renderCells = () => {
     const monthStart = startOfMonth(currentMonth);
     const startDate = startOfWeek(monthStart);
-    const endDate = addDays(startDate, 41); // 6 weeks
+    const endDate = addDays(startDate, 41);
 
     const rows = [];
     let days = [];
@@ -155,7 +154,6 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
 
   return (
     <>
-      {/* Hamburger button */}
       {!isSidebarOpen && (
         <div className="lg:hidden fixed top-4 right-4 z-50">
           <button
@@ -180,13 +178,11 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
         </div>
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`font-dm-sans fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col p-4 border-l border-gray-200 z-40 transition-transform duration-300 
-        ${isSidebarOpen ? "translate-x-0" : "translate-x-full"} 
-        lg:translate-x-0 lg:relative lg:flex`}
+        className={`fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col p-4 border-l border-gray-200 z-40 transition-transform duration-300 
+          ${isSidebarOpen ? "translate-x-0" : "translate-x-full"} 
+          lg:translate-x-0 lg:relative lg:flex`}
       >
-        {/* X button for mobile */}
         <div className="lg:hidden flex justify-start mb-2">
           <button
             onClick={toggleSidebar}
@@ -196,7 +192,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
           </button>
         </div>
 
-        {/* Top Info with Dropdown */}
+        {/* Dropdown */}
         <div className="flex items-center justify-between mb-5 relative">
           <div className="relative" ref={dropdownRef}>
             {isLoading ? (
@@ -259,7 +255,6 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
           </div>
         </div>
 
-        {/* Selected Date Text */}
         <div className="text-xs text-gray-500 mb-3">
           {isLoading ? (
             <div className="w-40 h-3 bg-gray-200 rounded animate-pulse" />
