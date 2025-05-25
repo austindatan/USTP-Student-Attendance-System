@@ -171,12 +171,12 @@ const LeftSidebar = ({ setBgImage }) => {
                         ) : (
                             <>
                                 <img
-                                    src="assets/excuse.png" 
+                                    src={`${process.env.PUBLIC_URL}/assets/excuse-2.png`}
                                     alt="Requests"
                                     className={`w-6 h-8 mb-1 block ${excuse_requests_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
-                                    src="assets/excuse-active.png" 
+                                    src={`${process.env.PUBLIC_URL}/assets/excuse-active-2.png`}
                                     alt="Requests Active"
                                     className={`w-6 h-8 mb-1 ${excuse_requests_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
@@ -185,7 +185,7 @@ const LeftSidebar = ({ setBgImage }) => {
                         {loading ? (
                             <div className="w-10 h-3 rounded bg-gray-200 animate-pulse" />
                         ) : (
-                            <span className="text-xs">Excuse Requests</span>
+                            <span className="text-xs">Excuse <br />Requests</span>
                         )}
                     </button>
 
