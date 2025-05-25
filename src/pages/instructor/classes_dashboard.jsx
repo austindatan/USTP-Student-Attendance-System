@@ -24,7 +24,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     try {
       console.log('Fetching sections...');
       const response = await fetch(
-        `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
+        `http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -36,8 +36,10 @@ export default function Classes_Dashboard({ selectedDate }) {
       console.error('Error fetching sections:', error);
       setSections([]); // Clear sections on error
     } finally {
+      setTimeout(() => {
       setIsLoading(false);
-    }
+    }, 1500);
+      }
   };
 
   // Fetch once when instructor_id changes

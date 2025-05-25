@@ -15,7 +15,7 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
                               backgroundImage: `url(${bgImage})`,
                               backgroundRepeat: "no-repeat",
                               backgroundPosition: "right 5px bottom",
-                              backgroundSize: "160px"
+                              backgroundSize: "130px"
                           }
                         : {}
                 }

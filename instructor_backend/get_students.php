@@ -3,15 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$dbname = 'attendance_monitoring';
-
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => 'Connection failed']));
-}
+require_once('../src/conn.php');
 
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $instructor_id = isset($_GET['instructor_id']) ? (int)$_GET['instructor_id'] : 0;
