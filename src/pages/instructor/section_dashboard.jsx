@@ -67,7 +67,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                 const presentIds = data.filter(student => student.status === 'Present').map(s => s.student_details_id);
                 setPresentStudents(presentIds);
-                setTimeout(() => setIsLoading(false), 500);
+                setTimeout(() => setIsLoading(false), 1500);
             } catch (error) {
                 console.error("Error fetching students:", error);
                 setIsLoading(false);
@@ -202,12 +202,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         <div>
                             {/* Adjusted to display course_name as main title and section_name below it */}
                             <h1 className="text-2xl font-bold">
-                                {sectionInfo?.course_name || 'Course Title (Missing)'}
+                                {sectionInfo?.course_name || 'Course Title'}
                             </h1>
                             <h2 className="text-xl font-semibold">
                                 {sectionInfo?.section_name || 'Section Name'}
                             </h2>
-                            <p className="text-sm">{sectionInfo?.room || 'Room'}</p>
+                            <p className="text-sm">{sectionInfo?.course_code || 'Course Code'}</p>
                             <p className="text-sm">
                                 {sectionInfo ? `${sectionInfo.schedule_day} ${sectionInfo.start_time} - ${sectionInfo.end_time}` : ''}
                             </p>
