@@ -27,6 +27,10 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
 import DropRequests from './pages/admin/drop_requests';
 import InstructorAdminPage from './pages/admin/instructorAdminpage';
+import AddStudent from './pages/admin/AddStudent';
+import EditStudent from './pages/admin/EditStudent';
+import Sections from './pages/admin/sections';
+import Courses from './pages/admin/courses';
 
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -206,13 +210,57 @@ function App() {
           }
         />
 
-
         <Route
           path="/admin-instructor"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminLayout>
                 <InstructorAdminPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-sections"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <Sections />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-courses"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <Courses />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+      {/* Admin add and edit buttons for student */}
+        <Route
+          path="/admin-students/add"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <AddStudent />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-students/edit/:student_id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <EditStudent />
               </AdminLayout>
             </ProtectedRoute>
           }
