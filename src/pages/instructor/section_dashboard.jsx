@@ -25,7 +25,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
+                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
                 );
                 const data = await response.json();
                 setStudents(data);
@@ -62,7 +62,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -147,10 +147,25 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 )}
 
                 {/* Student Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
+                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
                     {isLoading
                         ? Array.from({ length: 12 }).map((_, i) => (
-                            <div key={i} className="h-48 bg-gray-200 rounded-[20px] animate-pulse" />
+                            <div className={`cursor-pointer animate-pulse bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between w-24 sm:w-36`}>
+                                <div className="overflow-hidden rounded-t-[20px] flex justify-center">
+                                    <img
+                                        src="assets/white_placeholder2.jpg"
+                                        className="w-24 h-24 sm:w-36 sm:h-36 object-cover grayscale"
+                                        alt="Loading..."
+                                    />
+                                </div>
+                                <div className="pl-3 pr-4 pt-2 pb-6 items-center">
+                                    <p className="font-[Barlow] text-xs font-bold ml-[5px] text-[#737373] bg-gray-200 rounded w-16 h-4 mb-2"></p>
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2] bg-gray-200 rounded w-20 h-4"></div>
+                                        <div className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2] bg-gray-200 rounded w-20 h-4"></div>
+                                    </div>
+                                </div>
+                            </div>
                         ))
                         : students.map((student, index) => {
                             const isPresent = presentStudents.includes(student.student_details_id);
@@ -165,7 +180,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 >
                                     <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                         <img
-                                            src={student.image || 'default_image_url_here'}
+                                            src={`http://localhost/ustp-student-attendance/api/${student.image}`}
                                             className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
                                             alt={name}
                                         />
