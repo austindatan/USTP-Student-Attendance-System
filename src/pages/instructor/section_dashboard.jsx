@@ -25,7 +25,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
+                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
                 );
                 const data = await response.json();
                 setStudents(data);
@@ -180,7 +180,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 >
                                     <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                         <img
-                                            src={`http://localhost/ustp-student-attendance/api/${student.image}`}
+                                            src={`http://localhost/USTP-Student-Attendance-System/api/${student.image}`}
                                             className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
                                             alt={name}
                                         />

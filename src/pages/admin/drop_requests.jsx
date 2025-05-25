@@ -55,36 +55,39 @@ export default function DropRequests() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center p-6 md:p-10"
-      style={{ backgroundImage: "url('assets/white_theme.png')" }}
-    >
-      <div className="max-w-6xl mx-auto bg-white border-2 border-[#E55182] rounded-xl shadow-xl p-8">
-        <button
-          onClick={() => navigate("/admin-dashboard")}
-          className="mb-4 bg-[#E55182] text-white px-4 py-2 rounded hover:bg-[#c0406d]"
-        >
-          ← Go Back
-        </button>
+    <div className="p-8">
+      <button
+        onClick={() => navigate("/admin-dashboard")}
+        className="mb-4 bg-[#E55182] text-white px-4 py-2 rounded hover:bg-[#c0406d]"
+      >
+        ← Go Back
+      </button>
 
-        <h1 className="text-3xl font-bold text-[#E55182] mb-6">Drop Requests</h1>
+      <h1 className="text-3xl font-bold mb-6 text-[#E55182]">Drop Requests</h1>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-pink-900 border-collapse">
-            <thead className="bg-pink-100 text-pink-700 uppercase text-xs">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-xl p-8">
+        <table className="w-full text-sm text-left text-pink-900 border-collapse">
+          <thead className="bg-pink-100 text-pink-700 uppercase text-xs">
+            <tr>
+              <th className="px-6 py-3">Student ID</th>
+              <th className="px-6 py-3">Student Name</th>
+              <th className="px-6 py-3">Program</th>
+              <th className="px-6 py-3">Course</th>
+              <th className="px-6 py-3">Instructor</th>
+              <th className="px-6 py-3">Reason</th>
+              <th className="px-6 py-3">Status</th>
+              <th className="px-6 py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.length === 0 ? (
               <tr>
-                <th className="px-6 py-3">Student ID</th>
-                <th className="px-6 py-3">Student Name</th>
-                <th className="px-6 py-3">Program</th>
-                <th className="px-6 py-3">Course</th>
-                <th className="px-6 py-3">Instructor</th>
-                <th className="px-6 py-3">Reason</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Action</th>
+                <td colSpan="8" className="px-6 py-6 text-center text-gray-500">
+                  No drop requests found.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {requests.map((req) => (
+            ) : (
+              requests.map((req) => (
                 <tr key={req.drop_request_id} className="bg-white border-b hover:bg-pink-50">
                   <td className="px-6 py-4">{req.student_id}</td>
                   <td className="px-6 py-4">{req.student_name}</td>
@@ -115,17 +118,10 @@ export default function DropRequests() {
                     </button>
                   </td>
                 </tr>
-              ))}
-              {requests.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="px-6 py-6 text-center text-gray-500">
-                    No drop requests found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Modal */}
