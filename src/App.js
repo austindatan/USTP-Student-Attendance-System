@@ -67,7 +67,7 @@ function AdminLayout({ children }) {
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bgImage, setBgImage] = useState("url('assets/forest_theme.png')"); 
+  const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/forest_theme.png')`);
 
   return (
     <BrowserRouter>
@@ -114,23 +114,24 @@ function App() {
         />
 
         <Route
-          path="/section-dashboard"
+          path="/section-dashboard/:sectionId" // <-- CHANGE THIS LINE
           element={
-            <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
-                <div
-                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                  style={{ backgroundImage: bgImage }}
-                >
-                <SectionDashboard selectedDate={selectedDate} />
-                </div>
-              </DashboardLayout>
-            </ProtectedRoute>
+              <ProtectedRoute allowedRoles={['instructor']}>
+                  <DashboardLayout
+                      selectedDate={selectedDate}
+                      setSelectedDate={setSelectedDate}
+                      bgImage={bgImage}
+                      setBgImage={setBgImage}
+                  >
+                      <div
+                          className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                          style={{ backgroundImage: bgImage }}
+                      >
+                          {/* Assuming SectionDashboard is your Teacher_Dashboard component */}
+                          <SectionDashboard selectedDate={selectedDate} />
+                      </div>
+                  </DashboardLayout>
+              </ProtectedRoute>
           }
         />
 

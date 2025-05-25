@@ -4,6 +4,7 @@ ini_set('display_errors', 0);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 
+
 $conn = new mysqli("localhost", "root", "", "attendance_monitoring");
 
 if ($conn->connect_error) {

@@ -21,7 +21,7 @@ const LeftSidebar = ({ setBgImage }) => {
     };
 
     const dashboard_active = location.pathname === '/teacher-dashboard';
-    const classes_active = ['/classes-dashboard', '/section-dashboard'].some(path =>
+    const classes_active = ['/classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
     location.pathname.startsWith(path)
     );
 
@@ -72,7 +72,7 @@ const LeftSidebar = ({ setBgImage }) => {
                         <div className="w-20 h-20 rounded-full bg-gray-200 animate-pulse" />
                     ) : (
                         <img
-                            src="assets/ustp_logo.png"
+                            src={`${process.env.PUBLIC_URL}/assets/ustp_logo.png`}
                             alt="USTP Logo"
                             className="w-20 h-auto"
                         />
@@ -104,12 +104,12 @@ const LeftSidebar = ({ setBgImage }) => {
                         ) : (
                             <>
                                 <img
-                                    src="assets/dashboard.png"
+                                    src={`${process.env.PUBLIC_URL}/assets/dashboard.png`}
                                     alt="Dashboard"
                                     className={`w-8 h-8 mb-1 block ${dashboard_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
-                                    src="assets/dashboard-active.png"
+                                    src={`${process.env.PUBLIC_URL}/assets/dashboard-active.png`}
                                     alt="Dashboard Active"
                                     className={`w-8 h-8 mb-1 ${dashboard_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
@@ -135,12 +135,12 @@ const LeftSidebar = ({ setBgImage }) => {
                         ) : (
                             <>
                                 <img
-                                    src="assets/classes.png"
+                                    src={`${process.env.PUBLIC_URL}/assets/classes.png`}
                                     alt="Classes"
                                     className={`w-6 h-8 mb-1 block ${classes_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
-                                    src="assets/classes-active.png"
+                                    src={`${process.env.PUBLIC_URL}/assets/classes-active.png`}
                                     alt="Classes Active"
                                     className={`w-6 h-8 mb-1 ${classes_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
@@ -166,12 +166,12 @@ const LeftSidebar = ({ setBgImage }) => {
                             ) : (
                                 <div className="relative w-8 h-8 mb-1">
                                     <img
-                                        src="assets/palette.png"
+                                        src={`${process.env.PUBLIC_URL}/assets/palette.png`}
                                         alt="Default Theme Icon"
                                         className="absolute inset-0 w-8 h-8 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
                                     />
                                     <img
-                                        src="assets/palette-active.png"
+                                        src={`${process.env.PUBLIC_URL}/assets/palette-active.png`}
                                         alt="Active Theme Icon"
                                         className="absolute inset-0 w-8 h-8 transition-opacity duration-200 opacity-100 group-hover:opacity-0"
                                     />
@@ -188,19 +188,19 @@ const LeftSidebar = ({ setBgImage }) => {
                             <div className="absolute bottom-full font-dm-sans text-sm left-1 bg-white border rounded-md shadow-md hidden group-hover:block z-50">
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage("url('assets/water_theme.png')")}
+                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/water_theme.png')`)}
                                 >
                                     Water
                                 </button>
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage("url('assets/forest_theme.png')")}
+                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/forest_theme.png')`)}
                                 >
                                     Forest
                                 </button>
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage("url('assets/white_theme.png')")}
+                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/white_theme.png')`)}
                                 >
                                     Default
                                 </button>
