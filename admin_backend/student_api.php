@@ -10,7 +10,7 @@ include __DIR__ . '/../src/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $query = "
-        SELECT DISTINCT student.student_id, student.firstname, student.middlename, student.lastname, student.date_of_birth, student.contact_number FROM drop_request 
+        SELECT DISTINCT student.student_id, student.firstname, student.middlename, student.lastname, student.date_of_birth, student.contact_number, student.street, student.city, student.province, student.zipcode FROM drop_request 
         INNER JOIN attendance ON attendance.attendance_id = drop_request.attendance_id
         INNER JOIN student ON student.student_id = attendance.student_id
         WHERE (drop_request.status != 'Dropped')

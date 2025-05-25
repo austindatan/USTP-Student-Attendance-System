@@ -73,6 +73,7 @@ export default function DropRequests() {
           <table className="min-w-full text-sm text-left text-pink-900 border-collapse">
             <thead className="bg-pink-100 text-pink-700 uppercase text-xs">
               <tr>
+                <th className="px-6 py-3">Student ID</th>
                 <th className="px-6 py-3">Student Name</th>
                 <th className="px-6 py-3">Program</th>
                 <th className="px-6 py-3">Course</th>
@@ -85,6 +86,7 @@ export default function DropRequests() {
             <tbody>
               {requests.map((req) => (
                 <tr key={req.drop_request_id} className="bg-white border-b hover:bg-pink-50">
+                  <td className="px-6 py-4">{req.student_id}</td>
                   <td className="px-6 py-4">{req.student_name}</td>
                   <td className="px-6 py-4">{req.program_name}</td>
                   <td className="px-6 py-4">{req.course_name}</td>

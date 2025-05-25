@@ -83,9 +83,11 @@ export default function Admin_Students() {
                 <table className="w-full table-fixed text-sm text-left text-pink-900">
                   <thead className="text-xs uppercase bg-pink-100 text-pink-700">
                     <tr>
+                      <th className="w-40 px-4 py-3 truncate">Student ID</th>
                       <th className="w-40 px-4 py-3 truncate">Full Name</th>
                       <th className="w-28 px-4 py-3 truncate">Birthdate</th>
                       <th className="w-28 px-4 py-3 truncate">Contact Number</th>
+                      <th className="w-28 px-4 py-3 truncate">Address</th>
                       <th className="w-24 px-4 py-3 truncate">Action</th>
                     </tr>
                   </thead>
@@ -103,11 +105,15 @@ export default function Admin_Students() {
                           key={index}
                           className="bg-white border-b border-pink-200 hover:bg-pink-50"
                         >
+                          <td className="px-4 py-4 truncate">{student.student_id}</td>
                           <td className="px-4 py-4 truncate text-pink-900">
                             {student.firstname} {student.middlename} {student.lastname}
                           </td>
                           <td className="px-4 py-4 truncate">{student.date_of_birth}</td>
                           <td className="px-4 py-4 truncate">{student.contact_number}</td>
+                          <td className="px-4 py-4 truncate text-pink-900">
+                            {student.street} {student.city} {student.province} {student.zipcode}
+                          </td>
                           <td className="px-4 py-4 truncate">
                             <button
                               onClick={() => navigate(`/admin-students/edit/${student.student_id}`)}
