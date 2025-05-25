@@ -100,9 +100,9 @@ export default function Classes_Dashboard({ selectedDate }) {
                 handleSectionClick(section); // Pass the entire section object
               }
             }}
-            code={!isLoading ? `SEC ${section?.section_name}` : ''}
+            code={!isLoading ? section?.course_code || 'COURSE CODE' : ''}
             title={!isLoading ? section?.course_name || 'Course Title' : ''}
-            room={!isLoading ? section?.room || 'TBA' : ''}
+            room={!isLoading ? section?.section_name || 'TBA' : ''}
             schedule={
               !isLoading
                 ? `${section?.schedule_day || 'Day'} ${section?.start_time || ''} – ${section?.end_time || ''}`
