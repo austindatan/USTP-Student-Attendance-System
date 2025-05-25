@@ -1,63 +1,79 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
-import '../../App.css';
 import { useNavigate } from 'react-router-dom';
-import StudentCard from './components/student_card';
 
 export default function Teacher_Dashboard({ selectedDate }) {
-
-    const [presentStudents, setPresentStudents] = useState([]);
     const navigate = useNavigate();
-
-    const teacher_dashboard = () => {
-        navigate("/teacher-dashboard");
-    };
-
-    const fakeAttendance = {
-        '2025-05-20': ['Jean Grey', 'Pearl Pangan', 'Ghost'],
-        '2025-05-21': ['Luna Snow'],
-        '2025-05-22': ['Invisible Woman', 'Sentry'],
-    };
-
-    const students = [
-        { name: 'Jean Grey', img: 'assets/student_files/Jean_Grey_Uniform_III.png' },
-        { name: 'Pearl Pangan', img: 'assets/student_files/Wave_Uniform_I.png' },
-        { name: 'Luna Snow', img: 'assets/student_files/Luna_Snow_Uniform_III.png' },
-        { name: 'Susan Storm', img: 'assets/student_files/Invisible_Woman_Uniform_III.png' },
-        { name: 'Ava Starr', img: 'assets/student_files/Ghost_Uniform_II.png' },
-        { name: 'Robert Reynolds', img: 'assets/student_files/Sentry_Uniform_II.png' },
-        { name: 'Carol Danvers', img: 'assets/student_files/Captain_Marvel_Uniform_IIIIII.png' },
-        { name: 'Emma Frost', img: 'assets/student_files/Emma_Frost_Uniform_III.png' },
-        { name: 'Johnny Storm', img: 'assets/student_files/Human_Torch_Uniform_III.png' },
-        { name: 'Wanda Maximoff', img: 'assets/student_files/Scarlet_Witch_Uniform_III.png' },
-        { name: 'Yelena Belova', img: 'assets/student_files/Yelena_Belova_Uniform_III.png' },
-        { name: 'Nico Minoru', img: 'assets/student_files/Sister_Grimm_Uniform_II.png' },
-        { name: 'Stephen Strange', img: 'assets/student_files/Doctor_Strange_Uniform_IIIII.png' },
-        { name: 'Kamala Khan', img: 'assets/student_files/Ms._Marvel__28Kamala_Khan_29_Uniform_IIII.png' },
-    ];
-
-    useEffect(() => {
-        const dateKey = format(selectedDate || new Date(), 'yyyy-MM-dd');
-        setPresentStudents(fakeAttendance[dateKey] || []);
-    }, [selectedDate]);
-
-    const toggleAttendance = (studentName) => {
-        setPresentStudents(prev =>
-            prev.includes(studentName)
-                ? prev.filter(name => name !== studentName)
-                : [...prev, studentName]
-        );
-    };
-
+    const [students, setStudents] = useState([]);
+    const [presentStudents, setPresentStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const instructor = JSON.parse(localStorage.getItem('instructor'));
+
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, []);
+        if (!instructor) {
+            navigate('/login-instructor');
+        }
+    }, [instructor, navigate]);
+
+    useEffect(() => {
+        if (!instructor?.instructor_id) return;
+
+        const fetchStudents = async () => {
+            try {
+                setIsLoading(true);
+                const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
+                const response = await fetch(
+                    `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
+                );
+                const data = await response.json();
+                setStudents(data);
+
+                const presentIds = data
+                    .filter(student => student.status === 'Present')
+                    .map(student => student.student_details_id);
+                setPresentStudents(presentIds);
+                setTimeout(() => setIsLoading(false), 1500);
+            } catch (error) {
+                console.error("Error fetching students:", error);
+                setIsLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, [selectedDate, instructor?.instructor_id]);
+
+    const toggleAttendance = async (student) => {
+        const updatedList = presentStudents.includes(student.student_details_id)
+            ? presentStudents.filter(id => id !== student.student_details_id)
+            : [...presentStudents, student.student_details_id];
+
+        setPresentStudents(updatedList);
+
+        const attendanceData = {
+            student_details_id: student.student_details_id,
+            instructor_id: instructor.instructor_id,
+            section_id: student.section_id,
+            program_details_id: student.program_details_id,
+            admin_id: student.admin_id,
+            date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+            status: updatedList.includes(student.student_details_id) ? 'Present' : 'Absent',
+        };
+
+        try {
+            const res = await fetch('http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/save_attendance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData)
+            });
+
+            const result = await res.json();
+            console.log('Attendance saved:', result);
+        } catch (error) {
+            console.error('Error saving attendance:', error);
+        }
+    };
 
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
@@ -89,7 +105,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         }}
                     >
                         <div className="flex justify-between items-center">
-                            <button type="button" onClick={teacher_dashboard}>
+                            <button onClick={() => navigate("/classes-dashboard")}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     strokeWidth="1.5" stroke="currentColor" className="size-4">
                                     <path strokeLinecap="round" strokeLinejoin="round"
@@ -108,7 +124,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         </div>
                     </div>
                 )}
-
 
                 {/* Search */}
                 {isLoading ? (
@@ -131,17 +146,48 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 )}
 
-
                 {/* Student Cards */}
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
-                    {students.map((student, index) => (
-                        <StudentCard
-                            key={index}
-                            student={student}
-                            isPresent={presentStudents.includes(student.name)}
-                            onToggle={toggleAttendance}
-                        />
-                    ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
+                    {isLoading
+                        ? Array.from({ length: 12 }).map((_, i) => (
+                            <div key={i} className="h-48 bg-gray-200 rounded-[20px] animate-pulse" />
+                        ))
+                        : students.map((student, index) => {
+                            const isPresent = presentStudents.includes(student.student_details_id);
+                            const name = student.name || 'No Name';
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() => toggleAttendance(student)}
+                                    className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
+                                        bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
+                                        ${isPresent ? 'opacity-100' : 'opacity-60'}`}
+                                >
+                                    <div className="overflow-hidden rounded-t-[20px] flex justify-center">
+                                        <img
+                                            src={student.image || 'default_image_url_here'}
+                                            className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
+                                            alt={name}
+                                        />
+                                    </div>
+                                    <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                                        <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
+                                            ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
+                                            {isPresent ? 'Present' : 'Absent'}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
+                                                {name.includes(" ") ? (
+                                                    <>
+                                                        {name.split(" ")[0]} <br /> {name.split(" ")[1]}
+                                                    </>
+                                                ) : name}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                 </div>
             </section>
         </div>
