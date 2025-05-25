@@ -8,6 +8,10 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [students, setStudents] = useState([]);
     const [presentStudents, setPresentStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [showRequestModal, setShowRequestModal] = useState(false);
+    const [selectedStudentForRequest, setSelectedStudentForRequest] = useState('');
+    const [requestType, setRequestType] = useState('Excuse');
+    const [requestReason, setRequestReason] = useState('');
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
@@ -62,7 +66,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -72,6 +76,54 @@ export default function Teacher_Dashboard({ selectedDate }) {
             console.log('Attendance saved:', result);
         } catch (error) {
             console.error('Error saving attendance:', error);
+        }
+    };
+
+    const handleAddRequest = async () => {
+        // Find the attendance_id for the selected student on the current date
+        const studentAttendance = students.find(s => s.student_details_id === parseInt(selectedStudentForRequest));
+
+        if (!studentAttendance) {
+            alert('Student attendance record not found for the selected date. Please ensure the student has an attendance record before making a request.');
+            return;
+        }
+
+        if (!selectedStudentForRequest || !requestReason) {
+            alert('Please select a student and provide a reason for the request.');
+            return;
+        }
+
+        const requestData = {
+            attendance_id: studentAttendance.attendance_id,
+            reason: requestReason,
+            status: 'Pending', // Default status
+        };
+
+        let endpoint = '';
+        if (requestType === 'Excuse') {
+            endpoint = 'http://localhost/USTP-Student-Attendance-System/instructor_backend/add_excused_request.php';
+        } else if (requestType === 'Drop') {
+            endpoint = 'http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php';
+        }
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            });
+            const result = await res.json();
+            console.log('Request saved:', result);
+            alert('Request submitted successfully!');
+            setShowRequestModal(false);
+            setSelectedStudentForRequest('');
+            setRequestType('Excuse');
+            setRequestReason('');
+            // Potentially re-fetch students to update their status if the request changes it immediately
+            // fetchStudents(); // This would re-run the useEffect
+        } catch (error) {
+            console.error('Error submitting request:', error);
+            alert('Failed to submit request.');
         }
     };
 
@@ -125,24 +177,35 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 )}
 
-                {/* Search */}
+                {/* Search and Add Request Button */}
                 {isLoading ? (
-                    <div className="relative w-80 h-10 rounded-lg bg-white animate-pulse mb-4"></div>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="relative w-80 h-10 rounded-lg bg-white animate-pulse"></div>
+                        <div className="w-32 h-10 rounded-lg bg-white animate-pulse"></div>
+                    </div>
                 ) : (
-                    <div className="relative">
-                        <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                            </svg>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="relative w-80">
+                            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                id="table-search"
+                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+                                placeholder="Search for students."
+                            />
                         </div>
-                        <input
-                            type="text"
-                            id="table-search"
-                            className="font-poppins block w-80 ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
-                            placeholder="Search for students."
-                        />
+                        <button
+                            onClick={() => setShowRequestModal(true)}
+                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 border-[#0097b2] bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                        >
+                            Add Request
+                        </button>
                     </div>
                 )}
 
@@ -150,7 +213,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
                     {isLoading
                         ? Array.from({ length: 12 }).map((_, i) => (
-                            <div className={`cursor-pointer animate-pulse bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between w-24 sm:w-36`}>
+                            <div key={i} className={`cursor-pointer animate-pulse bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between w-24 sm:w-36`}>
                                 <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                     <img
                                         src="assets/white_placeholder2.jpg"
@@ -205,6 +268,103 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         })}
                 </div>
             </section>
+
+            {/* Request Modal */}
+            {showRequestModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+                    onClick={() => setShowRequestModal(false)} // Click outside to close
+                >
+                    <div
+                        className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md mx-auto"
+                        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing modal
+                    >
+                        <h2 className="text-xl font-bold text-[#0097b2] mb-4">Add Request</h2>
+
+                        {/* Student Dropdown */}
+                        <div className="mb-4">
+                            <label htmlFor="student-select" className="block text-sm font-medium text-gray-700 mb-1">
+                                Select Student:
+                            </label>
+                            <select
+                                id="student-select"
+                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#0097b2] focus:border-[#0097b2] sm:text-sm text-[#737373]"
+                                value={selectedStudentForRequest}
+                                onChange={(e) => setSelectedStudentForRequest(e.target.value)}
+                            >
+                                <option value="">-- Choose a student --</option>
+                                {students.map((student) => (
+                                    <option key={student.student_details_id} value={student.student_details_id}>
+                                        {student.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Request Type Radio Buttons */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Request Type:
+                            </label>
+                            <div className="mt-1 flex space-x-4">
+                                <label className="inline-flex items-center">
+                                    <input
+                                        type="radio"
+                                        className="form-radio text-[#0097b2] focus:ring-[#0097b2]"
+                                        name="requestType"
+                                        value="Excuse"
+                                        checked={requestType === 'Excuse'}
+                                        onChange={(e) => setRequestType(e.target.value)}
+                                    />
+                                    <span className="ml-2 text-gray-700">Excuse</span>
+                                </label>
+                                <label className="inline-flex items-center">
+                                    <input
+                                        type="radio"
+                                        className="form-radio text-[#0097b2] focus:ring-[#0097b2]"
+                                        name="requestType"
+                                        value="Drop"
+                                        checked={requestType === 'Drop'}
+                                        onChange={(e) => setRequestType(e.target.value)}
+                                    />
+                                    <span className="ml-2 text-gray-700">Drop</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Reason Textarea */}
+                        <div className="mb-6">
+                            <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
+                                Reason:
+                            </label>
+                            <textarea
+                                id="reason"
+                                rows="4"
+                                className="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#0097b2] focus:border-[#0097b2] sm:text-sm text-[#737373]"
+                                value={requestReason}
+                                onChange={(e) => setRequestReason(e.target.value)}
+                                placeholder="Enter reason for the request..."
+                            ></textarea>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowRequestModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAddRequest}
+                                className="px-4 py-2 text-sm font-medium text-white bg-[#0097b2] rounded-md hover:bg-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                            >
+                                Submit Request
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
