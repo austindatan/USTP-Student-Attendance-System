@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
@@ -21,18 +21,58 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement 
 );
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [pieLabels, setPieLabels] = useState([]);
+  const [pieCounts, setPieCounts] = useState([]);
+  const [chartLoadingError, setChartLoadingError] = useState('');
+
+  useEffect(() => {
+  
+    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_students_by_program.php';
+    console.log('Attempting to fetch pie chart data from:', apiUrl);
+
+    fetch(apiUrl)
+      .then((res) => {
+        console.log('Network response status:', res.status, res.statusText);
+        if (!res.ok) {
+          
+          return res.text().then(text => {
+            console.error('Server response was not OK:', text);
+            throw new Error(`Network response was not ok. Status: ${res.status}, Message: ${text.substring(0, 100)}...`);
+          });
+        }
+        return res.json(); 
+      })
+      .then((data) => {
+        console.log('Enrollment data from backend (parsed JSON):', data);
+        if (data.labels && Array.isArray(data.labels) && data.counts && Array.isArray(data.counts)) {
+          setPieLabels(data.labels);
+          setPieCounts(data.counts);
+          setChartLoadingError(''); 
+        } else if (data.error) {
+            setChartLoadingError(`Backend error: ${data.error} - ${data.details || ''}`);
+            console.error('Backend reported an error:', data.error, data.details);
+        } else {
+          setChartLoadingError('Data format from backend is unexpected.');
+          console.error('Unexpected data format:', data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching pie chart data (catch block):', error);
+        setChartLoadingError(`Failed to fetch chart data: ${error.message || error}`);
+      });
+  }, []); 
 
   const handleLogout = () => {
     localStorage.removeItem('admin');
     navigate('/login-admin');
   };
 
-  const blueBase = '#1D4ED8'; // Tailwind text-blue-700
+  const blueBase = '#1D4ED8';
 
   const lineData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
@@ -50,33 +90,33 @@ const AdminDashboard = () => {
 
   const lineOptions = {
     responsive: true,
-    maintainAspectRatio: false, // allow flexible height
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
       title: { display: true, text: 'Monthly Student Enrollment' },
     },
   };
 
+  const generateColors = (numColors) => {
+    const colors = [];
+    for (let i = 0; i < numColors; i++) {
+      const hue = (i * 360 / numColors) % 360;
+      colors.push(`hsla(${hue}, 70%, 50%, 0.7)`);
+    }
+    return colors;
+  };
+
+  const pieChartBackgroundColors = generateColors(pieLabels.length);
+  const pieChartBorderColors = pieChartBackgroundColors.map(color => color.replace('0.7)', '1)')); 
+
   const pieData = {
-    labels: ['BSIT', 'BSCS', 'BSCE', 'BSA', 'Other'],
+    labels: pieLabels,
     datasets: [
       {
         label: 'Enrollment by Course',
-        data: [300, 150, 100, 80, 50],
-        backgroundColor: [
-          'rgba(229, 81, 130, 0.7)',
-          'rgba(255, 159, 64, 0.7)',
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(153, 102, 255, 0.7)',
-        ],
-        borderColor: [
-          'rgba(229, 81, 130, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
+        data: pieCounts,
+        backgroundColor: pieChartBackgroundColors,
+        borderColor: pieChartBorderColors,
         borderWidth: 1,
       },
     ],
@@ -97,7 +137,6 @@ const AdminDashboard = () => {
         Welcome to Admin Dashboard!
       </h1>
 
-      {/* Charts container */}
       <div className="mt-10 flex flex-col md:flex-row flex-wrap gap-8 justify-center">
         <div
           className="bg-white p-4 rounded-lg shadow-md w-full md:w-[48%]"
@@ -110,8 +149,23 @@ const AdminDashboard = () => {
           className="bg-white p-4 rounded-lg shadow-md w-full md:w-[48%]"
           style={{ minHeight: '350px', position: 'relative' }}
         >
-          <Pie data={pieData} options={pieOptions} />
+          {chartLoadingError ? (
+            <div className="text-center pt-16 text-red-500 font-semibold">{chartLoadingError}</div>
+          ) : pieLabels.length > 0 && pieCounts.length > 0 ? (
+            <Pie data={pieData} options={pieOptions} />
+          ) : (
+            <div className="text-center pt-16 text-gray-500">Loading chart data...</div>
+          )}
         </div>
+      </div>
+      {/* You can add a logout button or other admin features here */}
+      <div className="mt-8 text-center">
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
