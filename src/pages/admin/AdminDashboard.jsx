@@ -9,7 +9,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement,
+  ArcElement, 
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 
@@ -28,10 +28,10 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [pieLabels, setPieLabels] = useState([]);
   const [pieCounts, setPieCounts] = useState([]);
-  const [chartLoadingError, setChartLoadingError] = useState('');
+  const [chartLoadingError, setChartLoadingError] = useState(''); 
 
   useEffect(() => {
-  
+
     const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_students_by_program.php';
     console.log('Attempting to fetch pie chart data from:', apiUrl);
 
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
       .then((res) => {
         console.log('Network response status:', res.status, res.statusText);
         if (!res.ok) {
-          
+
           return res.text().then(text => {
             console.error('Server response was not OK:', text);
             throw new Error(`Network response was not ok. Status: ${res.status}, Message: ${text.substring(0, 100)}...`);
@@ -65,71 +65,87 @@ const AdminDashboard = () => {
         console.error('Error fetching pie chart data (catch block):', error);
         setChartLoadingError(`Failed to fetch chart data: ${error.message || error}`);
       });
-  }, []); 
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('admin');
     navigate('/login-admin');
   };
 
-  const blueBase = '#1D4ED8';
+const blueBase = '#1D4ED8';
 
-  const lineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-    datasets: [
-      {
-        label: 'Students Attendance',
-        data: [50, 75, 60, 90, 120, 110, 130],
-        fill: false,
-        borderColor: blueBase,
-        backgroundColor: blueBase,
-        tension: 0.3,
-      },
-    ],
-  };
-
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Monthly Student Attendance' },
+// Line Chart (Monthly Student Attendance)
+const lineData = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+  datasets: [
+    {
+      label: 'Students Attendance',
+      data: [50, 75, 60, 90, 120, 110, 130],
+      fill: false,
+      borderColor: blueBase,
+      backgroundColor: blueBase,
+      tension: 0.3,
     },
-  };
+  ],
+};
 
-  const pieData = {
-    labels: pieLabels,
-    datasets: [
-      {
-        label: 'Attendance by Course',
-        data: [300, 150, 100, 80, 50],
-        backgroundColor: [
-          'rgba(229, 81, 130, 0.7)',
-          'rgba(255, 159, 64, 0.7)',
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(75, 192, 192, 0.7)',
-          'rgba(153, 102, 255, 0.7)',
-        ],
-        borderColor: [
-          'rgba(229, 81, 130, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
+const lineOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'top' },
+    title: { display: true, text: 'Monthly Student Attendance' },
+  },
+};
 
-  const pieOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right' },
-      title: { display: true, text: 'Student Attendance by Course' },
+// Pie Chart: student count
+const generateColors = (numColors) => {
+  const colors = [];
+  for (let i = 0; i < numColors; i++) {
+    const hue = (i * 360 / numColors) % 360;
+    colors.push(`hsla(${hue}, 70%, 50%, 0.7)`);
+  }
+  return colors;
+};
+
+const pieChartBackgroundColors = generateColors(pieLabels.length);
+const pieChartBorderColors = pieChartBackgroundColors.map(color => color.replace('0.7)', '1)'));
+
+const pieData = {
+  labels: pieLabels,
+  datasets: [
+    {
+      label: 'Student by Course',
+      data: pieCounts,
+      backgroundColor: [
+        'rgba(229, 81, 130, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+      ],
+      borderColor: [
+        'rgba(229, 81, 130, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+      ],
+      borderWidth: 1,
     },
-  };
+  ],
+};
+
+
+const pieOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'right' },
+    title: { display: true, text: 'Enrolled Student by Course' },
+  },
+};
+
 
   return (
     <div className="p-4 md:p-8 max-w-[1150px] mx-auto">
@@ -158,15 +174,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-      {/* You can add a logout button or other admin features here */}
-      <div className="mt-8 text-center">
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Logout
-        </button>
-      </div>
+
     </div>
   );
 };
