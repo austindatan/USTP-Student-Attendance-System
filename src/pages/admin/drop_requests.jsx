@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function DropRequests() {
   const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState({ isOpen: false, type: null, id: null });
   const [selectedReason, setSelectedReason] = useState("");
-  const navigate = useNavigate();
 
+  // Fetch drop requests from API
   const fetchRequests = () => {
+    setLoading(true);
     fetch("http://localhost/USTP-Student-Attendance-System/admin_backend/get_drop_req.php")
       .then((res) => res.json())
-      .then((data) => setRequests(data))
-      .catch((err) => console.error("Failed to fetch:", err));
+      .then((data) => {
+        setRequests(data);
+        setError(null);
+      })
+      .catch(() => setError("Failed to fetch drop requests."))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchRequests();
   }, []);
 
+  // Open modal with type and id; if reason, set selectedReason too
   const openModal = (type, id, reason = "") => {
     setModal({ isOpen: true, type, id });
     if (type === "reason") setSelectedReason(reason);
@@ -28,117 +36,164 @@ export default function DropRequests() {
     setSelectedReason("");
   };
 
+  // Confirm Drop or Reject action
   const confirmAction = async () => {
     if (modal.type === "drop" || modal.type === "reject") {
       const status = modal.type === "drop" ? "Dropped" : "Rejected";
 
       try {
-        const res = await fetch("http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ drop_request_id: modal.id, status }),
-        });
+        const res = await fetch(
+          "http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php",
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ drop_request_id: modal.id, status }),
+          }
+        );
 
         const result = await res.json();
         if (result.error) {
           alert("Failed to update status.");
         } else {
-          fetchRequests(); // refresh list
+          fetchRequests();
         }
       } catch (error) {
-        console.error("Error updating drop request:", error);
         alert("An error occurred while updating the request.");
+        console.error(error);
       } finally {
         closeModal();
       }
     }
   };
 
+  // Filter requests by student name or reason
+  const filteredRequests = requests.filter(
+    (req) =>
+      req.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.reason.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div
-      className="min-h-screen bg-cover bg-center p-6 md:p-10"
-      style={{ backgroundImage: "url('assets/white_theme.png')" }}
-    >
-      <div className="max-w-6xl mx-auto bg-white border-2 border-[#E55182] rounded-xl shadow-xl p-8">
-        <button
-          onClick={() => navigate("/admin-dashboard")}
-          className="mb-4 bg-[#E55182] text-white px-4 py-2 rounded hover:bg-[#c0406d]"
-        >
-          ← Go Back
-        </button>
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-6">
+<h1 className="text-2xl font-bold text-blue-700 text-center sm:text-left">Drop Requests</h1>
+      </div>
 
-        <h1 className="text-3xl font-bold text-[#E55182] mb-6">Drop Requests</h1>
+      {/* Content */}
+      <div className="bg-white shadow-md rounded-lg p-6">
+        {loading ? (
+          <p className="text-center text-gray-500">Loading drop requests...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : (
+          <>
+           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+  <p className="text-blue-700 font-semibold">
+    Total Requests: {filteredRequests.length}
+  </p>
+  <input
+    type="text"
+    placeholder="Search students... "
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
+  />
+</div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-pink-900 border-collapse">
-            <thead className="bg-pink-100 text-pink-700 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3">Student ID</th>
-                <th className="px-6 py-3">Student Name</th>
-                <th className="px-6 py-3">Program</th>
-                <th className="px-6 py-3">Course</th>
-                <th className="px-6 py-3">Instructor</th>
-                <th className="px-6 py-3">Reason</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {requests.map((req) => (
-                <tr key={req.drop_request_id} className="bg-white border-b hover:bg-pink-50">
-                  <td className="px-6 py-4">{req.student_id}</td>
-                  <td className="px-6 py-4">{req.student_name}</td>
-                  <td className="px-6 py-4">{req.program_name}</td>
-                  <td className="px-6 py-4">{req.course_name}</td>
-                  <td className="px-6 py-4">{req.instructor_name}</td>
-                  <td className="px-6 py-4 max-w-xs">
-                    <div
-                      onClick={() => openModal("reason", req.drop_request_id, req.reason)}
-                      className="cursor-pointer text-blue-600 hover:underline line-clamp-1"
-                    >
-                      {req.reason}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">{req.status}</td>
-                  <td className="px-6 py-4 space-x-2">
-                    <button
-                      onClick={() => openModal("drop", req.drop_request_id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                    >
-                      Drop
-                    </button>
-                    <button
-                      onClick={() => openModal("reject", req.drop_request_id)}
-                      className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
-                    >
-                      Reject
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {requests.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="px-6 py-6 text-center text-gray-500">
-                    No drop requests found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
+                <thead className="bg-blue-100 uppercase text-blue-700">
+                  <tr>
+                    <th className="px-4 py-2">Student ID</th>
+                    <th className="px-4 py-2">Student Name</th>
+                    <th className="px-4 py-2">Program</th>
+                    <th className="px-4 py-2">Course</th>
+                    <th className="px-4 py-2">Instructor</th>
+                    <th className="px-4 py-2">Reason</th>
+                    <th className="px-4 py-2">Status</th>
+                    <th className="px-4 py-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRequests.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="8"
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No drop requests found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRequests.map((req) => (
+                      <tr
+                        key={req.drop_request_id}
+                        className="border-b border-blue-200 hover:bg-blue-50"
+                      >
+                        <td className="px-4 py-2">{req.student_id}</td>
+                        <td className="px-4 py-2 truncate max-w-[140px]">
+                          {req.student_name}
+                        </td>
+                        <td className="px-4 py-2 truncate max-w-[120px]">
+                          {req.program_name}
+                        </td>
+                        <td className="px-4 py-2 truncate max-w-[140px]">
+                          {req.course_name}
+                        </td>
+                        <td className="px-4 py-2 truncate max-w-[140px]">
+                          {req.instructor_name}
+                        </td>
+                        <td className="px-4 py-2 max-w-xs">
+                          <div
+                            onClick={() =>
+                              openModal("reason", req.drop_request_id, req.reason)
+                            }
+                            className="cursor-pointer text-blue-600 hover:underline line-clamp-1"
+                            title="Click to view full reason"
+                          >
+                            {req.reason}
+                          </div>
+                        </td>
+                        <td className="px-4 py-2">{req.status}</td>
+                        <td className="px-4 py-2 space-x-2 whitespace-nowrap">
+                          <button
+                            onClick={() => openModal("drop", req.drop_request_id)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                          >
+                            Drop
+                          </button>
+                          <button
+                            onClick={() => openModal("reject", req.drop_request_id)}
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
+                          >
+                            Reject
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modal */}
       {modal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
             {modal.type === "reason" ? (
               <>
-                <h2 className="text-lg font-semibold mb-4 text-pink-700">Drop Reason</h2>
-                <p className="mb-6 text-gray-700">{selectedReason}</p>
+                <h2 className="text-lg font-semibold mb-4 text-blue-700">
+                  Drop Reason
+                </h2>
+                <p className="mb-6 text-gray-700 whitespace-pre-wrap">{selectedReason}</p>
                 <button
                   onClick={closeModal}
-                  className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                 >
                   Close
                 </button>
@@ -153,7 +208,7 @@ export default function DropRequests() {
                 <div className="flex justify-center gap-4 mt-4">
                   <button
                     onClick={confirmAction}
-                    className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                   >
                     Yes
                   </button>

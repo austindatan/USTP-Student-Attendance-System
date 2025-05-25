@@ -20,7 +20,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 // Format the date to yyyy-MM-dd
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
 
-                const response = await fetch(`http://localhost/ustp-student-attendance/backend/get_students.php?date=${dateStr}`);
+                const response = await fetch(`http://localhost/USTP-Student-Attendance-System/backend/get_students.php?date=${dateStr}`);
                 const data = await response.json();
 
                 setStudents(data);
@@ -59,7 +59,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance/backend/save_attendance.php', {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
