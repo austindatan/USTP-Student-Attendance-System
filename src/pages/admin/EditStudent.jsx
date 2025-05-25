@@ -13,6 +13,29 @@ export default function EditStudent() {
   });
   const navigate = useNavigate();
 
+   useEffect(() => {
+    // Apply USTP theme background when component mounts
+    document.body.style.backgroundImage = "url('assets/ustp_theme.png')";
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    document.body.style.backgroundPosition = 'top center';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.height = '100vh';
+    document.body.style.margin = '0';
+
+    return () => {
+      // Cleanup background on unmount
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundRepeat = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+      document.body.style.height = '';
+      document.body.style.margin = '';
+    };
+  }, []);
+
+
   useEffect(() => {
     axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`)
       .then(res => {

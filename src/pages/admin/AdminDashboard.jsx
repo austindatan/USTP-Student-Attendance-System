@@ -38,7 +38,7 @@ const AdminDashboard = () => {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
-        label: 'Students Enrolled',
+        label: 'Students Attendance',
         data: [50, 75, 60, 90, 120, 110, 130],
         fill: false,
         borderColor: blueBase,
@@ -53,7 +53,7 @@ const AdminDashboard = () => {
     maintainAspectRatio: false, // allow flexible height
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'Monthly Student Enrollment' },
+      title: { display: true, text: 'Monthly Student Attendance' },
     },
   };
 
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
     labels: ['BSIT', 'BSCS', 'BSCE', 'BSA', 'Other'],
     datasets: [
       {
-        label: 'Enrollment by Course',
+        label: 'Attendance by Course',
         data: [300, 150, 100, 80, 50],
         backgroundColor: [
           'rgba(229, 81, 130, 0.7)',
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'right' },
-      title: { display: true, text: 'Student Enrollment by Course' },
+      title: { display: true, text: 'Student Attendance by Course' },
     },
   };
 

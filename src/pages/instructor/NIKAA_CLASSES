@@ -28,7 +28,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             try {
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
+                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}`
                 );
                 const data = await response.json();
                 setStudents(data);
@@ -63,7 +63,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
