@@ -4,7 +4,7 @@ const InstructorAdminPage = () => {
   const [instructors, setInstructors] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost/USTP-Student-Attendance-System/src/get-instructor-info.php")
+    fetch("http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php")
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {

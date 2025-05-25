@@ -1,4 +1,3 @@
-// src/pages/DropRequests.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,18 +7,20 @@ export default function DropRequests() {
   const [selectedReason, setSelectedReason] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("http://localhost/USTP-Student-Attendance-System/src/drop_request_api.php")
+  const fetchRequests = () => {
+    fetch("http://localhost/USTP-Student-Attendance-System/admin_backend/get_drop_req.php")
       .then((res) => res.json())
       .then((data) => setRequests(data))
       .catch((err) => console.error("Failed to fetch:", err));
+  };
+
+  useEffect(() => {
+    fetchRequests();
   }, []);
 
   const openModal = (type, id, reason = "") => {
     setModal({ isOpen: true, type, id });
-    if (type === "reason") {
-      setSelectedReason(reason);
-    }
+    if (type === "reason") setSelectedReason(reason);
   };
 
   const closeModal = () => {
@@ -27,11 +28,30 @@ export default function DropRequests() {
     setSelectedReason("");
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (modal.type === "drop" || modal.type === "reject") {
-      setRequests((prev) => prev.filter((req) => req.drop_request_id !== modal.id));
+      const status = modal.type === "drop" ? "Dropped" : "Rejected";
+
+      try {
+        const res = await fetch("http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ drop_request_id: modal.id, status }),
+        });
+
+        const result = await res.json();
+        if (result.error) {
+          alert("Failed to update status.");
+        } else {
+          fetchRequests(); // refresh list
+        }
+      } catch (error) {
+        console.error("Error updating drop request:", error);
+        alert("An error occurred while updating the request.");
+      } finally {
+        closeModal();
+      }
     }
-    closeModal();
   };
 
   return (
@@ -54,6 +74,7 @@ export default function DropRequests() {
             <thead className="bg-pink-100 text-pink-700 uppercase text-xs">
               <tr>
                 <th className="px-6 py-3">Student Name</th>
+                <th className="px-6 py-3">Program</th>
                 <th className="px-6 py-3">Course</th>
                 <th className="px-6 py-3">Instructor</th>
                 <th className="px-6 py-3">Reason</th>
@@ -65,8 +86,9 @@ export default function DropRequests() {
               {requests.map((req) => (
                 <tr key={req.drop_request_id} className="bg-white border-b hover:bg-pink-50">
                   <td className="px-6 py-4">{req.student_name}</td>
-                  <td className="px-6 py-4">{req.course}</td>
-                  <td className="px-6 py-4">{req.instructor}</td>
+                  <td className="px-6 py-4">{req.program_name}</td>
+                  <td className="px-6 py-4">{req.course_name}</td>
+                  <td className="px-6 py-4">{req.instructor_name}</td>
                   <td className="px-6 py-4 max-w-xs">
                     <div
                       onClick={() => openModal("reason", req.drop_request_id, req.reason)}

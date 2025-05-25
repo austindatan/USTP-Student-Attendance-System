@@ -27,6 +27,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
 import DropRequests from './pages/admin/drop_requests';
 import InstructorAdminPage from './pages/admin/instructorAdminpage';
+import AddStudent from './pages/admin/AddStudent';
+import EditStudent from './pages/admin/EditStudent';
 
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -213,6 +215,29 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminLayout>
                 <InstructorAdminPage />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+      {/* Admin add and edit buttons */}
+        <Route
+          path="/admin-students/add"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <AddStudent />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-students/edit/:student_id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminLayout>
+                <EditStudent />
               </AdminLayout>
             </ProtectedRoute>
           }
