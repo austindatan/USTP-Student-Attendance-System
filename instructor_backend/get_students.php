@@ -15,14 +15,15 @@ if ($conn->connect_error) {
 
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $instructor_id = isset($_GET['instructor_id']) ? (int)$_GET['instructor_id'] : 0;
+$section_id = isset($_GET['section_id']) ? (int)$_GET['section_id'] : 0; // NEW: Get section_id
 
-if (!$instructor_id) {
-    echo json_encode(['success' => false, 'message' => 'Missing instructor_id']);
+if (!$instructor_id || !$section_id) { // MODIFIED: Check for section_id
+    echo json_encode(['success' => false, 'message' => 'Missing instructor_id or section_id']);
     exit;
 }
 
 $query = "
-    SELECT 
+    SELECT
         sd.student_details_id,
         s.student_id,
         s.firstname,
@@ -34,11 +35,12 @@ $query = "
     JOIN student s ON sd.student_id = s.student_id
     LEFT JOIN attendance a ON sd.student_details_id = a.student_details_id AND a.date = ?
     WHERE sd.instructor_id = ?
+    AND sd.section_id = ?  -- NEW: Filter by section_id here
     ORDER BY s.lastname, s.firstname
 ";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param("si", $date, $instructor_id);
+$stmt->bind_param("sii", $date, $instructor_id, $section_id); // MODIFIED: Added 'i' for section_id
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -49,4 +51,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 echo json_encode($students);
+
+$stmt->close(); // Close statement
+$conn->close(); // Close connection
 ?>

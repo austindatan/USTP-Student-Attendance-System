@@ -18,6 +18,7 @@ import RegisterInstructor from "./pages/login/RegisterInstructor";
 import TeacherDashboard from "./pages/instructor/teacher_dashboard";
 import Classes_Dashboard from "./pages/instructor/classes_dashboard";
 import SectionDashboard from "./pages/instructor/section_dashboard";
+import ExcuseRequestsPage from "./pages/instructor/excuse_requests"; 
 
 // STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -38,12 +39,16 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // Wrapper for Instructor & Student routes
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
   const location = useLocation();
-  const showRightSidebar = location.pathname !== "/drop_requests";
+  const showRightSidebar = location.pathname !== "/drop_requests"; // This might need adjustment if you add more pages that don't need RightSidebar
 
   return (
     <div className="flex h-screen w-full">
       <LeftSidebar setBgImage={setBgImage} />
-      <div className="flex-1 overflow-y-auto">
+      {/* Apply wallpaper and overflow styles directly to this div */}
+      <div
+        className="flex-1 overflow-y-auto bg-cover bg-center bg-fixed hide-scrollbar"
+        style={{ backgroundImage: bgImage }}
+      >
         {children}
       </div>
       {showRightSidebar && (
@@ -67,7 +72,7 @@ function AdminLayout({ children }) {
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bgImage, setBgImage] = useState("url('assets/forest_theme.png')"); 
+  const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
   return (
     <BrowserRouter>
@@ -102,35 +107,32 @@ function App() {
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                <div
-                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                  style={{ backgroundImage: bgImage }}
-                >        
+                {/* Removed the extra div for wallpaper here */}
                 <TeacherDashboard selectedDate={selectedDate} />
-                </div> 
               </DashboardLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/section-dashboard"
+          path="/section-dashboard/:sectionId" // <-- CHANGE THIS LINE
           element={
-            <ProtectedRoute allowedRoles={['instructor']}>
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
-                <div
-                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                  style={{ backgroundImage: bgImage }}
-                >
-                <SectionDashboard selectedDate={selectedDate} />
-                </div>
-              </DashboardLayout>
-            </ProtectedRoute>
+              <ProtectedRoute allowedRoles={['instructor']}>
+                  <DashboardLayout
+                      selectedDate={selectedDate}
+                      setSelectedDate={setSelectedDate}
+                      bgImage={bgImage}
+                      setBgImage={setBgImage}
+                  >
+                      <div
+                          className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
+                          style={{ backgroundImage: bgImage }}
+                      >
+                          {/* Assuming SectionDashboard is your Teacher_Dashboard component */}
+                          <SectionDashboard selectedDate={selectedDate} />
+                      </div>
+                  </DashboardLayout>
+              </ProtectedRoute>
           }
         />
 
@@ -144,12 +146,8 @@ function App() {
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                <div
-                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                  style={{ backgroundImage: bgImage }}
-                >
-                  <Classes_Dashboard selectedDate={selectedDate} />
-                </div>
+                {/* Removed the extra div for wallpaper here */}
+                <Classes_Dashboard selectedDate={selectedDate} />
               </DashboardLayout>
             </ProtectedRoute>
           }
@@ -165,12 +163,26 @@ function App() {
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                <div
-                  className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                  style={{ backgroundImage: bgImage }}
-                >
+                {/* Removed the extra div for wallpaper here */}
                 <EditProfile />
-                </div>
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* NEW ROUTE FOR EXCUSE REQUESTS */}
+        <Route
+          path="/excuse-requests"
+          element={
+            <ProtectedRoute allowedRoles={['instructor']}>
+              <DashboardLayout
+                selectedDate={selectedDate} // Pass if needed by ExcuseRequestsPage, though not directly used in hardcoded version
+                setSelectedDate={setSelectedDate} // Pass if needed
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
+                {/* ExcuseRequestsPage now receives bgImage and setBgImage from DashboardLayout */}
+                <ExcuseRequestsPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
@@ -266,10 +278,7 @@ function App() {
           }
         />
 
-
-
       </Routes>
-
     </BrowserRouter>
   );
 }

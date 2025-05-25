@@ -30,7 +30,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const email = instructor?.email || "";
 
   const imagePath = instructor?.image
-    ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace(
+    ? `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/api/uploads/${instructor.image.replace(
         "uploads/",
         ""
       )}`

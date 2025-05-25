@@ -26,10 +26,8 @@ const RegisterInstructor = () => {
 
   const validate = () => {
     const newErrors = {};
-
     if (!form.email) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Email is invalid";
-
     if (!form.password) newErrors.password = "Password is required";
     else if (form.password.length < 6) newErrors.password = "Password must be at least 6 characters";
 
@@ -50,7 +48,6 @@ const RegisterInstructor = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     const validationErrors = validate();
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -77,167 +74,172 @@ const RegisterInstructor = () => {
     }
   };
 
-  // show errors each input
   const renderError = (field) => {
-    if (!errors[field]) return null;
-    return <p className="text-red-600 text-sm mt-1">{errors[field]}</p>;
+    return errors[field] && <p className="text-red-500 text-xs mt-1">{errors[field]}</p>;
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 border rounded shadow bg-white">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Instructor Registration</h1>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4" noValidate>
-        {/* Email */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Email</label>
-          <input
-            type="email" name="email" value={form.email} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.email ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("email")}
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-8 bg-gray-100 font-dm-sans">
+
+      <div className="absolute inset-0 z-0">
+        <div
+          className="w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: "url('assets/ustp-cdo-3.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-40" />
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="relative z-10 bg-white p-4 sm:p-6 rounded-2xl shadow-md w-full max-w-2xl space-y-4"
+        noValidate
+      >
+        <div className="flex items-center justify-between">
+          <img src="assets/ustp_logo.png" className="w-10 h-10" alt="USTP Logo" />
+          <h2 className="text-lg sm:text-xl font-bold">Instructor Registration</h2>
         </div>
 
-        {/* Password */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Password</label>
-          <input
-            type="password" name="password" value={form.password} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.password ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("password")}
+        {/* Image preview + upload */}
+        <div className="text-center">
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-24 h-24 object-cover rounded-full mx-auto mb-2"
+            />
+          )}
+          <input type="file" name="image" accept="image/*" onChange={handleChange} className="text-sm" />
         </div>
 
-        {/* First Name */}
-        <div>
-          <label className="block mb-1 font-medium">First Name</label>
-          <input
-            type="text" name="firstname" value={form.firstname} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.firstname ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("firstname")}
+        {/* Name Fields */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          {["firstname", "middlename", "lastname"].map(field => (
+            <div key={field} className="flex-1">
+              <input
+                type="text"
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                className={`w-full p-2 text-sm border rounded ${errors[field] ? 'border-red-500' : ''}`}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1).replace("_", " ")}
+              />
+              {renderError(field)}
+            </div>
+          ))}
         </div>
 
-        {/* Middle Name */}
-        <div>
-          <label className="block mb-1 font-medium">Middle Name</label>
-          <input
-            type="text" name="middlename" value={form.middlename} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.middlename ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("middlename")}
+        {/* Email + Password */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          {["email", "password"].map(field => (
+            <div key={field} className="flex-1">
+              <input
+                type={field === "password" ? "password" : "email"}
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                className={`w-full p-2 text-sm border rounded ${errors[field] ? 'border-red-500' : ''}`}
+                placeholder={field === "email" ? "Email" : "Password"}
+              />
+              {renderError(field)}
+            </div>
+          ))}
         </div>
 
-        {/* Last Name */}
-        <div>
-          <label className="block mb-1 font-medium">Last Name</label>
-          <input
-            type="text" name="lastname" value={form.lastname} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.lastname ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("lastname")}
+        {/* Date of Birth + Contact */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex-1">
+            <input
+              type="date"
+              name="date_of_birth"
+              value={form.date_of_birth}
+              onChange={handleChange}
+              className={`w-full p-2 text-sm border rounded ${errors.date_of_birth ? 'border-red-500' : ''}`}
+            />
+            {renderError("date_of_birth")}
+          </div>
+          <div className="flex-1">
+            <input
+              type="text"
+              name="contact_number"
+              value={form.contact_number}
+              onChange={handleChange}
+              className={`w-full p-2 text-sm border rounded ${errors.contact_number ? 'border-red-500' : ''}`}
+              placeholder="Contact Number"
+            />
+            {renderError("contact_number")}
+          </div>
         </div>
 
-        {/* Date of Birth */}
-        <div>
-          <label className="block mb-1 font-medium">Date of Birth</label>
-          <input
-            type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.date_of_birth ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("date_of_birth")}
+        {/* Address Fields */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          {["street", "city"].map(field => (
+            <div key={field} className="flex-1">
+              <input
+                type="text"
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                className={`w-full p-2 text-sm border rounded ${errors[field] ? 'border-red-500' : ''}`}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              />
+              {renderError(field)}
+            </div>
+          ))}
         </div>
 
-        {/* Contact Number */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Contact Number</label>
-          <input
-            type="text" name="contact_number" value={form.contact_number} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.contact_number ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("contact_number")}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex-1">
+            <input
+              type="text"
+              name="province"
+              value={form.province}
+              onChange={handleChange}
+              className={`w-full p-2 text-sm border rounded ${errors.province ? 'border-red-500' : ''}`}
+              placeholder="Province"
+            />
+            {renderError("province")}
+          </div>
+          <div className="w-1/3">
+            <input
+              type="text"
+              name="zipcode"
+              value={form.zipcode}
+              onChange={handleChange}
+              className={`w-full p-2 text-sm border rounded ${errors.zipcode ? 'border-red-500' : ''}`}
+              placeholder="Zipcode"
+            />
+            {renderError("zipcode")}
+          </div>
+          <div className="flex-1">
+            <input
+              type="text"
+              name="country"
+              value={form.country}
+              onChange={handleChange}
+              className={`w-full p-2 text-sm border rounded ${errors.country ? 'border-red-500' : ''}`}
+              placeholder="Country"
+            />
+            {renderError("country")}
+          </div>
         </div>
 
-        {/* Street */}
-        <div>
-          <label className="block mb-1 font-medium">Street</label>
-          <input
-            type="text" name="street" value={form.street} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.street ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("street")}
-        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-sm transition"
+        >
+          Register
+        </button>
 
-        {/* City */}
-        <div>
-          <label className="block mb-1 font-medium">City</label>
-          <input
-            type="text" name="city" value={form.city} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.city ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("city")}
-        </div>
-
-        {/* Province */}
-        <div>
-          <label className="block mb-1 font-medium">Province</label>
-          <input
-            type="text" name="province" value={form.province} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.province ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("province")}
-        </div>
-
-        {/* Zipcode */}
-        <div>
-          <label className="block mb-1 font-medium">Zipcode</label>
-          <input
-            type="text" name="zipcode" value={form.zipcode} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.zipcode ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("zipcode")}
-        </div>
-
-        {/* Country */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Country</label>
-          <input
-            type="text" name="country" value={form.country} onChange={handleChange}
-            className={`w-full p-2 border rounded ${errors.country ? 'border-red-600' : ''}`}
-            required
-          />
-          {renderError("country")}
-        </div>
-
-        {/* Profile Image */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Profile Image (optional)</label>
-          <input type="file" name="image" accept="image/*" onChange={handleChange} className="w-full" />
-          {preview && <img src={preview} alt="Preview" className="w-32 h-32 object-cover mt-2 rounded" />}
-        </div>
-
-        {/* Submit button */}
-        <div className="md:col-span-2">
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition">Register</button>
-        </div>
+        <p className="text-center text-sm mt-2">
+          Already have an account?{" "}
+          <span
+            className="text-blue-600 hover:underline cursor-pointer"
+            onClick={() => navigate("/login-instructor")}
+          >
+            Login here
+          </span>
+        </p>
       </form>
-
-      <p className="mt-4 text-sm text-center">
-        Already have an account?{" "}
-        <span className="text-blue-500 hover:underline cursor-pointer" onClick={() => navigate('/login-instructor')}>
-          Login here
-        </span>
-      </p>
     </div>
   );
 };
