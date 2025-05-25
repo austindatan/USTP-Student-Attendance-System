@@ -5,7 +5,7 @@ header("Content-Type: application/json");
 
 $host = 'localhost';
 $user = 'root';
-$pass = '';
+$pass = 'austinreverie';
 $dbname = 'attendance_monitoring';
 
 $conn = new mysqli($host, $user, $pass, $dbname);

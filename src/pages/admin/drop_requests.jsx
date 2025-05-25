@@ -9,7 +9,7 @@ export default function DropRequests() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost/USTP-Student-Attendance-System/src/drop_request_api.php")
+    fetch("http://localhost/ustp-student-attendance/src/drop_request_api.php")
       .then((res) => res.json())
       .then((data) => setRequests(data))
       .catch((err) => console.error("Failed to fetch:", err));

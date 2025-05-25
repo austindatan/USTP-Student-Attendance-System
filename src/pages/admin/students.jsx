@@ -7,7 +7,7 @@ export default function Admin_Students() {
   const navigate = useNavigate();  // initialize navigate
 
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/src/student_api.php')
+    axios.get('http://localhost/ustp-student-attendance/src/student_api.php')
       .then(res => {
         setStudents(res.data);
       })
