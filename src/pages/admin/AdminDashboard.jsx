@@ -13,7 +13,6 @@ import {
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -33,16 +32,17 @@ const AdminDashboard = () => {
     navigate('/login-admin');
   };
 
-  // Example data for line chart (Students Enrolled Over Months)
+  const blueBase = '#1D4ED8'; // Tailwind text-blue-700
+
   const lineData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
         label: 'Students Enrolled',
-        data: [50, 75, 60, 90, 120, 110, 130], // example enrollment counts
+        data: [50, 75, 60, 90, 120, 110, 130],
         fill: false,
-        borderColor: 'rgb(229, 81, 130)', // pink color
-        backgroundColor: 'rgb(229, 81, 130)',
+        borderColor: blueBase,
+        backgroundColor: blueBase,
         tension: 0.3,
       },
     ],
@@ -50,19 +50,19 @@ const AdminDashboard = () => {
 
   const lineOptions = {
     responsive: true,
+    maintainAspectRatio: false, // allow flexible height
     plugins: {
       legend: { position: 'top' },
       title: { display: true, text: 'Monthly Student Enrollment' },
     },
   };
 
-  // Example data for pie chart (Enrollment by Course)
   const pieData = {
     labels: ['BSIT', 'BSCS', 'BSCE', 'BSA', 'Other'],
     datasets: [
       {
         label: 'Enrollment by Course',
-        data: [300, 150, 100, 80, 50], // example counts
+        data: [300, 150, 100, 80, 50],
         backgroundColor: [
           'rgba(229, 81, 130, 0.7)',
           'rgba(255, 159, 64, 0.7)',
@@ -84,6 +84,7 @@ const AdminDashboard = () => {
 
   const pieOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'right' },
       title: { display: true, text: 'Student Enrollment by Course' },
@@ -91,29 +92,25 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-blue-700">Welcome to the Admin Dashboard</h1>
-      <p className="mt-4 text-gray-700">You have successfully logged in as admin.</p>
+    <div className="p-4 md:p-8 max-w-[1150px] mx-auto">
+      <h1 className="text-3xl font-bold text-blue-700 text-center sm:text-left">
+        Welcome to Admin Dashboard!
+      </h1>
 
-      {/* Removed buttons section */}
-
-      {/* Charts section */}
-      <div
-        className="mt-10 flex flex-wrap gap-8 justify-center"
-        style={{ maxWidth: '1150px', margin: '0 auto' }}
-      >
+      {/* Charts container */}
+      <div className="mt-10 flex flex-col md:flex-row flex-wrap gap-8 justify-center">
         <div
-          className="bg-white p-4 rounded-lg shadow-md"
-          style={{ width: '550px', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          className="bg-white p-4 rounded-lg shadow-md w-full md:w-[48%]"
+          style={{ minHeight: '350px', position: 'relative' }}
         >
-          <Line data={lineData} options={lineOptions} width={520} height={360} />
+          <Line data={lineData} options={lineOptions} />
         </div>
 
         <div
-          className="bg-white p-4 rounded-lg shadow-md"
-          style={{ width: '550px', height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          className="bg-white p-4 rounded-lg shadow-md w-full md:w-[48%]"
+          style={{ minHeight: '350px', position: 'relative' }}
         >
-          <Pie data={pieData} options={pieOptions} width={520} height={360} />
+          <Pie data={pieData} options={pieOptions} />
         </div>
       </div>
     </div>
