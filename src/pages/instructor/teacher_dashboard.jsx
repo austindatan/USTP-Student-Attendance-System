@@ -20,7 +20,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 // Format the date to yyyy-MM-dd
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
 
-                const response = await fetch(`http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/backend/get_students.php?date=${dateStr}`);
+                const response = await fetch(`http://localhost/ustp-student-attendance/backend/get_students.php?date=${dateStr}`);
                 const data = await response.json();
 
                 setStudents(data);
@@ -59,7 +59,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         
 
         try {
-            const res = await fetch('http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance/backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -75,17 +75,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     return (
         <div
             className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
-            style={{ backgroundImage: "url('assets/forest_theme.png')" }}
         >
-            {/* Logout Button */}
-            <div className="absolute top-4 right-4 z-50">
-                <button
-                    onClick={handleLogout}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 transition"
-                >
-                    Logout
-                </button>
-            </div>
 
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
                 {/* Header */}
