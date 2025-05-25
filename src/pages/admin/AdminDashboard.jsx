@@ -78,7 +78,7 @@ const AdminDashboard = () => {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
     datasets: [
       {
-        label: 'Students Enrolled',
+        label: 'Students Attendance',
         data: [50, 75, 60, 90, 120, 110, 130],
         fill: false,
         borderColor: blueBase,
@@ -93,30 +93,30 @@ const AdminDashboard = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'Monthly Student Enrollment' },
+      title: { display: true, text: 'Monthly Student Attendance' },
     },
   };
-
-  const generateColors = (numColors) => {
-    const colors = [];
-    for (let i = 0; i < numColors; i++) {
-      const hue = (i * 360 / numColors) % 360;
-      colors.push(`hsla(${hue}, 70%, 50%, 0.7)`);
-    }
-    return colors;
-  };
-
-  const pieChartBackgroundColors = generateColors(pieLabels.length);
-  const pieChartBorderColors = pieChartBackgroundColors.map(color => color.replace('0.7)', '1)')); 
 
   const pieData = {
     labels: pieLabels,
     datasets: [
       {
-        label: 'Enrollment by Course',
-        data: pieCounts,
-        backgroundColor: pieChartBackgroundColors,
-        borderColor: pieChartBorderColors,
+        label: 'Attendance by Course',
+        data: [300, 150, 100, 80, 50],
+        backgroundColor: [
+          'rgba(229, 81, 130, 0.7)',
+          'rgba(255, 159, 64, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+        ],
+        borderColor: [
+          'rgba(229, 81, 130, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
         borderWidth: 1,
       },
     ],
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'right' },
-      title: { display: true, text: 'Student Enrollment by Course' },
+      title: { display: true, text: 'Student Attendance by Course' },
     },
   };
 

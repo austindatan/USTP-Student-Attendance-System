@@ -24,7 +24,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     try {
       console.log('Fetching sections...');
       const response = await fetch(
-        `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
+        `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -36,8 +36,10 @@ export default function Classes_Dashboard({ selectedDate }) {
       console.error('Error fetching sections:', error);
       setSections([]); // Clear sections on error
     } finally {
+      setTimeout(() => {
       setIsLoading(false);
-    }
+    }, 1500);
+      }
   };
 
   // Fetch once when instructor_id changes
@@ -100,9 +102,9 @@ export default function Classes_Dashboard({ selectedDate }) {
                 handleSectionClick(section); // Pass the entire section object
               }
             }}
-            code={!isLoading ? `SEC ${section?.section_name}` : ''}
+            code={!isLoading ? section?.course_code || 'COURSE CODE' : ''}
             title={!isLoading ? section?.course_name || 'Course Title' : ''}
-            room={!isLoading ? section?.room || 'TBA' : ''}
+            room={!isLoading ? section?.section_name || 'TBA' : ''}
             schedule={
               !isLoading
                 ? `${section?.schedule_day || 'Day'} ${section?.start_time || ''} – ${section?.end_time || ''}`

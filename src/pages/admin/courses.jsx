@@ -9,8 +9,9 @@ export default function Admin_Courses() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
+    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
       .then(res => {
         if (Array.isArray(res.data)) {
           setCourses(res.data);

@@ -13,8 +13,31 @@ export default function EditStudent() {
   });
   const navigate = useNavigate();
 
+   useEffect(() => {
+    // Apply USTP theme background when component mounts
+    document.body.style.backgroundImage = "url('assets/ustp_theme.png')";
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    document.body.style.backgroundPosition = 'top center';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.height = '100vh';
+    document.body.style.margin = '0';
+
+    return () => {
+      // Cleanup background on unmount
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundRepeat = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+      document.body.style.height = '';
+      document.body.style.margin = '';
+    };
+  }, []);
+
+
   useEffect(() => {
-    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`)
+    axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`)
       .then(res => {
         setFormData(res.data);
       })
@@ -30,7 +53,7 @@ export default function EditStudent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.put(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`, formData)
+    axios.put(`http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`, formData)
       .then(() => {
         alert("Student updated successfully!");
         navigate('/admin-students');
@@ -43,7 +66,7 @@ export default function EditStudent() {
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-[#E55182]">Edit Student</h2>
+        <h2 className="text-2xl font-bold mb-4 text-blue-700">Edit Student</h2>
 
         <label className="block mb-2">
           First Name:
@@ -53,7 +76,7 @@ export default function EditStudent() {
             value={formData.firstname}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded p-2 mt-1"
+            className="w-full border border-gray-300 rounded p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
 
@@ -64,7 +87,7 @@ export default function EditStudent() {
             name="middlename"
             value={formData.middlename}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded p-2 mt-1"
+            className="w-full border border-gray-300 rounded p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
 
@@ -76,7 +99,7 @@ export default function EditStudent() {
             value={formData.lastname}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded p-2 mt-1"
+            className="w-full border border-gray-300 rounded p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
 
@@ -88,7 +111,7 @@ export default function EditStudent() {
             value={formData.date_of_birth}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded p-2 mt-1"
+            className="w-full border border-gray-300 rounded p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
 
@@ -100,13 +123,13 @@ export default function EditStudent() {
             value={formData.contact_number}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded p-2 mt-1"
+            className="w-full border border-gray-300 rounded p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
 
         <button
           type="submit"
-          className="w-full bg-[#E55182] text-white py-2 rounded hover:bg-[#c0406d]"
+          className="w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 transition-colors"
         >
           Update Student
         </button>

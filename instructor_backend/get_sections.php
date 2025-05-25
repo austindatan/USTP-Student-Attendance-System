@@ -5,7 +5,7 @@ include '../src/conn.php';
 
 $instructor_id = $_GET['instructor_id'];
 
-$sql = "SELECT DISTINCT s.section_id, s.course_id, s.section_name, s.schedule_day, s.start_time, s.end_time, s.image, c.course_name
+$sql = "SELECT DISTINCT s.section_id, s.course_id, s.section_name, s.schedule_day, s.start_time, s.end_time, s.image, c.course_name, c.course_code
         FROM section s
         JOIN student_details sd ON sd.section_id = s.section_id
         JOIN course c ON c.course_id = s.course_id

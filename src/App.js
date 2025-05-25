@@ -72,7 +72,7 @@ function AdminLayout({ children }) {
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/forest_theme.png')`);
+  const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
   return (
     <BrowserRouter>

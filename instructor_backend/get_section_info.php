@@ -6,7 +6,7 @@ include '../src/conn.php';
 if (isset($_GET['section_id'])) {
     $section_id = $_GET['section_id'];
 
-    $sql = "SELECT s.section_name, s.schedule_day, s.start_time, s.end_time, c.course_name 
+    $sql = "SELECT s.section_name, s.schedule_day, s.start_time, s.end_time, c.course_name, c.course_code
             FROM section s
             JOIN course c ON s.course_id = c.course_id
             WHERE s.section_id = ?";

@@ -24,9 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         FROM student s
         WHERE NOT EXISTS (
             SELECT 1
-            FROM attendance a
-            INNER JOIN drop_request d ON d.attendance_id = a.attendance_id
-            INNER JOIN student_details sd ON a.student_details_id = sd.student_details_id
+            FROM student_details sd
+            INNER JOIN drop_request d ON d.student_details_id = sd.student_details_id
             WHERE sd.student_id = s.student_id
             AND d.status = 'Dropped'
         )

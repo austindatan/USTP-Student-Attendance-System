@@ -9,8 +9,10 @@ export default function Admin_Sections() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  
+
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
+    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_section.php')
       .then(res => {
         if (Array.isArray(res.data)) {
           setSections(res.data);

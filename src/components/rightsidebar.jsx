@@ -30,7 +30,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const email = instructor?.email || "";
 
   const imagePath = instructor?.image
-    ? `http://localhost/USTP-STUDENT-ATTENDANCE-SYSTEM/api/uploads/${instructor.image.replace(
+    ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace(
         "uploads/",
         ""
       )}`
@@ -179,7 +179,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
       )}
 
       <aside
-        className={`fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col p-4 border-l border-gray-200 z-40 transition-transform duration-300 
+        className={`font-dm-sans fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col p-4 border-l border-gray-200 z-40 transition-transform duration-300 
           ${isSidebarOpen ? "translate-x-0" : "translate-x-full"} 
           lg:translate-x-0 lg:relative lg:flex`}
       >
