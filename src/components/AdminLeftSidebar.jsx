@@ -32,19 +32,13 @@ const AdminLeftSidebar = () => {
   const navigate = useNavigate();
   const [academicsOpen, setAcademicsOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
-  const [isOpen, setIsOpen] = useState(false); // sidebar open state for mobile
+  const [isOpen, setIsOpen] = useState(false);
 
   const popupRef = useRef(null);
   const gearRef = useRef(null);
 
-  const toggleAcademics = () => {
-    setAcademicsOpen(!academicsOpen);
-  };
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-
+  const toggleSidebar = () => setIsOpen(!isOpen);
+  const toggleAcademics = () => setAcademicsOpen(!academicsOpen);
   const handleLogout = () => {
     localStorage.removeItem("admin");
     navigate("/login-admin");
@@ -66,18 +60,13 @@ const AdminLeftSidebar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Prevent scrolling when sidebar is open on mobile
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "";
   }, [isOpen]);
 
   return (
     <>
-      {/* Mobile hamburger button */}
+      {/* Mobile Hamburger */}
       <button
         className="fixed top-4 left-4 z-60 md:hidden p-2 rounded bg-white shadow"
         onClick={toggleSidebar}
@@ -86,14 +75,15 @@ const AdminLeftSidebar = () => {
         {isOpen ? <FaTimes className="w-6 h-6" /> : <HamburgerIcon />}
       </button>
 
-      {/* Overlay for mobile */}
+      {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden transition-opacity ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
         onClick={() => setIsOpen(false)}
-      ></div>
+      />
 
+      {/* Sidebar */}
       <div
         className={`
           fixed top-0 left-0 h-full bg-white border-r border-gray-200 shadow-md p-4 w-64 z-50
@@ -102,17 +92,16 @@ const AdminLeftSidebar = () => {
           md:translate-x-0 md:static md:flex-shrink-0
         `}
       >
+        {/* Header */}
         <div className="flex items-center mb-6 relative">
           <h2 className="text-xl font-bold text-blue-700 flex-grow">Admin Panel</h2>
-
-          {/* Gear Icon */}
           <button
             ref={gearRef}
             onClick={() => setShowLogout((prev) => !prev)}
-            className="p-1 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="p-1 rounded hover:bg-gray-200 focus:outline-none"
             aria-label="Settings"
           >
-            {/* Gear SVG */}
+            {/* Gear icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -138,11 +127,11 @@ const AdminLeftSidebar = () => {
           {showLogout && (
             <div
               ref={popupRef}
-              className="absolute top-12 left-40 ml-1 bg-red-600 rounded shadow-md w-20 text-center z-50"
+              className="absolute top-12 left-40 ml-1 bg-gray-500 rounded shadow-md w-20 text-center z-50"
             >
               <button
                 onClick={handleLogout}
-                className="w-full py-2 text-white hover:bg-red-800 rounded"
+                className="w-full py-2 text-white hover:bg-gray-800 rounded"
               >
                 Log Out
               </button>
@@ -150,8 +139,7 @@ const AdminLeftSidebar = () => {
           )}
         </div>
 
-        
-
+        {/* Menu */}
         <button
           onClick={() => {
             navigate("/admin-dashboard");
@@ -183,7 +171,7 @@ const AdminLeftSidebar = () => {
             <FaBook className="mr-2" />
             Academics
             <FaChevronDown
-              className={`ml-auto transform transition-transform duration-200 ${
+              className={`ml-auto transform transition-transform ${
                 academicsOpen ? "rotate-180" : ""
               }`}
             />
@@ -201,7 +189,6 @@ const AdminLeftSidebar = () => {
                 <FaUserGraduate className="mr-2" />
                 Students Enrolled
               </button>
-
               <button
                 onClick={() => {
                   navigate("/admin-instructor");
@@ -212,7 +199,6 @@ const AdminLeftSidebar = () => {
                 <FaUserTie className="mr-2" />
                 Instructors
               </button>
-
               <button
                 onClick={() => {
                   navigate("/admin-sections");
@@ -223,7 +209,6 @@ const AdminLeftSidebar = () => {
                 <FaClipboardList className="mr-2" />
                 Sections
               </button>
-
               <button
                 onClick={() => {
                   navigate("/admin-courses");
@@ -236,6 +221,53 @@ const AdminLeftSidebar = () => {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Theme Selector */}
+        <div className="absolute bottom-4 w-full flex justify-center">
+          <div className="relative group">
+            <button className="group flex flex-col items-center px-3 py-2 rounded-lg text-[#737373] hover:text-[#7685fc]">
+              <div className="relative w-8 h-8 mb-1">
+                <img
+                  src="assets/palette.png"
+                  alt="Theme Icon"
+                  className="absolute inset-0 w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+                <img
+                  src="assets/palette-active.png"
+                  alt="Theme Active Icon"
+                  className="absolute inset-0 w-8 h-8 opacity-100 group-hover:opacity-0 transition-opacity"
+                />
+              </div>
+              <span className="text-xs">Wallpapers</span>
+            </button>
+            <div className="absolute bottom-full font-dm-sans text-sm left-1 bg-white border rounded-md shadow-md hidden group-hover:block z-50">
+              <button
+                className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                onClick={() =>
+                  (document.body.style.backgroundImage = "url('assets/water_theme.png')")
+                }
+              >
+                Water
+              </button>
+              <button
+                className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                onClick={() =>
+                  (document.body.style.backgroundImage = "url('assets/forest_theme.png')")
+                }
+              >
+                Forest
+              </button>
+              <button
+                className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                onClick={() =>
+                  (document.body.style.backgroundImage = "url('assets/white_theme.png')")
+                }
+              >
+                Default
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>
