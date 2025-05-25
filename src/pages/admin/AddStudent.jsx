@@ -42,7 +42,7 @@ export default function AddStudent() {
       data.append('image', imageFile);
     }
 
-    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php', data)
+    axios.post('http://localhost/ustp-student-attendance/admin_backend/student_add_api.php', data)
       .then(() => {
         alert("Student added successfully!");
         navigate('/admin-students');

@@ -10,8 +10,9 @@ export default function Admin_Students() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php')
+    axios.get('http://localhost/ustp-student-attendance/admin_backend/student_api.php')
       .then(res => {
+        console.log("API response:", res.data);
         if (Array.isArray(res.data)) {
           setStudents(res.data);
         } else if (Array.isArray(res.data.students)) {
