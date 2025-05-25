@@ -15,7 +15,7 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
                               backgroundImage: `url(${bgImage})`,
                               backgroundRepeat: "no-repeat",
                               backgroundPosition: "right 5px bottom",
-                              backgroundSize: "130px"
+                              backgroundSize: "150px"
                           }
                         : {}
                 }
@@ -27,9 +27,9 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
                         <div className="bg-gray-300 h-5 w-12 rounded mt-2"></div>
                     </div>
                 ) : (
-                    <div className="font-poppins text-shadow-sm">
+                    <div className="font-poppins h-18 text-shadow-sm">
                         <p className="text-white text-sm font-semibold">{code}</p>
-                        <h2 className="text-white text-lg font-bold max-w-[180px] leading-tight">
+                        <h2 className="text-white text-lg font-bold max-w-[140px] leading-tight">
                             {title}
                         </h2>
                         <p className="text-white text-sm mt-1">{room}</p>
