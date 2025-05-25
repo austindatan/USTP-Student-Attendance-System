@@ -67,7 +67,7 @@ function AdminLayout({ children }) {
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [bgImage, setBgImage] = useState("url('assets/forest_theme.png')"); 
+  const [bgImage, setBgImage] = useState("url('assets/ustp_theme.png')"); 
 
   return (
     <BrowserRouter>

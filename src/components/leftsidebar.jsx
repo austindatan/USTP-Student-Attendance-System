@@ -200,6 +200,12 @@ const LeftSidebar = ({ setBgImage }) => {
                                 </button>
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                                    onClick={() => setBgImage("url('assets/ustp_theme.png')")}
+                                >
+                                    USTP
+                                </button>
+                                <button
+                                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                                     onClick={() => setBgImage("url('assets/white_theme.png')")}
                                 >
                                     Default

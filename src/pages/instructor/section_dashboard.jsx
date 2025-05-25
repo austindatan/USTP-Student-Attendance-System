@@ -34,7 +34,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     .filter(student => student.status === 'Present')
                     .map(student => student.student_details_id);
                 setPresentStudents(presentIds);
-                setTimeout(() => setIsLoading(false), 1500);
+                setTimeout(() => setIsLoading(false), 500);
             } catch (error) {
                 console.error("Error fetching students:", error);
                 setIsLoading(false);
