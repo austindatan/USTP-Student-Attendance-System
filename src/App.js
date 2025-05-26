@@ -36,27 +36,28 @@ import Courses from './pages/admin/courses';
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Wrapper for Instructor & Student routes
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
   const location = useLocation();
-  const showRightSidebar = location.pathname !== "/drop_requests"; // This might need adjustment if you add more pages that don't need RightSidebar
+  const isStudentDashboard = location.pathname === "/student-dashboard";
 
   return (
     <div className="flex h-screen w-full">
-      <LeftSidebar setBgImage={setBgImage} />
-      {/* Apply wallpaper and overflow styles directly to this div */}
+      {!isStudentDashboard && <LeftSidebar setBgImage={setBgImage} />}
+      
       <div
         className="flex-1 overflow-y-auto bg-cover bg-center bg-fixed hide-scrollbar"
         style={{ backgroundImage: bgImage }}
       >
         {children}
       </div>
-      {showRightSidebar && (
+
+      {!isStudentDashboard && (
         <RightSidebar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
       )}
     </div>
   );
 }
+
 
 // Wrapper for Admin routes
 function AdminLayout({ children }) {
