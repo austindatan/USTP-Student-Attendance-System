@@ -42,10 +42,15 @@ const AdminLeftSidebar = () => {
     setIsOpen(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin");
-    navigate("/login-admin");
-  };
+const handleLogout = () => {
+  localStorage.removeItem('userRole'); // <--- CRITICAL: Remove the userRole key
+  // If you also store a separate 'admin' flag or user ID, remove them too:
+  localStorage.removeItem('admin'); // Keep this if 'admin' is another flag your app uses
+  // localStorage.removeItem('token'); // If you store a token
+  // localStorage.removeItem('userId'); // If you store a user ID
+
+  navigate('/login-admin'); // Redirect the user to the admin login page
+};
 
   useEffect(() => {
     applyBackground("assets/ustp_theme.png");
