@@ -38,7 +38,7 @@ const EditProfile = () => {
     }
 
     fetch(
-        `http://localhost/ustp-student-attendance/api/get_instructor.php?id=${storedInstructor.instructor_id}`
+        `http://localhost/USTP-Student-Attendance-System/api/get_instructor.php?id=${storedInstructor.instructor_id}`
     )
         .then((res) => res.json())
         .then((data) => {
