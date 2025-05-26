@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,10 +16,30 @@ export default function AddStudent() {
     province: '',
     zipcode: '',
     country: '',
+    section_id: ''
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const navigate = useNavigate();
+  const [instructors, setInstructors] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [programDetails, setProgramDetails] = useState([]);
+
+  const [selectedInstructor, setSelectedInstructor] = useState('');
+  const [selectedProgram, setSelectedProgram] = useState('');
+
+  useEffect(() => {
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php')
+      .then(res => setInstructors(res.data))
+      .catch(err => console.error(err));
+
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php')
+      .then(res => setSections(res.data))
+      .catch(err => console.error(err));
+
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php')
+      .then(res => setProgramDetails(res.data))
+      .catch(err => console.error(err));
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,27 +50,29 @@ export default function AddStudent() {
     setImageFile(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
 
-    for (const key in formData) {
-      data.append(key, formData[key]);
-    }
+    const submissionData = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+  submissionData.append(key, value);
+});
+submissionData.append("instructor_id", selectedInstructor);
+submissionData.append("program_details_id", selectedProgram);
+submissionData.append("section_id", formData.section_id);
+
 
     if (imageFile) {
-      data.append('image', imageFile);
+      submissionData.append("image", imageFile);
     }
 
-    axios.post('http://localhost/ustp-student-attendance/admin_backend/student_add_api.php', data)
-      .then(() => {
-        alert("Student added successfully!");
-        navigate('/admin-students');
-      })
-      .catch((error) => {
-        console.error(error);
-        alert("Failed to add student.");
-      });
+    try {
+      const response = await axios.post("http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php", submissionData);
+      alert(response.data.message || "Student added successfully!");
+    } catch (error) {
+      console.error("Failed to add student:", error);
+      alert("Error adding student. Check the console for details.");
+    }
   };
 
   return (
@@ -91,7 +113,7 @@ export default function AddStudent() {
           ))}
         </div>
 
-        <div className="mt-4">
+        <div className="mt-6">
           <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image:</label>
           <input
             type="file"
@@ -100,6 +122,71 @@ export default function AddStudent() {
             onChange={handleImageChange}
             className="w-full"
           />
+        </div>
+
+        <hr className="my-6 border-t-2 border-gray-300" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instructor:</label>
+            <select
+              value={selectedInstructor}
+              onChange={(e) => setSelectedInstructor(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2"
+              required
+            >
+              <option value="">Select Instructor</option>
+              {instructors.map((instructor) => (
+                instructor.instructor_id && (
+                  <option key={`instructor-${instructor.instructor_id}`} value={instructor.instructor_id}>
+                    {instructor.firstname} {instructor.lastname}
+                  </option>
+                )
+              ))}
+            </select>
+
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Program:</label>
+            <select
+              value={selectedProgram}
+              onChange={(e) => setSelectedProgram(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2"
+              required
+            >
+              <option value="">Select Program</option>
+              {programDetails.map((program) => (
+                program.program_details_id && (
+                  <option key={`program-${program.program_details_id}`} value={program.program_details_id}>
+                    {program.program_name}
+                  </option>
+                )
+              ))}
+            </select>
+
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Section:</label>
+          <select
+            name="section_id"
+            value={formData.section_id}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2"
+            required
+          >
+            <option value="">Select Section</option>
+            {sections.map((section) => (
+              section.section_id && (
+                <option key={`section-${section.section_id}`} value={section.section_id}>
+                  {section.section_name}
+                </option>
+              )
+            ))}
+          </select>
+
         </div>
 
         <button
@@ -112,3 +199,4 @@ export default function AddStudent() {
     </div>
   );
 }
+

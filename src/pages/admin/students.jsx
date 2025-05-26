@@ -100,6 +100,7 @@ export default function Admin_Students() {
                   <th className="px-3 py-2">Student ID</th>
                   <th className="px-3 py-2">Full Name</th>
                   <th className="px-3 py-2">Program</th>
+                  <th className="px-3 py-2">Section</th>
                   <th className="px-3 py-2">Birthdate</th>
                   <th className="px-3 py-2">Contact Number</th>
                   <th className="px-3 py-2">Address</th>
@@ -124,6 +125,7 @@ export default function Admin_Students() {
                         {student.firstname} {student.middlename} {student.lastname}
                       </td>
                       <td className="px-3 py-2 truncate">{student.program_name}</td>
+                      <td className="px-3 py-2 truncate">{student.section_name}</td>
                       <td className="px-3 py-2 truncate">{student.date_of_birth}</td>
                       <td className="px-3 py-2 truncate">{student.contact_number}</td>
                       <td className="px-3 py-2 truncate">
