@@ -18,14 +18,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                drop_request.reason, 
                drop_request.status 
         FROM drop_request
-        INNER JOIN attendance ON attendance.attendance_id = drop_request.attendance_id
-        INNER JOIN student_details ON student_details.student_details_id = attendance.student_details_id
-        INNER JOIN student ON student.student_id = student_details.student_id
-        INNER JOIN instructor ON instructor.instructor_id = student_details.instructor_id
-        INNER JOIN section ON section.section_id = student_details.section_id
-        INNER JOIN course ON course.course_id = section.course_id
+        INNER JOIN student_details ON student_details.student_details_id = drop_request.student_details_id
+       	INNER JOIN student ON student.student_id = student_details.student_id
         INNER JOIN program_details ON program_details.program_details_id = student_details.program_details_id
         INNER JOIN program ON program.program_id = program_details.program_id
+        INNER JOIN section ON section.section_id = student_details.section_id
+        INNER JOIN course ON course.course_id = section.course_id
+        INNER JOIN instructor ON instructor.instructor_id = student_details.instructor_id
     ";
     $result = $conn->query($stmt);
 
