@@ -11,7 +11,7 @@ export default function Admin_Students() {
 
   
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/student_api.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php')
       .then(res => {
         console.log("API response:", res.data);
         if (Array.isArray(res.data)) {
@@ -78,6 +78,7 @@ export default function Admin_Students() {
                 <tr>
                   <th className="px-3 py-2">Student ID</th>
                   <th className="px-3 py-2">Full Name</th>
+                  <th className="px-3 py-2">Program</th>
                   <th className="px-3 py-2">Birthdate</th>
                   <th className="px-3 py-2">Contact Number</th>
                   <th className="px-3 py-2">Address</th>
@@ -101,6 +102,7 @@ export default function Admin_Students() {
                       <td className="px-3 py-2 truncate">
                         {student.firstname} {student.middlename} {student.lastname}
                       </td>
+                      <td className="px-3 py-2 truncate">{student.program_name}</td>
                       <td className="px-3 py-2 truncate">{student.date_of_birth}</td>
                       <td className="px-3 py-2 truncate">{student.contact_number}</td>
                       <td className="px-3 py-2 truncate">
