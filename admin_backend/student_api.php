@@ -16,22 +16,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     s.middlename, 
     s.lastname, 
     p.program_name,
+    sec.section_name,
     s.date_of_birth, 
     s.contact_number, 
     s.street, 
     s.city, 
     s.province, 
     s.zipcode 
-    FROM student s
-    INNER JOIN student_details sd ON sd.student_id = s.student_id
-    INNER JOIN program_details pd ON pd.program_details_id = sd.program_details_id
-    INNER JOIN program p ON p.program_id = pd.program_id
-    WHERE NOT EXISTS (
-        SELECT 1
-        FROM student_details sd2
-        INNER JOIN drop_request d ON d.student_details_id = sd2.student_details_id
-        WHERE sd2.student_id = s.student_id
-        AND d.status = 'Dropped'
+        FROM student_details sd
+        INNER JOIN student s ON sd.student_id = s.student_id
+        INNER JOIN section sec ON sec.section_id = sd.section_id
+        INNER JOIN program_details pd ON pd.program_details_id = sd.program_details_id
+        INNER JOIN program p ON p.program_id = pd.program_id
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM student_details sd2
+            INNER JOIN drop_request d ON d.student_details_id = sd2.student_details_id
+            WHERE sd2.student_id = s.student_id
+            AND d.status = 'Dropped'
         )
     ";
 
