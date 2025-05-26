@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
@@ -9,6 +9,7 @@ import {
   FaBookOpen,
   FaChevronDown,
   FaTimes,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 const HamburgerIcon = () => (
@@ -46,6 +47,10 @@ const AdminLeftSidebar = () => {
     navigate("/login-admin");
   };
 
+  useEffect(() => {
+    applyBackground("assets/ustp_theme.png");
+  }, []);
+
   const applyBackground = (url) => {
     document.body.style.backgroundImage = `url('${url}')`;
     document.body.style.backgroundSize = "cover";
@@ -60,7 +65,7 @@ const AdminLeftSidebar = () => {
     <>
       {/* Hamburger for Mobile */}
       <button
-        className="fixed top-4 left-4 z-60 md:hidden p-2 rounded bg-white shadow"
+        className="fixed top-4 left-4 z-160 md:hidden p-2 rounded bg-white shadow"
         onClick={toggleSidebar}
         aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       >
@@ -77,108 +82,115 @@ const AdminLeftSidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 p-4 bg-white border-r border-gray-200 shadow-md z-50 transform transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full w-50 p-4 bg-white border-r border-gray-200 shadow-md z-50 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:static md:flex-shrink-0`}
       >
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          <h2 className="text-xl font-bold text-blue-700 flex-grow">
-            Admin Panel
-          </h2>
+        <div className="flex justify-center items-center p-4 relative">
+          <img
+            src={`${process.env.PUBLIC_URL}/assets/ustp_logo.png`}
+            alt="USTP Logo"
+            className="w-10 h-auto"
+          />
         </div>
 
         {/* Navigation */}
         <nav>
           <button
             onClick={() => handleNavigate("/admin-dashboard")}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            className={`mt-3 group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
+              window.location.pathname === "/admin-dashboard"
+                ? "text-[#7685fc]"
+                : "hover:text-[#7685fc] text-[#737373]"
+            }`}
           >
-            <FaTachometerAlt className="mr-2" /> Dashboard
+            <FaTachometerAlt className="w-7 h-7 mb-1" />
+            <span className="text-xs">Dashboard</span>
           </button>
 
           <button
             onClick={() => handleNavigate("/drop_requests")}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded mt-2"
+            className={`mt-3 group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
+              window.location.pathname === "/drop_requests"
+                ? "text-[#7685fc]"
+                : "hover:text-[#7685fc] text-[#737373]"
+            }`}
           >
-            <FaClipboardList className="mr-2" /> Drop Requests
+            <FaClipboardList className="w-7 h-7 mb-1" />
+            <span className="text-xs">
+              Drop <br />
+              Requests
+            </span>
           </button>
 
-          {/* Academics Dropdown */}
-          <div className="mt-4">
+          <div className="mt-3">
             <button
               onClick={toggleAcademics}
-              className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+              className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
+                academicsOpen
+                  ? "text-[#7685fc]"
+                  : "hover:text-[#7685fc] text-[#737373]"
+              }`}
             >
-              <FaBook className="mr-2" /> Academics
-              <FaChevronDown
-                className={`ml-auto transform transition-transform ${
-                  academicsOpen ? "rotate-180" : ""
-                }`}
-              />
+              <FaBook className="w-7 h-7 mb-1" />
+              <span className="text-xs flex items-center gap-1">
+                Academics
+              </span>
             </button>
 
             {academicsOpen && (
-              <div className="pl-8 mt-2 space-y-2 text-sm text-gray-600">
+              <div className="mt-2 flex flex-col gap-2">
                 <button
                   onClick={() => handleNavigate("/admin-students")}
-                  className="flex items-center w-full hover:text-blue-600"
+                  className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
-                  <FaUserGraduate className="mr-2" /> Students Enrolled
+                  <FaUserGraduate className="w-5 h-5 mb-2" />
+                  Students
                 </button>
+
                 <button
                   onClick={() => handleNavigate("/admin-instructor")}
-                  className="flex items-center w-full hover:text-blue-600"
+                  className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
-                  <FaUserTie className="mr-2" /> Instructors
+                  <FaUserTie className="w-5 h-5 mb-2" />
+                  Instructors
                 </button>
                 <button
                   onClick={() => handleNavigate("/admin-sections")}
-                  className="flex items-center w-full hover:text-blue-600"
+                  className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
-                  <FaClipboardList className="mr-2" /> Sections
+                  <FaClipboardList className="w-5 h-5 mb-2" />
+                  Sections
                 </button>
                 <button
                   onClick={() => handleNavigate("/admin-courses")}
-                  className="flex items-center w-full hover:text-blue-600"
+                  className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
-                  <FaBookOpen className="mr-2" /> Courses
+                  <FaBookOpen className="w-5 h-5 mb-2" />
+                  Courses
                 </button>
               </div>
             )}
           </div>
-        </nav>
 
-        {/* Logout */}
-        <div className="mt-6">
-          <button
-            onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-600 hover:text-white rounded border border-red-600 transition-colors"
-          >
-            Log Out
-          </button>
-        </div>
-
-        {/* Theme Selector */}
-        <div className="absolute bottom-4 w-full flex justify-center">
-          <div className="relative group">
+          <div className="relative group mt-3">
             <button className="group flex flex-col items-center px-3 py-2 rounded-lg text-[#737373] hover:text-[#7685fc]">
-              <div className="relative w-8 h-8 mb-1">
+              <div className="relative w-7 h-7 mb-1">
                 <img
                   src="assets/palette.png"
                   alt="Theme Icon"
-                  className="absolute inset-0 w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute inset-0 w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
                 />
                 <img
                   src="assets/palette-active.png"
                   alt="Theme Active Icon"
-                  className="absolute inset-0 w-8 h-8 opacity-100 group-hover:opacity-0 transition-opacity"
+                  className="absolute inset-0 w-7 h-7 opacity-100 group-hover:opacity-0 transition-opacity"
                 />
               </div>
               <span className="text-xs">Wallpapers</span>
             </button>
 
-            <div className="absolute bottom-full left-1 font-dm-sans text-sm bg-white border rounded-md shadow-md hidden group-hover:block z-50">
+            <div className="absolute top-full left-1 font-dm-sans text-sm bg-white border rounded-md shadow-md hidden group-hover:block z-50">
               {[
                 { label: "Water", img: "assets/water_theme1.png" },
                 { label: "Forest", img: "assets/forest_theme.png" },
@@ -195,7 +207,19 @@ const AdminLeftSidebar = () => {
               ))}
             </div>
           </div>
-        </div>
+
+          <div className="absolute bottom-4 w-full flex justify-center right-[0]">
+            <div className="mt-3">
+              <button
+                onClick={handleLogout}
+                className="group flex flex-col items-center px-3 py-2 rounded-lg w-full text-center text-red-600 hover:text-white hover:bg-red-600 transition-all"
+              >
+                <FaSignOutAlt className="w-6 h-6 mb-1" />
+                <span className="text-xs">Log Out</span>
+              </button>
+            </div>
+          </div>
+        </nav>
       </div>
     </>
   );

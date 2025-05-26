@@ -2,6 +2,12 @@ import React, { useEffect, useState } from "react";
 
 const InstructorAdminPage = () => {
   const [instructors, setInstructors] = useState([]);
+  const [loading, setLoading] = useState(true);
+    
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+      return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     fetch("http://localhost/ustp-student-attendance/admin_backend/get_instructor_info.php")
@@ -17,8 +23,36 @@ const InstructorAdminPage = () => {
   }, []);
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4 text-blue-700">Instructor List</h1>
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-[-1]">
+
+      {/* Header */}
+      <div
+        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+        style={
+            !loading
+            ? {
+                backgroundImage: "url('assets/teacher_vector.png')",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "contain"
+                }
+            : {}
+        }
+        >
+        <div className="leading-none">
+            {loading ? (
+            <div className="animate-pulse space-y-3">
+                <div className="w-1/3 h-4 bg-white/50 rounded"></div>
+                <div className="w-1/2 h-8 bg-white/60 rounded"></div>
+            </div>
+            ) : (
+            <>
+                <h1 className="text-2xl text-blue-700 font-bold">Instructor Lists</h1>
+            </>
+            )}
+        </div>
+      </div>
 
       <div className="bg-white shadow-md p-6 rounded-lg overflow-x-auto">
         {instructors.length === 0 ? (
@@ -49,6 +83,7 @@ const InstructorAdminPage = () => {
           </table>
         )}
       </div>
+      </section>
     </div>
   );
 };

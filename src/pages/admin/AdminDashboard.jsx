@@ -32,7 +32,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
 
-    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_students_by_program.php';
+    const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_students_by_program.php';
     console.log('Attempting to fetch pie chart data from:', apiUrl);
 
     fetch(apiUrl)
@@ -72,97 +72,130 @@ const AdminDashboard = () => {
     navigate('/login-admin');
   };
 
-const blueBase = '#1D4ED8';
+  const blueBase = '#1D4ED8';
 
-// Line Chart (Monthly Student Attendance)
-const lineData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-  datasets: [
-    {
-      label: 'Students Attendance',
-      data: [50, 75, 60, 90, 120, 110, 130],
-      fill: false,
-      borderColor: blueBase,
-      backgroundColor: blueBase,
-      tension: 0.3,
+  // Line Chart (Monthly Student Attendance)
+  const lineData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+    datasets: [
+      {
+        label: 'Students Attendance',
+        data: [50, 75, 60, 90, 120, 110, 130],
+        fill: false,
+        borderColor: blueBase,
+        backgroundColor: blueBase,
+        tension: 0.3,
+      },
+    ],
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' },
+      title: { display: true, text: 'Monthly Student Attendance' },
     },
-  ],
-};
+  };
 
-const lineOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { position: 'top' },
-    title: { display: true, text: 'Monthly Student Attendance' },
-  },
-};
+  // Pie Chart: student count
+  const generateColors = (numColors) => {
+    const colors = [];
+    for (let i = 0; i < numColors; i++) {
+      const hue = (i * 360 / numColors) % 360;
+      colors.push(`hsla(${hue}, 70%, 50%, 0.7)`);
+    }
+    return colors;
+  };
 
-// Pie Chart: student count
-const generateColors = (numColors) => {
-  const colors = [];
-  for (let i = 0; i < numColors; i++) {
-    const hue = (i * 360 / numColors) % 360;
-    colors.push(`hsla(${hue}, 70%, 50%, 0.7)`);
-  }
-  return colors;
-};
+  const pieChartBackgroundColors = generateColors(pieLabels.length);
+  const pieChartBorderColors = pieChartBackgroundColors.map(color => color.replace('0.7)', '1)'));
 
-const pieChartBackgroundColors = generateColors(pieLabels.length);
-const pieChartBorderColors = pieChartBackgroundColors.map(color => color.replace('0.7)', '1)'));
+  const pieData = {
+    labels: pieLabels,
+    datasets: [
+      {
+        label: 'Student by Course',
+        data: pieCounts,
+        backgroundColor: [
+          'rgba(229, 81, 130, 0.7)',
+          'rgba(255, 159, 64, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+        ],
+        borderColor: [
+          'rgba(229, 81, 130, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
-const pieData = {
-  labels: pieLabels,
-  datasets: [
-    {
-      label: 'Student by Course',
-      data: pieCounts,
-      backgroundColor: [
-        'rgba(229, 81, 130, 0.7)',
-        'rgba(255, 159, 64, 0.7)',
-        'rgba(54, 162, 235, 0.7)',
-        'rgba(75, 192, 192, 0.7)',
-        'rgba(153, 102, 255, 0.7)',
-      ],
-      borderColor: [
-        'rgba(229, 81, 130, 1)',
-        'rgba(255, 159, 64, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-      ],
-      borderWidth: 1,
+
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right' },
+      title: { display: true, text: 'Enrolled Student by Course' },
     },
-  ],
-};
+  };
 
-
-const pieOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { position: 'right' },
-    title: { display: true, text: 'Enrolled Student by Course' },
-  },
-};
+  
+    const [loading, setLoading] = useState(true);
+  
+    useEffect(() => {
+      const timer = setTimeout(() => setLoading(false), 2000);
+      return () => clearTimeout(timer);
+    }, []);
 
 
   return (
-    <div className="p-4 md:p-8 max-w-[1150px] mx-auto">
-      <h1 className="text-3xl font-bold text-blue-700 text-center sm:text-left">
-        Welcome to Admin Dashboard!
-      </h1>
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+        <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-[-1]">
+          <div
+        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+        style={
+            !loading
+            ? {
+                backgroundImage: "url('assets/teacher_vector.png')",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "contain"
+                }
+            : {}
+        }
+        >
+        <div className="leading-none">
+            {loading ? (
+            <div className="animate-pulse space-y-3">
+                <div className="w-1/3 h-4 bg-white/50 rounded"></div>
+                <div className="w-1/2 h-8 bg-white/60 rounded"></div>
+            </div>
+            ) : (
+            <>
+                <h2 className="text-base text-blue-700 font-semibold">Welcome back,</h2>
+                <h1 className="text-3xl text-blue-700 font-bold">Austin Dilan</h1>
+            </>
+            )}
+        </div>
+      </div>
 
-      <div className="mt-10 flex flex-col md:flex-row flex-wrap gap-8 justify-center">
+      <div className="mt-5 flex flex-col md:flex-row flex-nowrap gap-8 justify-center overflow-x-auto">
         <div
-          className="bg-white p-4 rounded-lg shadow-md w-full md:w-[48%]"
+          className="bg-white p-4 rounded-lg shadow-md w-full md:w-[50%] min-w-[300px]"
           style={{ minHeight: '350px', position: 'relative' }}
         >
           <Line data={lineData} options={lineOptions} />
         </div>
 
         <div
-          className="bg-white p-4 rounded-lg shadow-md w-full md:w-[48%]"
+          className="bg-white p-4 rounded-lg shadow-md w-full md:w-[50%] min-w-[300px]"
           style={{ minHeight: '350px', position: 'relative' }}
         >
           {chartLoadingError ? (
@@ -175,6 +208,7 @@ const pieOptions = {
         </div>
       </div>
 
+        </section>
     </div>
   );
 };

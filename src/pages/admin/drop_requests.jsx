@@ -74,10 +74,35 @@ export default function DropRequests() {
   );
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-[-1]">
+
       {/* Header */}
-      <div className="mb-6">
-<h1 className="text-2xl font-bold text-blue-700 text-center sm:text-left">Drop Requests</h1>
+      <div
+        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+        style={
+            !loading
+            ? {
+                backgroundImage: "url('assets/teacher_vector.png')",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "contain"
+                }
+            : {}
+        }
+        >
+        <div className="leading-none">
+            {loading ? (
+            <div className="animate-pulse space-y-3">
+                <div className="w-1/3 h-4 bg-white/50 rounded"></div>
+                <div className="w-1/2 h-8 bg-white/60 rounded"></div>
+            </div>
+            ) : (
+            <>
+                <h1 className="text-2xl text-blue-700 font-bold">Drop Requests</h1>
+            </>
+            )}
+        </div>
       </div>
 
       {/* Content */}
@@ -88,19 +113,18 @@ export default function DropRequests() {
           <p className="text-center text-red-500">{error}</p>
         ) : (
           <>
-           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
-  <p className="text-blue-700 font-semibold">
-    Total Requests: {filteredRequests.length}
-  </p>
-  <input
-    type="text"
-    placeholder="Search students... "
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
-  />
-</div>
-
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+              <p className="text-blue-700 font-semibold">
+                Total Requests: {filteredRequests.length}
+              </p>
+              <input
+                type="text"
+                placeholder="Search students... "
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
+              />
+            </div>
 
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
@@ -190,7 +214,9 @@ export default function DropRequests() {
                 <h2 className="text-lg font-semibold mb-4 text-blue-700">
                   Drop Reason
                 </h2>
-                <p className="mb-6 text-gray-700 whitespace-pre-wrap">{selectedReason}</p>
+                <p className="mb-6 text-gray-700 whitespace-pre-wrap">
+                  {selectedReason}
+                </p>
                 <button
                   onClick={closeModal}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
@@ -224,6 +250,7 @@ export default function DropRequests() {
           </div>
         </div>
       )}
+      </section>
     </div>
   );
 }

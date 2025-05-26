@@ -32,13 +32,34 @@ export default function Admin_Students() {
   });
 
   return (
-    <div className="p-4 sm:p-8">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-[-1]">
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <h1 className="text-xl sm:text-2xl font-bold text-blue-700 whitespace-nowrap">
-            Student List
-          </h1>
+      <div
+        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+        style={
+            !loading
+            ? {
+                backgroundImage: "url('assets/teacher_vector.png')",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "contain"
+                }
+            : {}
+        }
+        >
+        <div className="leading-none">
+            {loading ? (
+            <div className="animate-pulse space-y-3">
+                <div className="w-1/3 h-4 bg-white/50 rounded"></div>
+                <div className="w-1/2 h-8 bg-white/60 rounded"></div>
+            </div>
+            ) : (
+            <>
+                <h1 className="text-2xl text-blue-700 font-bold">Student Lists</h1>
+            </>
+            )}
         </div>
       </div>
 
@@ -122,6 +143,7 @@ export default function Admin_Students() {
           </div>
         )}
       </div>
+      </section>
     </div>
   );
 }

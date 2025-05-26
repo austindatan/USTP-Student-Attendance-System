@@ -1,168 +1,210 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { FiSettings } from "react-icons/fi";
+import {
+  FiSettings,
+  FiUsers,
+  FiCheckCircle,
+  FiBookOpen,
+  FiCalendar,
+  FiMail
+} from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ClassCard from './components/class_card'; // adjust path if needed
 
 export default function Teacher_Dashboard({ selectedDate }) {
-    const navigate = useNavigate();
-    const [students, setStudents] = useState([]);
-    const [presentStudents, setPresentStudents] = useState([]);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate('/login-instructor');
-    };
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
-    // Fetch students and attendance status for the selected date
-    useEffect(() => {
-        const fetchStudents = async () => {
-            try {
-                // Format the date to yyyy-MM-dd
-                const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
+  const totalStudents = 120;
+  const studentsPresentToday = 95;
+  const totalClasses = 8;
+  const upcomingEvents = 3;
+  const attendanceRate = Math.round((studentsPresentToday / totalStudents) * 100);
 
-                const response = await fetch(`http://localhost/USTP-Student-Attendance-System/backend/get_students.php?date=${dateStr}`);
-                const data = await response.json();
+  const emailList = [
+    { id: 1, subject: "Reminder: Midterm Grading", sender: "Admin", time: "10 mins ago" },
+    { id: 2, subject: "Meeting with Dept. Head", sender: "Principal", time: "1 hour ago" },
+    { id: 3, subject: "Student Request", sender: "John Doe", time: "Yesterday" },
+  ];
 
-                setStudents(data);
+  const attendanceData = [
+    { name: 'Mon', students: 92 },
+    { name: 'Tue', students: 97 },
+    { name: 'Wed', students: 95 },
+    { name: 'Thu', students: 89 },
+    { name: 'Fri', students: 90 },
+  ];
 
-                // Initialize presentStudents array from students with status 'Present'
-                const presentIds = data
-                    .filter(student => student.status === 'Present')
-                    .map(student => student.student_id);
-                setPresentStudents(presentIds);
-
-            } catch (error) {
-                console.error("Error fetching students:", error);
-            }
-        };
-
-        fetchStudents();
-    }, [selectedDate]);
-
-    // Toggle attendance and save to DB
-    const toggleAttendance = async (student) => {
-        const updatedList = presentStudents.includes(student.student_id)
-            ? presentStudents.filter(id => id !== student.student_id)
-            : [...presentStudents, student.student_id];
-
-        setPresentStudents(updatedList);
-
-        const attendanceData = {
-            student_id: student.student_id,
-            instructor_id: 21,
-            section_id: 2,
-            program_details_id: 1,
-            admin_id: 1,
-            date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
-            status: updatedList.includes(student.student_id) ? 'Present' : 'Absent',
-        };
+  return (
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
         
-
-        try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/backend/save_attendance.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(attendanceData)
-            });
-
-            const result = await res.json();
-            console.log('Attendance saved:', result);
-        } catch (error) {
-            console.error('Error saving attendance:', error);
-        }
-    };
-
-    return (
+        {/* Header */}
         <div
-            className="bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
+        className="bg-[#7685fc] rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+        style={
+            !loading
+            ? {
+                backgroundImage: "url('assets/teacher_vector.png')",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "contain"
+                }
+            : {}
+        }
         >
-
-            <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
-                {/* Header */}
-                <div
-                    className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6"
-                    style={{
-                        backgroundImage: "url('assets/classes_vector_2.png')",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 50px center",
-                        backgroundSize: "contain"
-                    }}
-                >
-                    <div className="flex justify-between items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            strokeWidth="1.5" stroke="currentColor" className="size-4">
-                            <path strokeLinecap="round" strokeLinejoin="round"
-                                d="M15.75 19.5 8.25 12l7.5-7.5" />
-                        </svg>
-                        <FiSettings className="text-xl text-white cursor-pointer" />
-                    </div>
-                    <div className="mt-12">
-                        <div className="flex items-center gap-4">
-                            <h2 className="text-xl font-semibold">IT 221</h2>
-                            <p className="text-sm">T 7:30 AM - 9:00 AM</p>
-                        </div>
-                        <h1 className="text-2xl font-bold">Information Management</h1>
-                        <p className="text-sm">2R12</p>
-                    </div>
-                </div>
-
-                {/* Search */}
-                <div className="relative">
-                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                        </svg>
-                    </div>
-                    <input
-                        type="text"
-                        id="table-search"
-                        className="font-poppins block w-80 ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
-                        placeholder="Search for students."
-                    />
-                </div>
-
-                {/* Student Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
-                    {students.map((student, index) => {
-                        const isPresent = presentStudents.includes(student.student_id);
-                        const name = student.name || 'No Name';
-                        return (
-                            <div
-                                key={index}
-                                onClick={() => toggleAttendance(student)}
-                                className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                    bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
-                                    ${isPresent ? 'opacity-100' : 'opacity-60'}`}
-                            >
-                                <div className="overflow-hidden rounded-t-[20px] flex justify-center">
-                                    <img
-                                        src={student.image || 'default_image_url_here'}
-                                        className={`w-24 h-24 sm:w-36 sm:h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
-                                        alt={name}
-                                    />
-                                </div>
-                                <div className="pl-3 pr-4 pt-2 pb-4 items-center">
-                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
-                                        ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
-                                        {isPresent ? 'Present' : 'Absent'}
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
-                                            {name.includes(" ") ? (
-                                                <>
-                                                    {name.split(" ")[0]} <br /> {name.split(" ")[1]}
-                                                </>
-                                            ) : name}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </section>
+        <div className="leading-none">
+            {loading ? (
+            <div className="animate-pulse space-y-3">
+                <div className="w-1/3 h-4 bg-white/50 rounded"></div>
+                <div className="w-1/2 h-8 bg-white/60 rounded"></div>
+                <div className="w-1/4 h-4 mt-10 bg-white/40 rounded"></div>
+            </div>
+            ) : (
+            <>
+                <h2 className="text-base font-semibold">Welcome back,</h2>
+                <h1 className="text-3xl font-bold">Austin Dilan</h1>
+                <p className="text-sm mt-12">Let’s start teaching!</p>
+            </>
+            )}
         </div>
-    );
+        </div>
+
+
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {loading ? (
+            [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
+          ) : (
+            <>
+              <DashboardCard icon={<FiUsers size={28} />} label="Total Students" count={totalStudents} />
+              <DashboardCard icon={<FiCheckCircle size={28} />} label="Present Today" count={studentsPresentToday} />
+              <DashboardCard icon={<FiBookOpen size={28} />} label="Total Classes" count={totalClasses} />
+              <DashboardCard icon={<FiCalendar size={28} />} label="Upcoming Events" count={upcomingEvents} />
+            </>
+          )}
+        </div>
+
+        {/* Chart + Emails */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-white p-5 rounded-2xl shadow-lg col-span-2">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Attendance This Week</h3>
+            {loading ? (
+              <div className="animate-pulse h-[250px] bg-gray-200 rounded"></div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={attendanceData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="students" fill="#7685fc" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl shadow-lg col-span-2 lg:col-span-1 w-full">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
+              <FiMail /> Recent Messages
+            </h3>
+            {loading ? (
+              <ul className="space-y-3 animate-pulse">
+                {[...Array(3)].map((_, i) => (
+                  <li key={i} className="space-y-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {emailList.map(email => (
+                  <li key={email.id} className="py-2">
+                    <p className="font-medium text-gray-800">{email.subject}</p>
+                    <p className="text-sm text-gray-500">{email.sender} • {email.time}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+
+        {/* Classes */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+          {loading ? (
+            [...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-gray-100 rounded-xl h-40"></div>
+            ))
+          ) : (
+            <>
+              <ClassCard
+                isLoading={false}
+                code="CS101"
+                title="Computer Science Basics"
+                room="Lab 1"
+                schedule="Mon 9:00AM – 11:00AM"
+                onClick={() => console.log("Clicked CS101")}
+                bgImage={`${process.env.PUBLIC_URL}/assets/classes_vector_2.png`}
+                bgClass="bg-[#0097b2]"
+              />
+              <ClassCard
+                isLoading={false}
+                code="ENG201"
+                title="English Literature"
+                room="Room 305"
+                schedule="Tue 1:00PM – 3:00PM"
+                onClick={() => console.log("Clicked ENG201")}
+                bgImage={`${process.env.PUBLIC_URL}/assets/classes_vector_4.png`}
+                bgClass="bg-[#b23a48]"
+              />
+              <ClassCard
+                isLoading={false}
+                code="MATH204"
+                title="Advanced Calculus"
+                room="Room 102"
+                schedule="Wed 8:00AM – 10:00AM"
+                onClick={() => console.log("Clicked MATH204")}
+                bgImage={`${process.env.PUBLIC_URL}/assets/classes_vector_3.png`}
+                bgClass="bg-[#1b998b]"
+              />
+            </>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DashboardCard({ icon, label, count }) {
+  return (
+    <div className="font-dm-sans bg-white backdrop-blur-md p-5 rounded-2xl shadow-lg flex items-center gap-4 hover:scale-[1.02] transition">
+      <div className="text-indigo-600">{icon}</div>
+      <div>
+        <p className="text-sm text-gray-600 line-clamp-1">{label}</p>
+        <p className="text-2xl font-semibold text-gray-800 text-wrap break-words max-w-[100px] sm:max-w-[150px] md:max-w-none leading-tight">
+          {count}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="animate-pulse bg-gray-100 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+      <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+      <div className="flex-1 space-y-2">
+        <div className="w-3/4 h-4 bg-gray-300 rounded"></div>
+        <div className="w-1/2 h-6 bg-gray-400 rounded"></div>
+      </div>
+    </div>
+  );
 }

@@ -90,7 +90,8 @@ const ExcuseRequestsPage = () => {
     }
 
     return (
-        <div className="font-dm-sans p-6 min-h-[calc(100vh-80px)]">
+        <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+        <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
             <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-xl bg-opacity-90">
                 <h1 className="text-3xl font-bold text-[#0097b2] mb-6 border-b-2 border-[#0097b2] pb-2">
                     Student Excuse Requests
@@ -197,6 +198,7 @@ const ExcuseRequestsPage = () => {
                     </div>
                 </div>
             )}
+        </section>
         </div>
     );
 };
