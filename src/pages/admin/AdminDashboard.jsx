@@ -32,7 +32,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
 
-    const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_students_by_program.php';
+    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_students_by_program.php';
     console.log('Attempting to fetch pie chart data from:', apiUrl);
 
     fetch(apiUrl)
