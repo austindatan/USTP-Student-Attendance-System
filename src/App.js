@@ -36,6 +36,9 @@ import Courses from './pages/admin/courses';
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// 404 Page
+import NotFound from "./components/NotFound"; // <--- IMPORT THE NEW 404 COMPONENT
+
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
   const location = useLocation();
   const isStudentDashboard = location.pathname === "/student-dashboard";
@@ -89,7 +92,7 @@ function App() {
         <Route
           path="/student-dashboard"
           element={
-            <ProtectedRoute allowedRoles={['student']}>
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
                 <StudentDashboard />
               </DashboardLayout>
@@ -101,14 +104,13 @@ function App() {
         <Route
           path="/teacher-dashboard"
           element={
-            <ProtectedRoute allowedRoles={['instructor']}>
+            <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
               <DashboardLayout
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                {/* Removed the extra div for wallpaper here */}
                 <TeacherDashboard selectedDate={selectedDate} />
               </DashboardLayout>
             </ProtectedRoute>
@@ -116,9 +118,9 @@ function App() {
         />
 
         <Route
-          path="/section-dashboard/:sectionId" // <-- CHANGE THIS LINE
+          path="/section-dashboard/:sectionId"
           element={
-              <ProtectedRoute allowedRoles={['instructor']}>
+              <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
                   <DashboardLayout
                       selectedDate={selectedDate}
                       setSelectedDate={setSelectedDate}
@@ -129,7 +131,6 @@ function App() {
                           className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
                           style={{ backgroundImage: bgImage }}
                       >
-                          {/* Assuming SectionDashboard is your Teacher_Dashboard component */}
                           <SectionDashboard selectedDate={selectedDate} />
                       </div>
                   </DashboardLayout>
@@ -140,14 +141,13 @@ function App() {
         <Route
           path="/classes-dashboard"
           element={
-            <ProtectedRoute allowedRoles={['instructor']}>
+            <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
               <DashboardLayout
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                {/* Removed the extra div for wallpaper here */}
                 <Classes_Dashboard selectedDate={selectedDate} />
               </DashboardLayout>
             </ProtectedRoute>
@@ -157,14 +157,13 @@ function App() {
         <Route
           path="/edit-profile"
           element={
-            <ProtectedRoute allowedRoles={['instructor']}>
+            <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
               <DashboardLayout
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                {/* Removed the extra div for wallpaper here */}
                 <EditProfile />
               </DashboardLayout>
             </ProtectedRoute>
@@ -175,14 +174,13 @@ function App() {
         <Route
           path="/excuse-requests"
           element={
-            <ProtectedRoute allowedRoles={['instructor']}>
+            <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
               <DashboardLayout
-                selectedDate={selectedDate} // Pass if needed by ExcuseRequestsPage, though not directly used in hardcoded version
-                setSelectedDate={setSelectedDate} // Pass if needed
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                {/* ExcuseRequestsPage now receives bgImage and setBgImage from DashboardLayout */}
                 <ExcuseRequestsPage />
               </DashboardLayout>
             </ProtectedRoute>
@@ -193,7 +191,7 @@ function App() {
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <AdminDashboard />
               </AdminLayout>
@@ -204,7 +202,7 @@ function App() {
         <Route
           path="/admin-students"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <Admin_Students />
               </AdminLayout>
@@ -215,7 +213,7 @@ function App() {
         <Route
           path="/drop_requests"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <DropRequests />
               </AdminLayout>
@@ -226,7 +224,7 @@ function App() {
         <Route
           path="/admin-instructor"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <InstructorAdminPage />
               </AdminLayout>
@@ -237,7 +235,7 @@ function App() {
         <Route
           path="/admin-sections"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <Sections />
               </AdminLayout>
@@ -248,7 +246,7 @@ function App() {
         <Route
           path="/admin-courses"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <Courses />
               </AdminLayout>
@@ -260,7 +258,7 @@ function App() {
         <Route
           path="/admin-students/add"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <AddStudent />
               </AdminLayout>
@@ -271,7 +269,7 @@ function App() {
         <Route
           path="/admin-students/edit/:student_id"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <EditStudent />
               </AdminLayout>
@@ -279,6 +277,8 @@ function App() {
           }
         />
 
+        {/* CATCH-ALL ROUTE FOR 404 PAGE*/}
+        <Route path="*" element={<NotFound />} /> 
       </Routes>
     </BrowserRouter>
   );

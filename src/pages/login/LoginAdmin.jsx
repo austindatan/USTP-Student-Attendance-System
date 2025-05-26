@@ -14,14 +14,13 @@ const LoginAdmin = () => {
     setError("");
 
     try {
-      const response = await fetch(
-        "http://localhost/USTP-Student-Attendance-System/api/auth/login-admin.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch("http://localhost/USTP-Student-Attendance-System/api/auth/login-admin.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      credentials: "include" // important for sending session cookie
+    });
+
 
       const data = await response.json();
 
