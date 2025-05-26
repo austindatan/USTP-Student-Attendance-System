@@ -205,7 +205,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
             )}
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow-md border z-50">
+  <div className="absolute left-full ml-2 top-0 w-40 bg-white rounded shadow-md border z-50">
                 <button
                   onClick={() => {
                     setDropdownOpen(false);
