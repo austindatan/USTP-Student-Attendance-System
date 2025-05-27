@@ -7,7 +7,6 @@ import {
   FaUserTie,
   FaClipboardList,
   FaBookOpen,
-  FaChevronDown,
   FaTimes,
   FaSignOutAlt,
 } from "react-icons/fa";
@@ -42,10 +41,12 @@ const AdminLeftSidebar = () => {
     setIsOpen(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin");
-    navigate("/login-admin");
-  };
+const handleLogout = () => {
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('admin'); 
+
+  navigate('/login-admin'); // Redirect the user to the admin login page
+};
 
   useEffect(() => {
     applyBackground("assets/ustp_theme.png");
@@ -190,7 +191,11 @@ const AdminLeftSidebar = () => {
               <span className="text-xs">Wallpapers</span>
             </button>
 
-            <div className="absolute top-full left-1 font-dm-sans text-sm bg-white border rounded-md shadow-md hidden group-hover:block z-50">
+            <div
+              className={`absolute left-1 font-dm-sans text-sm bg-white border rounded-md shadow-md hidden group-hover:block z-50 ${
+                academicsOpen ? "bottom-full mb-1" : "top-full"
+              }`}
+            >
               {[
                 { label: "Water", img: "assets/water_theme1.png" },
                 { label: "Forest", img: "assets/forest_theme.png" },
