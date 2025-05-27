@@ -93,15 +93,15 @@ export default function EditStudent() {
     if (imageFile) submissionData.append('image', imageFile);
 
     try {
-const res = await axios.post(
-  `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
-  submissionData,
-  {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  }
-);
+      const res = await axios.post(
+        `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
+        submissionData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
       alert(res.data.message || 'Student updated successfully!');
       navigate('/admin-students');
     } catch (error) {
@@ -222,10 +222,19 @@ const res = await axios.post(
             </select>
           </div>
 
-          <div className="md:col-span-2 text-right">
+          {/* Buttons: Submit and Cancel */}
+          <div className="md:col-span-2 flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => navigate('/admin-students')}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+
             <button
               type="submit"
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
             >
               Update Student
             </button>

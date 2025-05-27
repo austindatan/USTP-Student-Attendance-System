@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; 
 
 export default function AddStudent() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstname: '',
     middlename: '',
@@ -25,6 +29,9 @@ export default function AddStudent() {
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
 
+  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false); 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -38,6 +45,7 @@ export default function AddStudent() {
         setProgramDetails(progRes.data);
       } catch (error) {
         console.error('Error fetching dropdown data:', error);
+        alert('Failed to load necessary data for dropdowns. Please try again.');
       }
     };
     fetchData();
@@ -52,8 +60,56 @@ export default function AddStudent() {
     setImageFile(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleResetForm = () => {
+    setFormData({
+      firstname: '',
+      middlename: '',
+      lastname: '',
+      date_of_birth: '',
+      contact_number: '',
+      email: '',
+      password: '',
+      street: '',
+      city: '',
+      province: '',
+      zipcode: '',
+      country: '',
+      section_id: '',
+    });
+    setImageFile(null);
+    setSelectedInstructor('');
+    setSelectedProgram('');
+  };
+
+  
+  const handleCancel = () => {
+    handleResetForm(); 
+    navigate('/admin-students'); 
+  };
+
+  
+  const handleOpenAddStudentModal = (e) => {
+    e.preventDefault(); 
+  
+    if (
+      !formData.firstname ||
+      !formData.lastname ||
+      !formData.date_of_birth ||
+      !formData.contact_number ||
+      !formData.email ||
+      !formData.password ||
+      !selectedInstructor ||
+      !selectedProgram ||
+      !formData.section_id
+    ) {
+      alert('Please fill in all required fields (First Name, Last Name, Date of Birth, Contact, Email, Password, Instructor, Program, Section).');
+      return;
+    }
+    setIsAddStudentModalOpen(true);
+  };
+
+  const handleConfirmAddStudent = async () => {
+    setIsLoading(true); 
     const submissionData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       submissionData.append(key, value);
@@ -68,10 +124,19 @@ export default function AddStudent() {
         submissionData
       );
       alert(res.data.message || 'Student added successfully!');
+      setIsAddStudentModalOpen(false); 
+      handleResetForm(); 
+      navigate('/admin-students'); 
     } catch (error) {
-      console.error('Failed to add student:', error);
-      alert('Error adding student. Please check the console.');
+      console.error('Failed to add student:', error.response?.data || error.message);
+      alert(`Error adding student: ${error.response?.data?.message || 'Please check the console for details.'}`);
+    } finally {
+      setIsLoading(false); 
     }
+  };
+
+  const handleCloseAddStudentModal = () => {
+    setIsAddStudentModalOpen(false); 
   };
 
   return (
@@ -79,12 +144,12 @@ export default function AddStudent() {
       className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex"
       style={{ overflowY: 'auto' }}
     >
-      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
         {/* Header Container */}
         <div
-          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative flex items-center"
           style={{
-            backgroundImage: "url('assets/teacher_vector.png')",
+            backgroundImage: "url('/assets/teacher_vector.png')", 
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -95,7 +160,7 @@ export default function AddStudent() {
 
         {/* Form Container */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleOpenAddStudentModal} 
           className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
           encType="multipart/form-data"
         >
@@ -181,7 +246,7 @@ export default function AddStudent() {
               name="section_id"
               value={formData.section_id}
               onChange={handleChange}
-              required
+              required 
               className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">Select Section</option>
@@ -193,17 +258,36 @@ export default function AddStudent() {
             </select>
           </div>
 
-          {/* Submit Button */}
-          <div className="md:col-span-2 text-right">
+          {/* Buttons at bottom right */}
+          <div className="md:col-span-2 flex justify-end items-center space-x-4">
             <button
-              type="submit"
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+              type="button"
+              onClick={handleCancel} 
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit" 
+              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
             >
               Save Student
             </button>
           </div>
         </form>
       </section>
+
+      {/*Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isAddStudentModalOpen}
+        onClose={handleCloseAddStudentModal}
+        onConfirm={handleConfirmAddStudent}
+        title="Confirm Student Addition"
+        message={`Are you sure you want to add ${formData.firstname} ${formData.lastname} as a new student?`}
+        confirmText="Add Student"
+        loading={isLoading} 
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800" 
+      />
     </div>
   );
 }

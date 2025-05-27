@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; 
 
-const AddSection = () => {
+export default function AddSection() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -17,27 +18,27 @@ const AddSection = () => {
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState('');
 
-  // Fetch courses
-useEffect(() => {
-  console.log("Sending formData:", formData);
-  axios
-    .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
-    .then((res) => {
-      if (res.data.success) {
-        setCourses(res.data.courses);
-        setErrorCourses(null); 
-      } else {
-        setErrorCourses('Failed to fetch courses');
-      }
-      setLoadingCourses(false);
-    })
-    .catch((err) => {
-      console.error('Axios error:', err);
-      setErrorCourses('Error loading courses');
-      setLoadingCourses(false);
-    });
-}, []);
+  const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
 
+  useEffect(() => {
+    axios
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
+      .then((res) => {
+        if (res.data.success) {
+          setCourses(res.data.courses);
+          setErrorCourses(null);
+        } else {
+          setErrorCourses('Failed to fetch courses');
+        }
+        setLoadingCourses(false);
+      })
+      .catch((err) => {
+        console.error('Axios error:', err);
+        setErrorCourses('Error loading courses');
+        setLoadingCourses(false);
+      });
+  }, []);
 
   const handleChange = (e) => {
     setFormData((prevData) => ({
@@ -46,157 +47,204 @@ useEffect(() => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    formData.course_id = parseInt(formData.course_id, 10);
+  const handleOpenAddSectionModal = (e) => {
+    e.preventDefault(); 
 
-    e.preventDefault();
 
-    axios
-      .post(
+    if (
+      !formData.section_name ||
+      !formData.course_id ||
+      !formData.schedule_day ||
+      !formData.start_time ||
+      !formData.end_time
+    ) {
+      alert('Please fill in all required fields (Section Name, Course, Schedule Day, Start Time, End Time).');
+      return;
+    }
+    setIsAddSectionModalOpen(true);
+  };
+
+  const handleConfirmAddSection = async () => {
+    setIsLoading(true); 
+  
+    const submitData = { ...formData, course_id: parseInt(formData.course_id, 10) };
+
+    try {
+      const res = await axios.post(
         'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
-        JSON.stringify(formData),
+        JSON.stringify(submitData),
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         }
-      )
-      .then((res) => {
-        console.log("Server response:", res.data);
-        if (res.data.success) {
-          alert(res.data.message || 'Section added successfully!');
-          navigate('/admin-sections');
-        } else {
-          alert(res.data.message || 'Failed to add section.');
-        }
-      })
+      );
 
-      .catch((err) => {
-        console.error(err);
-        alert('An error occurred while adding the section.');
-      });
+      if (res.data.success) {
+        alert(res.data.message || 'Section added successfully!');
+        setIsAddSectionModalOpen(false); 
+
+        setFormData({
+          section_name: '',
+          course_id: '',
+          schedule_day: '',
+          start_time: '',
+          end_time: '',
+        });
+        navigate('/admin-sections');
+      } else {
+        alert(res.data.message || 'Failed to add section.');
+      }
+    } catch (err) {
+      console.error('An error occurred:', err);
+      alert('An error occurred while adding the section.');
+    } finally {
+      setIsLoading(false); // End loading
+    }
+  };
+
+  const handleCloseAddSectionModal = () => {
+    setIsAddSectionModalOpen(false); 
+  };
+
+  const handleCancel = () => {
+    navigate('/admin-sections');
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl"
-      >
-        <h2 className="text-3xl font-bold mb-6 text-blue-700 text-center">
-          Add New Section
-        </h2>
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll" style={{ backgroundImage: "url('/assets/section_bg.png')" }}>
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-5xl mx-auto">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Section Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Section Name:
-            </label>
-            <input
-              type="text"
-              name="section_name"
-              value={formData.section_name}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          style={{
+            backgroundImage: "url('/assets/section_vector.png')", 
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right',
+            backgroundSize: 'contain',
+          }}
+        >
+          <h1 className="text-2xl text-blue-700 font-bold">Add New Section</h1>
+        </div>
 
-          {/* Course (Dropdown) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Course:
-            </label>
-            {loadingCourses ? (
-              <p className="text-gray-500">Loading courses...</p>
-            ) : errorCourses ? (
-              <p className="text-red-500">{errorCourses}</p>
-            ) : (
-              <select
-                name="course_id"
-                value={formData.course_id}
+        <div className="bg-white shadow-md p-8 rounded-lg">
+          <form onSubmit={handleOpenAddSectionModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Section Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Section Name</label>
+              <input
+                type="text"
+                name="section_name"
+                value={formData.section_name}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a Course</option>
-                {Array.isArray(courses) && courses.length > 0 ? (
-                  courses.map((course) => (
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* Course Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Course</label>
+              {loadingCourses ? (
+                <p className="text-gray-500 mt-2">Loading courses...</p>
+              ) : errorCourses ? (
+                <p className="text-red-500 mt-2">{errorCourses}</p>
+              ) : (
+                <select
+                  name="course_id"
+                  value={formData.course_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select a Course</option>
+                  {courses.map((course) => (
                     <option key={course.course_id} value={course.course_id}>
                       {course.course_code}
                     </option>
-                  ))
-                ) : (
-                  <option disabled>No courses available</option>
-                )}
+                  ))}
+                </select>
+              )}
+            </div>
 
+            {/* Schedule Day */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Schedule Day</label>
+              <select
+                name="schedule_day"
+                value={formData.schedule_day}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select a day</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
               </select>
-            )}
-          </div>
+            </div>
 
-          {/* Schedule Day */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Schedule Day:
-            </label>
-            <select
-              name="schedule_day"
-              value={formData.schedule_day}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select a day</option>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-              <option value="Saturday">Saturday</option>
-            </select>
-          </div>
+            {/* Start Time */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Start Time</label>
+              <input
+                type="time"
+                name="start_time"
+                value={formData.start_time}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
 
-          {/* Start Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Start Time:
-            </label>
-            <input
-              type="time"
-              name="start_time"
-              value={formData.start_time}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            {/* End Time */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">End Time</label>
+              <input
+                type="time"
+                name="end_time"
+                value={formData.end_time}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
 
-          {/* End Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              End Time:
-            </label>
-            <input
-              type="time"
-              name="end_time"
-              value={formData.end_time}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            {/* Buttons - full width below */}
+            <div className="md:col-span-2 flex justify-end gap-3 mt-4">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit" 
+                className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800"
+              >
+                Add Section
+              </button>
+            </div>
+
+          </form>
         </div>
+      </section>
 
-        <button
-          type="submit"
-          className="mt-6 w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition duration-200"
-        >
-          Add Section
-        </button>
-      </form>
+      {/* Confirmation Modal for Add Section */}
+      <ConfirmationModal
+        isOpen={isAddSectionModalOpen}
+        onClose={handleCloseAddSectionModal}
+        onConfirm={handleConfirmAddSection}
+        title="Confirm Section Addition"
+        message={`Are you sure you want to add section "${formData.section_name}" for the selected course and schedule?`}
+        confirmText="Add Section"
+        loading={isLoading} 
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800" //
+      />
     </div>
   );
-};
-
-export default AddSection;
+}

@@ -33,8 +33,8 @@ export default function Admin_Courses() {
   );
 
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-6xl mx-auto">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
+      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
 
         {/* Header */}
         <div
@@ -57,14 +57,14 @@ export default function Admin_Courses() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-bold">Courses Lists</h1>
+              <h1 className="text-2xl text-blue-700 font-bold">Course List</h1>
             )}
           </div>
         </div>
 
         {/* Controls */}
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
               Total Courses: {filteredCourses.length}
             </p>
@@ -76,13 +76,10 @@ export default function Admin_Courses() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
-                aria-label="Search courses"
               />
               <button
-                type="button"
                 onClick={() => navigate("/admin-courses/add")}
                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
-                aria-label="Add new course"
               >
                 + Add Course
               </button>
@@ -95,13 +92,13 @@ export default function Admin_Courses() {
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
-            <div className="overflow-auto rounded-md">
+            <div className="overflow-x-auto max-w-full">
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-4 py-2 whitespace-nowrap">Course Code</th>
-                    <th className="px-4 py-2 whitespace-nowrap">Description</th>
-                    <th className="px-4 py-2 whitespace-nowrap">Action</th>
+                    <th className="px-3 py-2">Course Code</th>
+                    <th className="px-3 py-2">Description</th>
+                    <th className="px-3 py-2">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -117,14 +114,12 @@ export default function Admin_Courses() {
                         key={course.course_id ?? course.course_code}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-4 py-2 max-w-xs truncate">{course.course_code}</td>
-                        <td className="px-4 py-2 max-w-md truncate">{course.description}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="px-3 py-2 max-w-[120px] truncate">{course.course_code}</td>
+                        <td className="px-3 py-2 max-w-[200px] truncate">{course.description}</td>
+                        <td className="px-3 py-2">
                           <button
-                            type="button"
                             onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-                            aria-label={`Edit course ${course.course_code}`}
+                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
                           >
                             Edit
                           </button>
