@@ -25,14 +25,13 @@ export default function InstructorAdminPage() {
   }, []);
 
   const filteredInstructors = instructors.filter((instructor) => {
-    // FIX 1: Wrap the template literal string in backticks (`)
     const fullName = `${instructor.firstname} ${instructor.middlename} ${instructor.lastname}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
 
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex flex-col overflow-y-auto">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
+      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
         {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
@@ -60,8 +59,8 @@ export default function InstructorAdminPage() {
         </div>
 
         {/* Controls & Table */}
-        <div className="bg-white shadow-md p-6 rounded-lg overflow-x-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+        <div className="bg-white shadow-md p-6 rounded-lg">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
               Total Instructors: {filteredInstructors.length}
             </p>
@@ -83,50 +82,51 @@ export default function InstructorAdminPage() {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Table wrapper with horizontal scroll on mobile */}
           {loading ? (
             <p className="text-center text-gray-500">Loading instructors...</p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
-            <table className="w-full text-sm text-left text-blue-900">
-              <thead className="bg-blue-100 uppercase text-blue-700">
-                <tr>
-                  <th className="px-4 py-2">First Name</th>
-                  <th className="px-4 py-2">Middle Name</th>
-                  <th className="px-4 py-2">Last Name</th>
-                  <th className="px-4 py-2">Date of Birth</th>
-                  <th className="px-4 py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInstructors.length === 0 ? (
+            <div className="overflow-x-auto max-w-full">
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
+                <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
-                      No instructors found.
-                    </td>
+                    <th className="px-3 py-2">First Name</th>
+                    <th className="px-3 py-2">Middle Name</th>
+                    <th className="px-3 py-2">Last Name</th>
+                    <th className="px-3 py-2">Date of Birth</th>
+                    <th className="px-3 py-2">Action</th>
                   </tr>
-                ) : (
-                  filteredInstructors.map((instructor, index) => (
-                    <tr key={index} className="border-b border-blue-200 hover:bg-blue-50">
-                      <td className="px-4 py-2 truncate">{instructor.firstname}</td>
-                      <td className="px-4 py-2 truncate">{instructor.middlename}</td>
-                      <td className="px-4 py-2 truncate">{instructor.lastname}</td>
-                      <td className="px-4 py-2 truncate">{instructor.date_of_birth}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          // FIX 2: Wrap the template literal string in backticks (`)
-                          onClick={() => navigate(`/admin-instructor/edit/${instructor.instructor_id}`)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
-                        >
-                          Edit
-                        </button>
+                </thead>
+                <tbody>
+                  {filteredInstructors.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
+                        No instructors found.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredInstructors.map((instructor, index) => (
+                      <tr key={index} className="border-b border-blue-200 hover:bg-blue-50">
+                        <td className="px-3 py-2 truncate max-w-[120px]">{instructor.firstname}</td>
+                        <td className="px-3 py-2 truncate max-w-[120px]">{instructor.middlename}</td>
+                        <td className="px-3 py-2 truncate max-w-[140px]">{instructor.lastname}</td>
+                        <td className="px-3 py-2 truncate max-w-[110px]">{instructor.date_of_birth}</td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <button
+                            onClick={() => navigate(`/admin-instructor/edit/${instructor.instructor_id}`)}
+                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </section>
