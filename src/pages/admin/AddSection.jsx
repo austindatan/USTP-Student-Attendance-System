@@ -23,7 +23,7 @@ export default function AddSection() {
 
   useEffect(() => {
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -69,9 +69,9 @@ export default function AddSection() {
   
     const submitData = { ...formData, course_id: parseInt(formData.course_id, 10) };
 
-    try {
-      const res = await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
+    axios
+      .post(
+        'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
           headers: { 'Content-Type': 'application/json' },

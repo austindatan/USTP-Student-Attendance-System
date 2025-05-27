@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom'; 
 
 const ExcuseRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false); 
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [modal, setModal] = useState({ show: false, id: null, type: '' });
 
   // Fetch data from the backend
   const fetchRequests = () => {
-    fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php')
+    fetch('http://localhost/ustp-student-attendance/instructor_backend/get_excused_req.php')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -25,8 +26,15 @@ const ExcuseRequestsPage = () => {
     fetchRequests();
   }, []);
 
-  const openModal = (id, type) => {
+  // Handler for the Approve/Reject Confirmation Modal
+  const openConfirmationModal = (id, type) => {
     setModal({ show: true, id, type });
+  };
+
+  // Handler for the "View Details" Modal
+  const handleViewDetails = (request) => {
+    setSelectedRequest(request);
+    setShowModal(true);
   };
 
   const closeModal = () => {
@@ -41,7 +49,7 @@ const ExcuseRequestsPage = () => {
 
       try {
         const res = await fetch(
-          "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php",
+          "http://localhost/ustp-student-attendance/instructor_backend/update_excuse_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -53,20 +61,15 @@ const ExcuseRequestsPage = () => {
         if (result.error) {
           alert("Failed to update status.");
         } else {
-          fetchRequests();
+          fetchRequests(); 
         }
       } catch (error) {
         alert("An error occurred while updating the request.");
         console.error(error);
       } finally {
-        closeModal();
+        closeModal(); 
       }
     }
-  };
-
-  const handleViewDetails = (request) => {
-    setSelectedRequest(request);
-    setShowModal(true);
   };
 
   if (error) {
@@ -84,7 +87,7 @@ const ExcuseRequestsPage = () => {
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
         <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-xl bg-opacity-90">
-          <h1 className="text-3xl font-bold text-[#0097b2] mb-6 border-b-2 border-[#0097b2] pb-2">
+          <h1 className="text-3xl font-bold text-indigo-600 mb-6 border-b-2 border-indigo-600 pb-2">
             Student Excuse Requests
           </h1>
 
@@ -117,7 +120,7 @@ const ExcuseRequestsPage = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {requests.map((req) => (
                     <tr key={req.excused_request_id} className="hover:bg-gray-100 transition duration-150 ease-in-out">
-                      <td className="py-3 px-4 whitespace-nowrap text-sm text-[#0097b2] font-medium">
+                      <td className="py-3 px-4 whitespace-nowrap text-sm text-indigo-600 font-medium">
                         {req.student_name}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-sm text-[#737373]">
@@ -126,7 +129,7 @@ const ExcuseRequestsPage = () => {
                       <td className="py-3 px-4 whitespace-nowrap text-center text-sm">
                         <button
                           onClick={() => handleViewDetails(req)}
-                          className="px-3 py-1 bg-[#0097b2] text-white rounded-md hover:bg-[#007b94] focus:outline-none focus:ring-2 focus:ring-[#1F27A6] focus:ring-opacity-50 transition duration-150 ease-in-out"
+                          className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                         >
                           View
                         </button>
@@ -141,22 +144,26 @@ const ExcuseRequestsPage = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-center text-sm font-medium">
-                        
+                        {/* Conditional rendering for action buttons based on status */}
+                        {req.status === 'Pending' ? (
                           <div className="flex justify-center space-x-2">
                             <button
-                              onClick={() => openModal(req.excused_request_id, 'approve')}
+                              onClick={() => openConfirmationModal(req.excused_request_id, 'approve')}
                               className="px-3 py-1 bg-[#3CB371] text-white rounded-md hover:bg-[#2E8B57] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                             >
                               Approve
                             </button>
                             <button
-                              onClick={() => openModal(req.excused_request_id, 'reject')}
+                              onClick={() => openConfirmationModal(req.excused_request_id, 'reject')}
                               className="px-3 py-1 bg-[#DC3545] text-white rounded-md hover:bg-[#C82333] focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                             >
                               Reject
                             </button>
                           </div>
-                        
+                        ) : (
+                          // Display "Already {Status}" if the status is not 'Pending'
+                          <span className="text-gray-500">Already {req.status}</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -166,15 +173,13 @@ const ExcuseRequestsPage = () => {
           )}
         </div>
 
-        {/* Details Modal */}
-        {showModal && selectedRequest && (
+        {/* --- Details Modal --- */}
+        {showModal && selectedRequest && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-bold text-[#0097b2]">Excuse Request Details</h3>
-                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">
-                  &times;
-                </button>
+            <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-auto" onClick={(e) => e.stopPropagation()}>
+            
+              <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                <h3 className="text-2xl font-bold text-indigo-600">Excuse Request Details</h3>
               </div>
               <div className="space-y-3 text-lg text-[#737373]">
                 <p><strong>Date Requested:</strong> {selectedRequest.date_requested}</p>
@@ -190,33 +195,38 @@ const ExcuseRequestsPage = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {/* Confirmation Modal */}
-        {modal.show && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded shadow-xl w-full max-w-sm">
-              <h2 className="text-xl font-semibold mb-4 text-center text-[#0097b2]">Confirm Action</h2>
-              <p className="text-center text-[#737373] mb-6">
-                Are you sure you want to <strong>{modal.type}</strong> this excuse request?
+        {/* --- Confirmation Modal --- */}
+        {modal.show && createPortal(
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
+            <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto" onClick={(e) => e.stopPropagation()}>
+              
+              <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-indigo-600 text-center">Confirm Action</h2>
+              </div>
+              <p className="text-gray-700 mb-6 text-center">
+                Are you sure you want to <strong>{modal.type}</strong> this excuse request? 
               </p>
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={confirmAction}
-                  className="bg-[#0097b2] text-white px-4 py-2 rounded hover:bg-[#007b94]"
-                >
-                  Yes
-                </button>
+              <div className="flex justify-end space-x-3">
                 <button
                   onClick={closeModal}
-                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200"
                 >
                   Cancel
                 </button>
+                <button
+                  onClick={confirmAction}
+                  className="px-4 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+                >
+                  Confirm
+                </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </section>
     </div>

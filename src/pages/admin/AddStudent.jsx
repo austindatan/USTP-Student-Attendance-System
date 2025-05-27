@@ -36,9 +36,9 @@ export default function AddStudent() {
     const fetchData = async () => {
       try {
         const [instRes, secRes, progRes] = await Promise.all([
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
         ]);
         setInstructors(instRes.data);
         setSections(secRes.data);
