@@ -41,10 +41,12 @@ const AdminLeftSidebar = () => {
     setIsOpen(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin");
-    navigate("/login-admin");
-  };
+const handleLogout = () => {
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('admin'); 
+
+  navigate('/login-admin'); // Redirect the user to the admin login page
+};
 
   useEffect(() => {
     applyBackground("assets/ustp_theme.png");
