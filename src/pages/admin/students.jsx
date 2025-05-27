@@ -26,27 +26,18 @@ export default function Admin_Students() {
   }, []);
 
   const filteredStudents = students.filter(student => {
+    // FIX 1: Wrap the template literal string in backticks (`)
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
 
   return (
-<<<<<<< Updated upstream
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen w-full">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
         {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
-=======
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
-
-      {/* Header */}
-      <div
-        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-        style={
->>>>>>> Stashed changes
             !loading
               ? {
                   backgroundImage: "url('assets/teacher_vector.png')",
@@ -137,6 +128,7 @@ export default function Admin_Students() {
                         </td>
                         <td className="px-3 py-2 truncate">
                           <button
+                            // FIX 2: Wrap the template literal string in backticks (`)
                             onClick={() => navigate(`/admin-students/edit/${student.student_id}`)}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
                           >

@@ -1,29 +1,25 @@
 <?php
-// student_api.php
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *'); 
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-include __DIR__ . '/../src/conn.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $query = "
-       SELECT course_name, description FROM course
-    ";
-
-    $result = $conn->query($query);
-
-    $courses = [];
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $courses[] = $row;
-        }
-    }
-
-    echo json_encode($courses);
-} else {
-    http_response_code(405);
-    echo json_encode(["error" => "Invalid request method."]);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(); 
 }
+
+include __DIR__ . '/../src/conn.php'; 
+
+$sql = "SELECT course_id, course_code FROM course";
+$result = $conn->query($sql);
+$course = [];
+
+while ($row = $result->fetch_assoc()) {
+    $course[] = $row;
+}
+
+echo json_encode(["success" => true, "courses" => $course]);
+
+$conn->close();
+?>

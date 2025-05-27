@@ -31,9 +31,11 @@ import InstructorAdminPage from './pages/admin/instructorAdminpage';
 import AddStudent from './pages/admin/AddStudent';
 import EditStudent from './pages/admin/EditStudent';
 import Sections from './pages/admin/sections';
-import Courses from './pages/admin/courses';
+import Courses from './pages/admin/Courses';
 import AddInstructor from './pages/admin/AddInstructor';
 import EditInstructor from './pages/admin/EditInstructor';
+import AddCourse from './pages/admin/AddCourse';
+import AddSection from './pages/admin/AddSection';
 
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -72,6 +74,7 @@ function AdminLayout({ children }) {
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  // Corrected line: Use backticks for the entire CSS url() string
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
   return (
@@ -208,12 +211,36 @@ function App() {
           }
         />
 
+        {/* ROUTE FOR ADDING SECTIONS */}
+        <Route
+          path="/admin-sections/add"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <AddSection /> 
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin-courses"
           element={
             <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <Courses />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/*Route for Adding Courses */}
+        <Route
+          path="/admin-courses/add"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <AddCourse />
               </AdminLayout>
             </ProtectedRoute>
           }

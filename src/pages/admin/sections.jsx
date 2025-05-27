@@ -12,15 +12,24 @@ export default function Admin_Sections() {
   useEffect(() => {
     axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
       .then(res => {
+        // Log the data to inspect its structure if needed
+        console.log("Fetched sections data:", res.data); 
         if (Array.isArray(res.data)) {
           setSections(res.data);
-        } else if (Array.isArray(res.data.sections)) {
+        } else if (res.data && Array.isArray(res.data.sections)) { // Check if res.data exists before accessing .sections
           setSections(res.data.sections);
         } else {
           setSections([]);
+          // Optionally, set an error if the data format is unexpected but not a network error
+          if (res.data !== null && res.data !== undefined && typeof res.data === 'object') {
+              console.warn("Unexpected data format for sections:", res.data);
+          }
         }
       })
-      .catch(() => setError("Failed to fetch sections."))
+      .catch((err) => {
+        console.error("Error fetching sections:", err); // Log the actual error
+        setError("Failed to fetch sections. Please check your network or server.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,24 +38,15 @@ export default function Admin_Sections() {
   );
 
   return (
-<<<<<<< Updated upstream
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
         {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
-=======
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
-
-      {/* Header */}
-      <div
-        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-        style={
->>>>>>> Stashed changes
             !loading
               ? {
+                    // Make sure 'assets/teacher_vector.png' is correctly served from your public folder
                   backgroundImage: "url('assets/teacher_vector.png')",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right",
@@ -129,7 +129,7 @@ export default function Admin_Sections() {
                         <td className="px-3 py-2 truncate max-w-[90px]">{section.end_time}</td>
                         <td className="px-3 py-2">
                           <button
-                            onClick={() => navigate(`/admin-sections/edit/${section.section}`)}
+                            onClick={() => navigate(`/admin-sections/edit/${section.section_id}`)} // Corrected line 122
                             className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
                           >
                             Edit

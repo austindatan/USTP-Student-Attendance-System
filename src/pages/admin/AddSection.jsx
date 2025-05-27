@@ -2,42 +2,78 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-export default function AddSection() {
+const AddSection = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     section_name: '',
-    course_name: '',
+    course_id: '',
     schedule_day: '',
     start_time: '',
     end_time: '',
   });
 
-  const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [errorCourses, setErrorCourses] = useState('');
 
-  useEffect(() => {
-    document.body.style.backgroundImage = "url('assets/ustp_theme.png')";
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundRepeat = "no-repeat";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundAttachment = "fixed";
-    document.body.style.margin = "0";
-    document.body.style.height = "100vh";
-  }, []);
+  // Fetch courses
+useEffect(() => {
+  console.log("Sending formData:", formData);
+  axios
+    .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
+    .then((res) => {
+      if (res.data.success) {
+        setCourses(res.data.courses);
+        setErrorCourses(null); 
+      } else {
+        setErrorCourses('Failed to fetch courses');
+      }
+      setLoadingCourses(false);
+    })
+    .catch((err) => {
+      console.error('Axios error:', err);
+      setErrorCourses('Error loading courses');
+      setLoadingCourses(false);
+    });
+}, []);
+
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prevData) => ({
+      ...prevData,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleSubmit = (e) => {
+    formData.course_id = parseInt(formData.course_id, 10);
+
     e.preventDefault();
-    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/section_add_api.php', formData)
-      .then(() => {
-        alert('Section added successfully!');
-        navigate('/admin-sections');
+
+    axios
+      .post(
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
+        JSON.stringify(formData),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+      .then((res) => {
+        console.log("Server response:", res.data);
+        if (res.data.success) {
+          alert(res.data.message || 'Section added successfully!');
+          navigate('/admin-sections');
+        } else {
+          alert(res.data.message || 'Failed to add section.');
+        }
       })
-      .catch(error => {
-        console.error(error);
-        alert('Failed to add section.');
+
+      .catch((err) => {
+        console.error(err);
+        alert('An error occurred while adding the section.');
       });
   };
 
@@ -47,12 +83,16 @@ export default function AddSection() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl"
       >
-        <h2 className="text-3xl font-bold mb-6 text-blue-700 text-center">Add New Section</h2>
+        <h2 className="text-3xl font-bold mb-6 text-blue-700 text-center">
+          Add New Section
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Section Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Section Name:</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Section Name:
+            </label>
             <input
               type="text"
               name="section_name"
@@ -63,22 +103,43 @@ export default function AddSection() {
             />
           </div>
 
-          {/* Course Name */}
+          {/* Course (Dropdown) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Course Name:</label>
-            <input
-              type="text"
-              name="course_name"
-              value={formData.course_name}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Course:
+            </label>
+            {loadingCourses ? (
+              <p className="text-gray-500">Loading courses...</p>
+            ) : errorCourses ? (
+              <p className="text-red-500">{errorCourses}</p>
+            ) : (
+              <select
+                name="course_id"
+                value={formData.course_id}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select a Course</option>
+                {Array.isArray(courses) && courses.length > 0 ? (
+                  courses.map((course) => (
+                    <option key={course.course_id} value={course.course_id}>
+                      {course.course_code}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No courses available</option>
+                )}
+
+              </select>
+            )}
           </div>
 
           {/* Schedule Day */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Day:</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Schedule Day:
+            </label>
             <select
               name="schedule_day"
               value={formData.schedule_day}
@@ -98,7 +159,9 @@ export default function AddSection() {
 
           {/* Start Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Time:</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Start Time:
+            </label>
             <input
               type="time"
               name="start_time"
@@ -111,7 +174,9 @@ export default function AddSection() {
 
           {/* End Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">End Time:</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              End Time:
+            </label>
             <input
               type="time"
               name="end_time"
@@ -132,4 +197,6 @@ export default function AddSection() {
       </form>
     </div>
   );
-}
+};
+
+export default AddSection;
