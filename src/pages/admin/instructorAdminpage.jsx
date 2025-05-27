@@ -5,18 +5,10 @@ import { useNavigate } from 'react-router-dom';
 export default function InstructorAdminPage() {
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
-<<<<<<< Updated upstream
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-=======
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();
->>>>>>> Stashed changes
 
   useEffect(() => {
     axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php')
@@ -38,14 +30,8 @@ export default function InstructorAdminPage() {
   });
 
   return (
-<<<<<<< Updated upstream
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex flex-col overflow-y-auto">
-      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-=======
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
->>>>>>> Stashed changes
-
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
         {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
@@ -55,11 +41,7 @@ export default function InstructorAdminPage() {
                   backgroundImage: "url('assets/teacher_vector.png')",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right",
-<<<<<<< Updated upstream
-                  backgroundSize: "contain",
-=======
                   backgroundSize: "contain"
->>>>>>> Stashed changes
                 }
               : {}
           }
@@ -76,14 +58,6 @@ export default function InstructorAdminPage() {
           </div>
         </div>
 
-<<<<<<< Updated upstream
-        {/* Table Section */}
-        <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg overflow-x-auto">
-          {instructors.length === 0 ? (
-            <p className="text-blue-700 text-sm">Loading instructor data or no instructors found.</p>
-          ) : (
-            <table className="w-full min-w-[600px] text-left text-sm text-blue-900">
-=======
         {/* Controls & Table */}
         <div className="bg-white shadow-md p-6 rounded-lg overflow-x-auto">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
@@ -115,29 +89,12 @@ export default function InstructorAdminPage() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <table className="w-full text-sm text-left text-blue-900">
->>>>>>> Stashed changes
               <thead className="bg-blue-100 uppercase text-blue-700">
                 <tr>
                   <th className="px-4 py-2">First Name</th>
                   <th className="px-4 py-2">Middle Name</th>
                   <th className="px-4 py-2">Last Name</th>
                   <th className="px-4 py-2">Date of Birth</th>
-<<<<<<< Updated upstream
-                </tr>
-              </thead>
-              <tbody>
-                {instructors.map((inst, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-blue-200 hover:bg-blue-50"
-                  >
-                    <td className="px-4 py-2 truncate">{inst.firstname}</td>
-                    <td className="px-4 py-2 truncate">{inst.middlename}</td>
-                    <td className="px-4 py-2 truncate">{inst.lastname}</td>
-                    <td className="px-4 py-2 truncate">{inst.date_of_birth}</td>
-                  </tr>
-                ))}
-=======
                   <th className="px-4 py-2">Action</th>
                 </tr>
               </thead>
@@ -166,7 +123,6 @@ export default function InstructorAdminPage() {
                     </tr>
                   ))
                 )}
->>>>>>> Stashed changes
               </tbody>
             </table>
           )}

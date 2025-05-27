@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Admin_Students() {
   const [students, setStudents] = useState([]);
@@ -9,44 +9,48 @@ export default function Admin_Students() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  const fetchStudents = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(
+        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
+      );
+
+      let data = [];
+      if (Array.isArray(res.data)) {
+        data = res.data;
+      } else if (Array.isArray(res.data.students)) {
+        data = res.data.students;
+      }
+
+      // Sort by student_id ascending
+      data.sort((a, b) => a.student_id - b.student_id);
+      setStudents(data);
+    } catch (err) {
+      setError("Failed to fetch students.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php')
-      .then(res => {
-        console.log("API response:", res.data);
-        if (Array.isArray(res.data)) {
-          setStudents(res.data);
-        } else if (Array.isArray(res.data.students)) {
-          setStudents(res.data.students);
-        } else {
-          setStudents([]);
-        }
-      })
-      .catch(() => setError("Failed to fetch students."))
-      .finally(() => setLoading(false));
+    fetchStudents();
   }, []);
 
-  const filteredStudents = students.filter(student => {
+  // Filter students by search term (fullname)
+  const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
 
   return (
-<<<<<<< Updated upstream
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen w-full">
-      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-        {/* Header */}
-        <div
-          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-          style={
-=======
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
-
-      {/* Header */}
-      <div
-        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-        style={
->>>>>>> Stashed changes
+        {/* Header */}
+        <div
+          className="bg-white rounded-lg p-6 mb-6 relative overflow-hidden"
+          style={
             !loading
               ? {
                   backgroundImage: "url('assets/teacher_vector.png')",
@@ -115,14 +119,14 @@ export default function Admin_Students() {
                 <tbody>
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="px-3 py-4 text-center text-gray-500">
+                      <td colSpan={7} className="px-3 py-4 text-center text-gray-500">
                         No students found.
                       </td>
                     </tr>
                   ) : (
-                    filteredStudents.map((student, index) => (
+                    filteredStudents.map((student) => (
                       <tr
-                        key={index}
+                        key={student.student_id}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
                         <td className="px-3 py-2 truncate">{student.student_id}</td>
@@ -137,7 +141,9 @@ export default function Admin_Students() {
                         </td>
                         <td className="px-3 py-2 truncate">
                           <button
-                            onClick={() => navigate(`/admin-students/edit/${student.student_id}`)}
+                            onClick={() =>
+                              navigate(`/admin-students/edit/${student.student_id}`)
+                            }
                             className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
                           >
                             Edit
