@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 const InstructorAdminPage = () => {
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
-    
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
-      return () => clearTimeout(timer);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -23,66 +23,65 @@ const InstructorAdminPage = () => {
   }, []);
 
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-[-1]">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex flex-col overflow-y-auto">
+      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
 
-      {/* Header */}
-      <div
-        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-        style={
+        {/* Header */}
+        <div
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          style={
             !loading
-            ? {
-                backgroundImage: "url('assets/teacher_vector.png')",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right",
-                backgroundSize: "contain"
+              ? {
+                  backgroundImage: "url('assets/teacher_vector.png')",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right",
+                  backgroundSize: "contain",
                 }
-            : {}
-        }
+              : {}
+          }
         >
-        <div className="leading-none">
+          <div className="leading-none">
             {loading ? (
-            <div className="animate-pulse space-y-3">
+              <div className="animate-pulse space-y-3">
                 <div className="w-1/3 h-4 bg-white/50 rounded"></div>
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
-            </div>
+              </div>
             ) : (
-            <>
-                <h1 className="text-2xl text-blue-700 font-bold">Instructor Lists</h1>
-            </>
+              <h1 className="text-2xl text-blue-700 font-bold">Instructor Lists</h1>
             )}
+          </div>
         </div>
-      </div>
 
-      <div className="bg-white shadow-md p-6 rounded-lg overflow-x-auto">
-        {instructors.length === 0 ? (
-          <p>Loading instructor data or no instructors found.</p>
-        ) : (
-          <table className="w-full text-left text-sm text-blue-900">
-            <thead className="bg-blue-100 uppercase text-blue-700">
-              <tr>
-                <th className="px-4 py-2">First Name</th>
-                <th className="px-4 py-2">Middle Name</th>
-                <th className="px-4 py-2">Last Name</th>
-                <th className="px-4 py-2">Date of Birth</th>
-              </tr>
-            </thead>
-            <tbody>
-              {instructors.map((inst, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-blue-200 hover:bg-blue-50"
-                >
-                  <td className="px-4 py-2 truncate">{inst.firstname}</td>
-                  <td className="px-4 py-2 truncate">{inst.middlename}</td>
-                  <td className="px-4 py-2 truncate">{inst.lastname}</td>
-                  <td className="px-4 py-2 truncate">{inst.date_of_birth}</td>
+        {/* Table Section */}
+        <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg overflow-x-auto">
+          {instructors.length === 0 ? (
+            <p className="text-blue-700 text-sm">Loading instructor data or no instructors found.</p>
+          ) : (
+            <table className="w-full min-w-[600px] text-left text-sm text-blue-900">
+              <thead className="bg-blue-100 uppercase text-blue-700">
+                <tr>
+                  <th className="px-4 py-2">First Name</th>
+                  <th className="px-4 py-2">Middle Name</th>
+                  <th className="px-4 py-2">Last Name</th>
+                  <th className="px-4 py-2">Date of Birth</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {instructors.map((inst, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-blue-200 hover:bg-blue-50"
+                  >
+                    <td className="px-4 py-2 truncate">{inst.firstname}</td>
+                    <td className="px-4 py-2 truncate">{inst.middlename}</td>
+                    <td className="px-4 py-2 truncate">{inst.lastname}</td>
+                    <td className="px-4 py-2 truncate">{inst.date_of_birth}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </section>
     </div>
   );
