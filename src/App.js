@@ -18,7 +18,7 @@ import RegisterInstructor from "./pages/login/RegisterInstructor";
 import TeacherDashboard from "./pages/instructor/teacher_dashboard";
 import Classes_Dashboard from "./pages/instructor/classes_dashboard";
 import SectionDashboard from "./pages/instructor/section_dashboard";
-import ExcuseRequestsPage from "./pages/instructor/excuse_requests"; 
+import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
 
 // STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -32,37 +32,33 @@ import AddStudent from './pages/admin/AddStudent';
 import EditStudent from './pages/admin/EditStudent';
 import Sections from './pages/admin/sections';
 import Courses from './pages/admin/courses';
+import AddInstructor from './pages/admin/AddInstructor';
+import EditInstructor from './pages/admin/EditInstructor';
 
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // 404 Page
-import NotFound from "./components/NotFound"; // <--- IMPORT THE NEW 404 COMPONENT
+import NotFound from "./components/NotFound";
 
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
   const location = useLocation();
   const isStudentDashboard = location.pathname === "/student-dashboard";
+  const showRightSidebar = location.pathname !== "/drop_requests";
 
   return (
     <div className="flex h-screen w-full">
       {!isStudentDashboard && <LeftSidebar setBgImage={setBgImage} />}
-      
-      <div
-        className="flex-1 overflow-y-auto bg-cover bg-center bg-fixed hide-scrollbar"
-        style={{ backgroundImage: bgImage }}
-      >
+      <div className="flex-1 overflow-y-auto bg-cover bg-center bg-fixed hide-scrollbar" style={{ backgroundImage: bgImage }}>
         {children}
       </div>
-
-      {!isStudentDashboard && (
+      {!isStudentDashboard && showRightSidebar && (
         <RightSidebar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
       )}
     </div>
   );
 }
 
-
-// Wrapper for Admin routes
 function AdminLayout({ children }) {
   return (
     <div className="flex h-screen w-full">
@@ -93,7 +89,7 @@ function App() {
           path="/student-dashboard"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate}>
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                 <StudentDashboard />
               </DashboardLayout>
             </ProtectedRoute>
@@ -105,12 +101,7 @@ function App() {
           path="/teacher-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                 <TeacherDashboard selectedDate={selectedDate} />
               </DashboardLayout>
             </ProtectedRoute>
@@ -120,21 +111,11 @@ function App() {
         <Route
           path="/section-dashboard/:sectionId"
           element={
-              <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
-                  <DashboardLayout
-                      selectedDate={selectedDate}
-                      setSelectedDate={setSelectedDate}
-                      bgImage={bgImage}
-                      setBgImage={setBgImage}
-                  >
-                      <div
-                          className="bg-cover bg-center bg-fixed min-h-screen hide-scrollbar overflow-scroll"
-                          style={{ backgroundImage: bgImage }}
-                      >
-                          <SectionDashboard selectedDate={selectedDate} />
-                      </div>
-                  </DashboardLayout>
-              </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
+                <SectionDashboard selectedDate={selectedDate} />
+              </DashboardLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -142,12 +123,7 @@ function App() {
           path="/classes-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                 <Classes_Dashboard selectedDate={selectedDate} />
               </DashboardLayout>
             </ProtectedRoute>
@@ -158,29 +134,18 @@ function App() {
           path="/edit-profile"
           element={
             <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                 <EditProfile />
               </DashboardLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* NEW ROUTE FOR EXCUSE REQUESTS */}
         <Route
           path="/excuse-requests"
           element={
             <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
-              <DashboardLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
-              >
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                 <ExcuseRequestsPage />
               </DashboardLayout>
             </ProtectedRoute>
@@ -254,7 +219,6 @@ function App() {
           }
         />
 
-      {/* Admin add and edit buttons for student */}
         <Route
           path="/admin-students/add"
           element={
@@ -277,8 +241,30 @@ function App() {
           }
         />
 
-        {/* CATCH-ALL ROUTE FOR 404 PAGE*/}
-        <Route path="*" element={<NotFound />} /> 
+        <Route
+          path="/admin-instructor/add"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <AddInstructor />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-instructor/edit/:instructor_id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <EditInstructor />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

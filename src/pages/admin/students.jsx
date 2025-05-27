@@ -31,12 +31,22 @@ export default function Admin_Students() {
   });
 
   return (
+<<<<<<< Updated upstream
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen w-full">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
         {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
+=======
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
+
+      {/* Header */}
+      <div
+        className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+        style={
+>>>>>>> Stashed changes
             !loading
               ? {
                   backgroundImage: "url('assets/teacher_vector.png')",
