@@ -15,8 +15,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [selectedStudentForRequest, setSelectedStudentForRequest] = useState('');
-    const [requestType, setRequestType] = useState('Excuse');
     const [requestReason, setRequestReason] = useState('');
+    const [dropdownStudents, setDropdownStudents] = useState([]);
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
@@ -55,7 +55,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
                 );
 
                 if (!response.ok) {
@@ -121,53 +121,58 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const filteredStudents = students.filter(student =>
         student.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const handleAddRequest = async () => {
-        // Find the attendance_id for the selected student on the current date
-        const studentAttendance = students.find(s => s.student_details_id === parseInt(selectedStudentForRequest));
 
-        if (!studentAttendance) {
-            alert('Student attendance record not found for the selected date. Please ensure the student has an attendance record before making a request.');
-            return;
-        }
-
-        if (!selectedStudentForRequest || !requestReason) {
-            alert('Please select a student and provide a reason for the request.');
-            return;
-        }
-
-        const requestData = {
-            attendance_id: studentAttendance.attendance_id,
-            reason: requestReason,
-            status: 'Pending', // Default status
-        };
-
-        let endpoint = '';
-        if (requestType === 'Excuse') {
-            endpoint = 'http://localhost/USTP-Student-Attendance-System/instructor_backend/add_excused_request.php';
-        } else if (requestType === 'Drop') {
-            endpoint = 'http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php';
-        }
-
+    useEffect(() => {
+    const fetchDropdownStudents = async () => {
         try {
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
-            });
-            const result = await res.json();
-            console.log('Request saved:', result);
-            alert('Request submitted successfully!');
-            setShowRequestModal(false);
-            setSelectedStudentForRequest('');
-            setRequestType('Excuse');
-            setRequestReason('');
-            // Potentially re-fetch students to update their status if the request changes it immediately
-            // fetchStudents(); // This would re-run the useEffect
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php');
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            const data = await res.json();
+            setDropdownStudents(data);
         } catch (error) {
-            console.error('Error submitting request:', error);
-            alert('Failed to submit request.');
+            console.error("Error fetching dropdown students:", error);
         }
     };
+
+    fetchDropdownStudents();
+}, []);
+
+    const handleAddDropRequest = async () => {
+    if (!selectedStudentForRequest || !requestReason.trim()) {
+        alert("Please select a student and enter a reason.");
+        return;
+    }
+
+    const requestData = {
+        student_details_id: selectedStudentForRequest,
+        reason: requestReason,
+    };
+
+    try {
+        const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData),
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+            alert("Drop request submitted successfully.");
+            setShowRequestModal(false);
+            setSelectedStudentForRequest('');
+            setRequestReason('');
+        } else {
+            alert("Failed to submit: " + (result.error || "Unknown error"));
+        }
+    } catch (error) {
+        console.error("Submission error:", error);
+        alert("An error occurred while submitting the drop request.");
+    }
+};
+
 
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
@@ -334,45 +339,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 value={selectedStudentForRequest}
                                 onChange={(e) => setSelectedStudentForRequest(e.target.value)}
                             >
-                                <option value="">-- Choose a student --</option>
-                                {students.map((student) => (
-                                    <option key={student.student_details_id} value={student.student_details_id}>
-                                        {student.name}
+                                <option value="" disabled>Select Student</option> {/* Placeholder */}
+                                {dropdownStudents.map((student) => (
+                                    <option key={student.student_id} value={student.student_id}>
+                                        {student.student_name}
                                     </option>
                                 ))}
                             </select>
+
                         </div>
 
-                        {/* Request Type Radio Buttons */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Request Type:
-                            </label>
-                            <div className="mt-1 flex space-x-4">
-                                <label className="inline-flex items-center">
-                                    <input
-                                        type="radio"
-                                        className="form-radio text-[#0097b2] focus:ring-[#0097b2]"
-                                        name="requestType"
-                                        value="Excuse"
-                                        checked={requestType === 'Excuse'}
-                                        onChange={(e) => setRequestType(e.target.value)}
-                                    />
-                                    <span className="ml-2 text-gray-700">Excuse</span>
-                                </label>
-                                <label className="inline-flex items-center">
-                                    <input
-                                        type="radio"
-                                        className="form-radio text-[#0097b2] focus:ring-[#0097b2]"
-                                        name="requestType"
-                                        value="Drop"
-                                        checked={requestType === 'Drop'}
-                                        onChange={(e) => setRequestType(e.target.value)}
-                                    />
-                                    <span className="ml-2 text-gray-700">Drop</span>
-                                </label>
-                            </div>
-                        </div>
 
                         {/* Reason Textarea */}
                         <div className="mb-6">
@@ -398,7 +374,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleAddRequest}
+                                onClick={handleAddDropRequest}
                                 className="px-4 py-2 text-sm font-medium text-white bg-[#0097b2] rounded-md hover:bg-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
                             >
                                 Submit Request
