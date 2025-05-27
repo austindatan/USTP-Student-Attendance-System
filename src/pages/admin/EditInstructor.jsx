@@ -159,8 +159,16 @@ export default function EditInstructor() {
               />
             </div>
 
-            {/* Submit button */}
-            <div className="md:col-span-2 flex justify-end items-center">
+            {/* Submit and Cancel buttons */}
+            <div className="md:col-span-2 flex justify-end items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/admin-instructor')}
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+
               <button
                 type="submit"
                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"

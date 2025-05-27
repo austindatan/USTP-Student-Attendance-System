@@ -87,7 +87,7 @@ export default function AddSection() {
             backgroundSize: 'contain',
           }}
         >
-          <h1 className="text-2xl text-blue-700 font-bold">Add New Section</h1>
+          <h1 className="text-2xl text-blue-700 font-bold">Edit Section</h1>
         </div>
 
         <div className="bg-white shadow-md p-8 rounded-lg">
@@ -191,7 +191,7 @@ export default function AddSection() {
                 type="submit"
                 className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800"
               >
-                Add Section
+                Edit Section
               </button>
             </div>
 

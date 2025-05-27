@@ -1,32 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
-export default function AddCourse() {
+export default function EditCourse() {
   const [formData, setFormData] = useState({
     course_name: '',
     description: '',
   });
 
   const navigate = useNavigate();
+  const { id } = useParams(); // assuming you're passing course ID via route
+
+  useEffect(() => {
+    // Fetch existing course data
+    axios
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_course_info.php?id=${id}`)
+      .then((response) => {
+        setFormData(response.data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch course data:', error);
+      });
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add_api.php',
-        formData
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_update_api.php',
+        { id, ...formData }
       );
-      alert('Course added successfully!');
+      alert('Course updated successfully!');
       navigate('/admin-courses');
     } catch (error) {
-      console.error('Error adding course:', error.response || error.message);
-      alert('Failed to add course.');
+      console.error('Error updating course:', error.response || error.message);
+      alert('Failed to update course.');
     }
   };
 
@@ -40,7 +53,6 @@ export default function AddCourse() {
       style={{ backgroundImage: "url('assets/ustp_theme.png')" }}
     >
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-5xl mx-auto">
-
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
@@ -50,7 +62,7 @@ export default function AddCourse() {
             backgroundSize: 'contain',
           }}
         >
-          <h1 className="text-2xl text-blue-700 font-bold">Add New Course</h1>
+          <h1 className="text-2xl text-blue-700 font-bold">Edit Course</h1>
         </div>
 
         <div className="bg-white shadow-md p-8 rounded-lg">
@@ -93,7 +105,7 @@ export default function AddCourse() {
                 type="submit"
                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
               >
-                Add Course
+                Update Course
               </button>
             </div>
           </form>

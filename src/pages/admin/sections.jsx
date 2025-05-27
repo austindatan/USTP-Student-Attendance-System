@@ -62,7 +62,7 @@ export default function Admin_Sections() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-bold">Section Lists</h1>
+              <h1 className="text-2xl text-blue-700 font-bold">Section List</h1>
             )}
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function Admin_Sections() {
                         <td className="px-3 py-2">
                           <button
                             onClick={() => navigate(`/admin-sections/edit/${section.section_id}`)} // Corrected line 122
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
+                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
                           >
                             Edit
                           </button>

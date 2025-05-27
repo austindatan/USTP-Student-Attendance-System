@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function AddStudent() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     firstname: '',
     middlename: '',
@@ -74,15 +77,37 @@ export default function AddStudent() {
     }
   };
 
+  const handleCancel = () => {
+    setFormData({
+      firstname: '',
+      middlename: '',
+      lastname: '',
+      date_of_birth: '',
+      contact_number: '',
+      email: '',
+      password: '',
+      street: '',
+      city: '',
+      province: '',
+      zipcode: '',
+      country: '',
+      section_id: '',
+    });
+    setImageFile(null);
+    setSelectedInstructor('');
+    setSelectedProgram('');
+    navigate('/admin-students'); // Redirect on cancel
+  };
+
   return (
     <div
       className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex"
       style={{ overflowY: 'auto' }}
     >
-      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
         {/* Header Container */}
         <div
-          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative flex items-center"
           style={{
             backgroundImage: "url('assets/teacher_vector.png')",
             backgroundRepeat: 'no-repeat',
@@ -91,6 +116,7 @@ export default function AddStudent() {
           }}
         >
           <h1 className="text-2xl text-blue-700 font-bold">Add New Student</h1>
+          {/* Removed Cancel button from here */}
         </div>
 
         {/* Form Container */}
@@ -193,11 +219,18 @@ export default function AddStudent() {
             </select>
           </div>
 
-          {/* Submit Button */}
-          <div className="md:col-span-2 text-right">
+          {/* Buttons at bottom right */}
+          <div className="md:col-span-2 flex justify-end items-center space-x-4">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
             >
               Save Student
             </button>

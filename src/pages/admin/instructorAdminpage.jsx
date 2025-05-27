@@ -54,7 +54,7 @@ export default function InstructorAdminPage() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-bold">Instructor Lists</h1>
+              <h1 className="text-2xl text-blue-700 font-bold">Instructor List</h1>
             )}
           </div>
         </div>
