@@ -69,8 +69,8 @@ export default function AddSection() {
   
     const submitData = { ...formData, course_id: parseInt(formData.course_id, 10) };
 
-    axios
-      .post(
+    try {
+      const res = await axios.post(
         'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {

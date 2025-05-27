@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-header("Access-Control-Allow-Origin: *");  
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -55,39 +55,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $program_details_id = $_POST['program_details_id'] ?? null;
     $section_id = $_POST['section_id'] ?? null;
 
-    // Update student table
-    $stmt = $conn->prepare("UPDATE student SET firstname=?, middlename=?, lastname=?, date_of_birth=?, contact_number=?, email=?, street=?, city=?, province=?, zipcode=?, country=? WHERE student_id=?");
-    $stmt->bind_param("sssssssssssi",
-        $firstname, $middlename, $lastname, $date_of_birth, $contact_number, $email, $street, $city, $province, $zipcode, $country, $student_id
-    );
-    $success = $stmt->execute();
-    $stmt->close();
+    // Initialize an array to hold parts of the SQL query for dynamic updates
+    $update_fields = [];
+    $bind_params = [];
+    $bind_types = "";
+
+    // Add fields from POST to update if they are not empty
+    if (!empty($firstname)) { $update_fields[] = "firstname=?"; $bind_params[] = $firstname; $bind_types .= "s"; }
+    if (!empty($middlename)) { $update_fields[] = "middlename=?"; $bind_params[] = $middlename; $bind_types .= "s"; }
+    if (!empty($lastname)) { $update_fields[] = "lastname=?"; $bind_params[] = $lastname; $bind_types .= "s"; }
+    if (!empty($date_of_birth)) { $update_fields[] = "date_of_birth=?"; $bind_params[] = $date_of_birth; $bind_types .= "s"; }
+    if (!empty($contact_number)) { $update_fields[] = "contact_number=?"; $bind_params[] = $contact_number; $bind_types .= "s"; }
+    if (!empty($email)) { $update_fields[] = "email=?"; $bind_params[] = $email; $bind_types .= "s"; }
+    if (!empty($street)) { $update_fields[] = "street=?"; $bind_params[] = $street; $bind_types .= "s"; }
+    if (!empty($city)) { $update_fields[] = "city=?"; $bind_params[] = $city; $bind_types .= "s"; }
+    if (!empty($province)) { $update_fields[] = "province=?"; $bind_params[] = $province; $bind_types .= "s"; }
+    if (!empty($zipcode)) { $update_fields[] = "zipcode=?"; $bind_params[] = $zipcode; $bind_types .= "s"; }
+    if (!empty($country)) { $update_fields[] = "country=?"; $bind_params[] = $country; $bind_types .= "s"; }
+
+    $success = true; // Assume success until an error occurs
+
+    // Update student table if there are fields to update
+    if (!empty($update_fields)) {
+        $sql = "UPDATE student SET " . implode(", ", $update_fields) . " WHERE student_id=?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            // Add student_id to bind parameters
+            $bind_params[] = $student_id;
+            $bind_types .= "i";
+
+            $stmt->bind_param($bind_types, ...$bind_params);
+            $success = $stmt->execute();
+            $stmt->close();
+        } else {
+            $success = false;
+            error_log("Failed to prepare statement for student update: " . $conn->error);
+        }
+    }
 
     // Update student_details table
-    if ($instructor_id !== null && $program_details_id !== null && $section_id !== null) {
-        $stmt2 = $conn->prepare("UPDATE student_details SET instructor_id=?, program_details_id=?, section_id=? WHERE student_id=?");
-        $stmt2->bind_param("iiii", $instructor_id, $program_details_id, $section_id, $student_id);
-        $success = $success && $stmt2->execute();
-        $stmt2->close();
+    if ($instructor_id !== null || $program_details_id !== null || $section_id !== null) {
+        $update_details_fields = [];
+        $bind_details_params = [];
+        $bind_details_types = "";
+
+        if ($instructor_id !== null) { $update_details_fields[] = "instructor_id=?"; $bind_details_params[] = $instructor_id; $bind_details_types .= "i"; }
+        if ($program_details_id !== null) { $update_details_fields[] = "program_details_id=?"; $bind_details_params[] = $program_details_id; $bind_details_types .= "i"; }
+        if ($section_id !== null) { $update_details_fields[] = "section_id=?"; $bind_details_params[] = $section_id; $bind_details_types .= "i"; }
+
+        if (!empty($update_details_fields)) {
+            $sql2 = "UPDATE student_details SET " . implode(", ", $update_details_fields) . " WHERE student_id=?";
+            $stmt2 = $conn->prepare($sql2);
+            if ($stmt2) {
+                $bind_details_params[] = $student_id;
+                $bind_details_types .= "i";
+
+                $stmt2->bind_param($bind_details_types, ...$bind_details_params);
+                $success = $success && $stmt2->execute();
+                $stmt2->close();
+            } else {
+                $success = false;
+                error_log("Failed to prepare statement for student_details update: " . $conn->error);
+            }
+        }
     }
 
     // Handle image upload if exists
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $target_dir = __DIR__ . '/../uploads/student_images/';
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        $filename = basename($_FILES["image"]["name"]);
-        $target_file = $target_dir . $filename;
-        if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // Save path to DB if needed
-            // Example: update student_images table or student table image column
-        } else {
-            http_response_code(500);
-            echo json_encode(["message" => "Failed to upload image"]);
-            exit();
-        }
+    error_log("Image upload triggered");
+
+    $target_dir = __DIR__ . '/../uploads/student_images/';
+    if (!is_dir($target_dir)) {
+        mkdir($target_dir, 0777, true);
+        error_log("Target directory created: " . $target_dir);
     }
+
+    $filename = basename($_FILES["image"]["name"]);
+    $target_file = $target_dir . $filename;
+    error_log("Target file: " . $target_file);
+
+    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+        error_log("File successfully moved");
+
+        $image_db_path = 'uploads/student_images/' . $filename;
+        error_log("Database image path: " . $image_db_path);
+
+        $stmt_image = $conn->prepare("UPDATE student SET image_path=? WHERE student_id=?");
+        if ($stmt_image) {
+            $stmt_image->bind_param("si", $image_db_path, $student_id);
+            if (!$stmt_image->execute()) {
+                error_log("Execute failed: " . $stmt_image->error);
+                $success = false;
+            } else {
+                error_log("Database updated successfully with image path");
+            }
+            $stmt_image->close();
+        } else {
+            error_log("Failed to prepare statement: " . $conn->error);
+            $success = false;
+        }
+    } else {
+        error_log("Failed to move uploaded file");
+        http_response_code(500);
+        echo json_encode(["message" => "Failed to upload image"]);
+        exit();
+    }
+} else {
+    if (!isset($_FILES['image'])) {
+        error_log("Image file not set in request.");
+    } elseif ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        error_log("Image upload error code: " . $_FILES['image']['error']);
+    }
+}
 
     if ($success) {
         echo json_encode(["message" => "Student updated successfully"]);
