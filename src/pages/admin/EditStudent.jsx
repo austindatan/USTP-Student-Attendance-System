@@ -227,7 +227,7 @@ export default function EditStudent() {
             <button
               type="button"
               onClick={() => navigate('/admin-students')}
-              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
             >
               Cancel
             </button>
