@@ -31,12 +31,13 @@ import InstructorAdminPage from './pages/admin/instructorAdminpage';
 import AddStudent from './pages/admin/AddStudent';
 import EditStudent from './pages/admin/EditStudent';
 import Sections from './pages/admin/sections';
-import Courses from './pages/admin/Courses';
+import Courses from './pages/admin/courses';
 import AddInstructor from './pages/admin/AddInstructor';
 import EditInstructor from './pages/admin/EditInstructor';
 import AddCourse from './pages/admin/AddCourse';
 import AddSection from './pages/admin/AddSection';
-import EditSection from './pages/admin/EditSection'; // <-- New Import!
+import EditSection from './pages/admin/EditSection';
+import EditCourse from './pages/admin/EditCourse';
 
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -253,6 +254,18 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <AddCourse />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ROUTE FOR EDITING COURSES */}
+        <Route
+          path="/admin-courses/edit/:id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <EditCourse />
               </AdminLayout>
             </ProtectedRoute>
           }
