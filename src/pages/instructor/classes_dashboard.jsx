@@ -91,31 +91,30 @@ export default function Classes_Dashboard({ selectedDate }) {
       </div>
 
       {/* Section Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 w-full mt-6 mb-6">
-        {(isLoading ? Array.from({ length: 6 }) : filteredSections).map((section, index) => (
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+        {(isLoading ? Array.from({ length: 6 }) : sections).map((section, i) => (
           <ClassCard
-            key={section?.section_id || index} // Use section.section_id as key for better performance and stability
+            key={section?.section_id || i}
             isLoading={isLoading}
-            onClick={() => {
-              // Call the correct handler and pass the 'section' object
-              if (!isLoading && section?.section_id) {
-                handleSectionClick(section); // Pass the entire section object
-              }
-            }}
-            code={!isLoading ? section?.course_code || 'COURSE CODE' : ''}
-            title={!isLoading ? section?.course_name || 'Course Title' : ''}
-            room={!isLoading ? section?.section_name || 'TBA' : ''}
+            code={!isLoading ? section.course_code : ''}
+            title={!isLoading ? section.course_name : ''}
+            room={!isLoading ? section.section_name || 'TBA' : ''}
             schedule={
               !isLoading
-                ? `${section?.schedule_day || 'Day'} ${section?.start_time || ''} – ${section?.end_time || ''}`
+                ? `${section.schedule_day} ${section.start_time} – ${section.end_time}`
                 : ''
             }
-            // Ensure these paths are correct relative to your public folder
-            bgImage={`${process.env.PUBLIC_URL}/assets/classes_vector_2.png`}
-            bgClass="bg-[#0097b2]"
+            onClick={() => {
+              if (!isLoading && section?.section_id) {
+                navigate(`/section-dashboard/${section.section_id}`);
+              }
+            }}
+            bgImage={`${process.env.PUBLIC_URL}/${section?.image}`}
+            bgClass={`bg-[${section?.hexcode}]`}
           />
         ))}
       </div>
+
     </section>
   );
 }

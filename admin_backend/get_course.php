@@ -1,29 +1,33 @@
 <?php
-// student_api.php
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit();
+}
 
 include __DIR__ . '/../src/conn.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $query = "
-       SELECT course_name, description FROM course
-    ";
+$sql = "SELECT course_id, course_code, course_name FROM course"; 
+$result = $conn->query($sql);
 
-    $result = $conn->query($query);
+$course = [];
 
-    $courses = [];
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $courses[] = $row;
-        }
+if ($result) { 
+    while ($row = $result->fetch_assoc()) {
+        $course[] = $row;
     }
-
-    echo json_encode($courses);
+    echo json_encode(["success" => true, "courses" => $course]);
 } else {
-    http_response_code(405);
-    echo json_encode(["error" => "Invalid request method."]);
+
+    error_log("SQL Error in get_course.php: " . $conn->error);
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Database query failed: " . $conn->error]);
 }
+
+
+$conn->close();
+?>

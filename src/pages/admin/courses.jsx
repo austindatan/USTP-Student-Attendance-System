@@ -12,24 +12,30 @@ export default function Admin_Courses() {
   useEffect(() => {
     axios.get('http://localhost/ustp-student-attendance-system/admin_backend/get_course.php')
       .then(res => {
+
         if (Array.isArray(res.data)) {
           setCourses(res.data);
         } else if (Array.isArray(res.data.courses)) {
           setCourses(res.data.courses);
         } else {
+          console.error("Unexpected data format from get_course.php:", res.data);
           setCourses([]);
         }
       })
-      .catch(() => setError("Failed to fetch courses."))
+      .catch((err) => {
+        console.error("Error fetching courses:", err);
+        setError("Failed to fetch courses. Please check the server.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const filteredCourses = courses.filter(course =>
-    course.course_name.toLowerCase().includes(searchTerm.toLowerCase())
+    (course.course_code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+    (course.course_name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
 
         {/* Header */}
@@ -38,11 +44,11 @@ export default function Admin_Courses() {
           style={
             !loading
               ? {
-                backgroundImage: "url('assets/teacher_vector.png')",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right",
-                backgroundSize: "contain"
-              }
+                  backgroundImage: "url('assets/teacher_vector.png')",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right",
+                  backgroundSize: "contain"
+                }
               : {}
           }
         >
@@ -53,14 +59,14 @@ export default function Admin_Courses() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-bold">Courses Lists</h1>
+              <h1 className="text-2xl text-blue-700 font-bold">Course List</h1>
             )}
           </div>
         </div>
 
         {/* Controls */}
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
               Total Courses: {filteredCourses.length}
             </p>
@@ -88,13 +94,13 @@ export default function Admin_Courses() {
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
-            <div className="overflow-auto rounded-md">
+            <div className="overflow-x-auto max-w-full">
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-4 py-2 whitespace-nowrap">Course Name</th>
-                    <th className="px-4 py-2 whitespace-nowrap">Description</th>
-                    <th className="px-4 py-2 whitespace-nowrap">Action</th>
+                    <th className="px-3 py-2">Course Code</th>
+                    <th className="px-3 py-2">Course Name</th> 
+                    <th className="px-3 py-2">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -105,17 +111,17 @@ export default function Admin_Courses() {
                       </td>
                     </tr>
                   ) : (
-                    filteredCourses.map((course, index) => (
+                    filteredCourses.map((course) => (
                       <tr
-                        key={index}
+                        key={course.course_id ?? course.course_code}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-4 py-2 max-w-xs truncate">{course.course_name}</td>
-                        <td className="px-4 py-2 max-w-md truncate">{course.description}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="px-3 py-2 max-w-[120px] truncate">{course.course_code}</td>
+                        <td className="px-3 py-2 max-w-[200px] truncate">{course.course_name}</td> {/* CHANGED: From "course.description" to "course.course_name" */}
+                        <td className="px-3 py-2">
                           <button
-                            onClick={() => navigate(`/admin-courses/edit/${course.course}`)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                            onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
+                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
                           >
                             Edit
                           </button>

@@ -77,7 +77,7 @@ const AdminDashboard = () => {
   const blueBase = '#1D4ED8';
 
   useEffect(() => {
-    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_students_by_program.php';
+    const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_students_by_program.php';
     console.log('Fetching pie chart data from:', apiUrl);
 
     fetch(apiUrl)
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
 
   // Fetch Line Chart Data (Monthly Attendance)
   useEffect(() => {
-    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_monthly_attendance.php';
+    const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_monthly_attendance.php';
     console.log('Fetching line chart data from:', apiUrl);
 
     fetch(apiUrl)
