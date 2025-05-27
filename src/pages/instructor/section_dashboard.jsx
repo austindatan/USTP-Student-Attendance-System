@@ -125,10 +125,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
     useEffect(() => {
     const fetchDropdownStudents = async () => {
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php');
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
+            const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             setDropdownStudents(data);
         } catch (error) {
@@ -137,7 +135,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     fetchDropdownStudents();
-}, []);
+}, [instructor?.instructor_id, sectionId]);
+
 
     const handleAddDropRequest = async () => {
     if (!selectedStudentForRequest || !requestReason.trim()) {
@@ -341,7 +340,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             >
                                 <option value="" disabled>Select Student</option> {/* Placeholder */}
                                 {dropdownStudents.map((student) => (
-                                    <option key={student.student_id} value={student.student_id}>
+                                    <option key={student.student_details_id} value={student.student_details_id}>
                                         {student.student_name}
                                     </option>
                                 ))}
