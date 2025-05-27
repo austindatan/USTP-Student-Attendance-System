@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; 
+import ConfirmationModal from '../../components/confirmationmodal';
 
 export default function AddSection() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function AddSection() {
   const [errorCourses, setErrorCourses] = useState('');
 
   const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     axios
@@ -48,8 +48,7 @@ export default function AddSection() {
   };
 
   const handleOpenAddSectionModal = (e) => {
-    e.preventDefault(); 
-
+    e.preventDefault();
 
     if (
       !formData.section_name ||
@@ -64,13 +63,13 @@ export default function AddSection() {
     setIsAddSectionModalOpen(true);
   };
 
-  const handleConfirmAddSection = async () => {
-    setIsLoading(true); 
-  
+  const handleConfirmAddSection = async () => { // Function is async
+    setIsLoading(true);
+
     const submitData = { ...formData, course_id: parseInt(formData.course_id, 10) };
 
-    try {
-      const res = await axios.post(
+    try { // <-- Start of the try block
+      const res = await axios.post( // <-- Await the axios call and assign response to 'res'
         'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
@@ -80,7 +79,7 @@ export default function AddSection() {
 
       if (res.data.success) {
         alert(res.data.message || 'Section added successfully!');
-        setIsAddSectionModalOpen(false); 
+        setIsAddSectionModalOpen(false);
 
         setFormData({
           section_name: '',
@@ -93,7 +92,7 @@ export default function AddSection() {
       } else {
         alert(res.data.message || 'Failed to add section.');
       }
-    } catch (err) {
+    } catch (err) { // <-- Correctly placed catch block
       console.error('An error occurred:', err);
       alert('An error occurred while adding the section.');
     } finally {
@@ -102,7 +101,7 @@ export default function AddSection() {
   };
 
   const handleCloseAddSectionModal = () => {
-    setIsAddSectionModalOpen(false); 
+    setIsAddSectionModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -116,7 +115,7 @@ export default function AddSection() {
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('/assets/section_vector.png')", 
+            backgroundImage: "url('/assets/section_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -223,7 +222,7 @@ export default function AddSection() {
               </button>
 
               <button
-                type="submit" 
+                type="submit"
                 className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800"
               >
                 Add Section
@@ -242,7 +241,7 @@ export default function AddSection() {
         title="Confirm Section Addition"
         message={`Are you sure you want to add section "${formData.section_name}" for the selected course and schedule?`}
         confirmText="Add Section"
-        loading={isLoading} 
+        loading={isLoading}
         confirmButtonClass="bg-blue-700 hover:bg-blue-800" //
       />
     </div>

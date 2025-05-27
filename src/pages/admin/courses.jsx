@@ -12,6 +12,7 @@ export default function Admin_Courses() {
   useEffect(() => {
     axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
       .then(res => {
+
         if (Array.isArray(res.data)) {
           setCourses(res.data);
         } else if (Array.isArray(res.data.courses)) {
@@ -29,7 +30,8 @@ export default function Admin_Courses() {
   }, []);
 
   const filteredCourses = courses.filter(course =>
-    (course.course_code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
+    (course.course_code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
+    (course.course_name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -97,7 +99,7 @@ export default function Admin_Courses() {
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
                     <th className="px-3 py-2">Course Code</th>
-                    <th className="px-3 py-2">Description</th>
+                    <th className="px-3 py-2">Course Name</th> 
                     <th className="px-3 py-2">Action</th>
                   </tr>
                 </thead>
@@ -115,7 +117,7 @@ export default function Admin_Courses() {
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
                         <td className="px-3 py-2 max-w-[120px] truncate">{course.course_code}</td>
-                        <td className="px-3 py-2 max-w-[200px] truncate">{course.description}</td>
+                        <td className="px-3 py-2 max-w-[200px] truncate">{course.course_name}</td> {/* CHANGED: From "course.description" to "course.course_name" */}
                         <td className="px-3 py-2">
                           <button
                             onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
