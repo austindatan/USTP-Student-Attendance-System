@@ -37,7 +37,7 @@ export default function EditStudent() {
 
 
   useEffect(() => {
-    axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`)
+    axios.get(`http://localhost/ustp-student-attendance-system/admin_backend/student_get_api.php?student_id=${student_id}`)
       .then(res => {
         setFormData(res.data);
       })
@@ -53,7 +53,7 @@ export default function EditStudent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.put(`http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`, formData)
+    axios.put(`http://localhost/ustp-student-attendance-system/admin_backend/student_update_api.php?student_id=${student_id}`, formData)
       .then(() => {
         alert("Student updated successfully!");
         navigate('/admin-students');

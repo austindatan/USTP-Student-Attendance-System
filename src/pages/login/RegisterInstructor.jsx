@@ -57,7 +57,7 @@ const RegisterInstructor = () => {
     Object.entries(form).forEach(([key, value]) => data.append(key, value));
 
     try {
-      const res = await fetch("http://localhost/ustp-student-attendance/api/auth/register-instructor.php", {
+      const res = await fetch("http://localhost/ustp-student-attendance-system/api/auth/register-instructor.php", {
         method: "POST",
         body: data
       });
