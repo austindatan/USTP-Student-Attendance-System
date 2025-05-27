@@ -31,7 +31,7 @@ import InstructorAdminPage from './pages/admin/instructorAdminpage';
 import AddStudent from './pages/admin/AddStudent';
 import EditStudent from './pages/admin/EditStudent';
 import Sections from './pages/admin/sections';
-import Courses from './pages/admin/Courses';
+import Courses from './pages/admin/courses';
 import AddInstructor from './pages/admin/AddInstructor';
 import EditInstructor from './pages/admin/EditInstructor';
 import AddCourse from './pages/admin/AddCourse';

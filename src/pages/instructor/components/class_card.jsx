@@ -22,12 +22,12 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
             >
                 {isLoading ? (
                     <div className="w-full space-y-2">
-                        <div className="bg-gray-300 h-6 w-20 rounded"></div>
-                        <div className="bg-gray-300 h-7 w-32 rounded"></div>
-                        <div className="bg-gray-300 h-5 w-12 rounded mt-2"></div>
+                        <div className="bg-gray-300 h-8 w-20 rounded"></div>
+                        <div className="bg-gray-300 h-10 w-32 rounded"></div>
+                        <div className="bg-gray-300 h-8 w-12 rounded mt-2"></div>
                     </div>
                 ) : (
-                    <div className="font-poppins h-18 text-shadow-sm">
+                    <div className="font-poppins h-24 text-shadow-sm">
                         <p className="text-white text-sm font-semibold">{code}</p>
                         <h2 className="text-white text-lg font-bold max-w-[140px] leading-tight">
                             {title}

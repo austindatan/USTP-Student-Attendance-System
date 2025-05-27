@@ -14,7 +14,7 @@ export default function EditCourse() {
   useEffect(() => {
     // Fetch existing course data
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_course_info.php?id=${id}`)
+      .get(`http://localhost/ustp-student-attendance/admin_backend/get_course_info.php?id=${id}`)
       .then((response) => {
         setFormData(response.data);
       })
@@ -32,7 +32,7 @@ export default function EditCourse() {
     e.preventDefault();
     try {
       await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_update_api.php',
+        'http://localhost/ustp-student-attendance/admin_backend/course_update_api.php',
         { id, ...formData }
       );
       alert('Course updated successfully!');

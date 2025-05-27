@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-$conn = new mysqli("localhost", "root", "", "attendance_monitoring");
+$conn = new mysqli("localhost", "root", "austinreverie", "attendance_monitoring");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
