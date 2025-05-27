@@ -20,6 +20,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
+    console.log("sectionInfo", sectionInfo);
+    console.log("Image:", sectionInfo?.image);
+
     useEffect(() => {
         if (!instructor) {
             navigate('/login-instructor');
@@ -32,7 +35,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -55,7 +58,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
                 );
 
                 if (!response.ok) {
@@ -95,7 +98,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -125,7 +128,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     useEffect(() => {
     const fetchDropdownStudents = async () => {
         try {
-            const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+            const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             setDropdownStudents(data);
@@ -150,7 +153,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     try {
-        const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
+        const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/add_drop_request.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData),
@@ -186,11 +189,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 ) : (
                     <div
-                        className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6 relative"
+                        className="rounded-lg p-6 text-white font-poppins mb-6 relative"
                         style={{
-                            backgroundImage: `url(${process.env.PUBLIC_URL}/assets/classes_vector_2.png)`,
+                            backgroundColor: sectionInfo?.hexcode || '#0097b2',
+                            backgroundImage: `url(${process.env.PUBLIC_URL}/${sectionInfo?.image})`,
                             backgroundRepeat: "no-repeat",
-                            backgroundPosition: "right 50px center",
+                            backgroundPosition: "right 20px center",
                             backgroundSize: "contain",
                         }}
                     >
@@ -238,13 +242,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             <input
                                 type="text"
                                 id="table-search"
-                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
                                 placeholder="Search for students."
+                                style={{backgroundColor: sectionInfo?.hexcode || '#0097b2'}}
                             />
                         </div>
                         <button
                             onClick={() => setShowRequestModal(true)}
-                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 border-[#0097b2] bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                            style={{borderColor: sectionInfo?.hexcode || '#0097b2', color: sectionInfo?.hexcode || '#0097b2'}}
                         >
                             Add Request
                         </button>
@@ -284,7 +290,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 >
                                     <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                         <img
-                                            src={`http://localhost/USTP-Student-Attendance-System/api/${student.image}?${new Date().getTime()}`} // Added cache busting
+                                            src={`http://localhost/ustp-student-attendance/api/${student.image}?${new Date().getTime()}`} // Added cache busting
                                             className={`w-full h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
                                             alt={name}
                                             onError={(e) => {
@@ -295,15 +301,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                         />
                                     </div>
                                     <div className="pl-3 pr-4 pt-2 pb-4 items-center">
-                                        <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
-                                            ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
+                                        <p
+                                            className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`} // Static Tailwind classes here
+                                            style={{
+                                                color: isPresent ? (sectionInfo?.hexcode || '#0097b2') : '#737373' // Dynamic color here
+                                            }}
+                                        >
                                             {isPresent ? 'Present' : 'Absent'}
                                         </p>
                                         <div className="flex items-center justify-between">
                                             <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
                                                 {name.includes(" ") ? (
                                                     <>
-                                                        {name.split(" ")[0]} <br /> {name.split(" ")[1]}
+                                                        {name.split(" ")[0]} {name.split(" ")[1]} <br /> {name.split(" ")[2]} {name.split(" ")[3]}
                                                     </>
                                                 ) : name}
                                             </p>
