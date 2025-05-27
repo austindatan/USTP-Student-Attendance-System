@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; 
 
 export default function AddSection() {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ export default function AddSection() {
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState('');
+
+  const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
 
   useEffect(() => {
     axios
@@ -43,9 +47,26 @@ export default function AddSection() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Ensure course_id is integer
+  const handleOpenAddSectionModal = (e) => {
+    e.preventDefault(); 
+
+
+    if (
+      !formData.section_name ||
+      !formData.course_id ||
+      !formData.schedule_day ||
+      !formData.start_time ||
+      !formData.end_time
+    ) {
+      alert('Please fill in all required fields (Section Name, Course, Schedule Day, Start Time, End Time).');
+      return;
+    }
+    setIsAddSectionModalOpen(true);
+  };
+
+  const handleConfirmAddSection = async () => {
+    setIsLoading(true); 
+  
     const submitData = { ...formData, course_id: parseInt(formData.course_id, 10) };
 
     axios
@@ -55,19 +76,33 @@ export default function AddSection() {
         {
           headers: { 'Content-Type': 'application/json' },
         }
-      )
-      .then((res) => {
-        if (res.data.success) {
-          alert(res.data.message || 'Section added successfully!');
-          navigate('/admin-sections');
-        } else {
-          alert(res.data.message || 'Failed to add section.');
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        alert('An error occurred while adding the section.');
-      });
+      );
+
+      if (res.data.success) {
+        alert(res.data.message || 'Section added successfully!');
+        setIsAddSectionModalOpen(false); 
+
+        setFormData({
+          section_name: '',
+          course_id: '',
+          schedule_day: '',
+          start_time: '',
+          end_time: '',
+        });
+        navigate('/admin-sections');
+      } else {
+        alert(res.data.message || 'Failed to add section.');
+      }
+    } catch (err) {
+      console.error('An error occurred:', err);
+      alert('An error occurred while adding the section.');
+    } finally {
+      setIsLoading(false); // End loading
+    }
+  };
+
+  const handleCloseAddSectionModal = () => {
+    setIsAddSectionModalOpen(false); 
   };
 
   const handleCancel = () => {
@@ -75,13 +110,13 @@ export default function AddSection() {
   };
 
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll" style={{ backgroundImage: "url('assets/section_bg.png')" }}>
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll" style={{ backgroundImage: "url('/assets/section_bg.png')" }}>
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-5xl mx-auto">
 
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('assets/section_vector.png')",
+            backgroundImage: "url('/assets/section_vector.png')", 
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -91,7 +126,7 @@ export default function AddSection() {
         </div>
 
         <div className="bg-white shadow-md p-8 rounded-lg">
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleOpenAddSectionModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Section Name */}
             <div>
@@ -188,7 +223,7 @@ export default function AddSection() {
               </button>
 
               <button
-                type="submit"
+                type="submit" 
                 className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800"
               >
                 Add Section
@@ -198,6 +233,18 @@ export default function AddSection() {
           </form>
         </div>
       </section>
+
+      {/* Confirmation Modal for Add Section */}
+      <ConfirmationModal
+        isOpen={isAddSectionModalOpen}
+        onClose={handleCloseAddSectionModal}
+        onConfirm={handleConfirmAddSection}
+        title="Confirm Section Addition"
+        message={`Are you sure you want to add section "${formData.section_name}" for the selected course and schedule?`}
+        confirmText="Add Section"
+        loading={isLoading} 
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800" //
+      />
     </div>
   );
 }
