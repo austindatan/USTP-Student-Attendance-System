@@ -1,21 +1,25 @@
 <?php
-// ERM HINDI ITO NAGAMIT
+// student_get_api.php
 
-// CORS Headers 
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: GET");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
 include __DIR__ . '/../src/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['student_id'])) {
-    $student_id = $_GET['student_id'];
+    $student_id = intval($_GET['student_id']);
     
-    $stmt = $conn->prepare("SELECT student.student_id, student.firstname, student.middlename, student.lastname, student.date_of_birth, student.contact_number FROM drop_request 
-                            INNER JOIN attendance ON attendance.attendance_id = drop_request.attendance_id
-                            INNER JOIN student ON student.student_id = attendance.student_id
-                            WHERE drop_request.status !='Dropped' AND student_id = ?");
+    // Adjust query to fetch all needed fields
+    $stmt = $conn->prepare("
+        SELECT 
+            s.student_id, s.firstname, s.middlename, s.lastname, s.date_of_birth, s.contact_number, s.email, s.street, s.city, s.province, s.zipcode, s.country,
+            sd.section_id, sd.instructor_id, sd.program_details_id
+        FROM student s
+        INNER JOIN student_details sd ON s.student_id = sd.student_id
+        WHERE s.student_id = ?
+    ");
     $stmt->bind_param("i", $student_id);
     $stmt->execute();
     $result = $stmt->get_result();

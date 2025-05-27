@@ -1,49 +1,43 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
+    http_response_code(204);
+    exit;
 }
 
-require_once('../src/conn.php');
+include __DIR__ . '/../src/conn.php';
 
-$response = array();
+$data = json_decode(file_get_contents("php://input"));
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $json_data = file_get_contents("php://input");
-    $data = json_decode($json_data, true);
+$student_details_id = $data->student_details_id ?? null;
+$reason = $data->reason ?? null;
+$status = "Pending";
 
-    if (isset($data['attendance_id']) && isset($data['reason'])) {
-        $attendance_id = $data['attendance_id'];
-        $reason = $data['reason'];
-        $status = 'Pending';
+if (!is_numeric($student_details_id) || empty(trim($reason))) {
+    http_response_code(400);
+    echo json_encode(["error" => "Invalid input data"]);
+    exit;
+}
 
-        $stmt = $conn->prepare("INSERT INTO drop_request (attendance_id, reason, status) VALUES (?, ?, ?)");
-        $stmt->bind_param("iss", $attendance_id, $reason, $status);
+$stmt = $conn->prepare("INSERT INTO drop_request (student_details_id, reason, status) VALUES (?, ?, ?)");
+$stmt->bind_param("iss", $student_details_id, $reason, $status);
 
-        if ($stmt->execute()) {
-            $response['success'] = true;
-            $response['message'] = 'Drop request submitted successfully.';
-        } else {
-            $response['success'] = false;
-            $response['message'] = 'Failed to insert drop request: ' . $stmt->error;
-        }
-
-        $stmt->close();
-    } else {
-        $response['success'] = false;
-        $response['message'] = 'Missing required parameters (attendance_id or reason).';
-    }
+if ($stmt->execute()) {
+    echo json_encode([
+        "success" => true,
+        "message" => "Drop request submitted.",
+        "drop_request_id" => $stmt->insert_id
+    ]);
 } else {
-    $response['success'] = false;
-    $response['message'] = 'Invalid request method. Only POST is allowed.';
+    error_log("Drop request error: " . $stmt->error); // Optional for debugging
+    http_response_code(500);
+    echo json_encode(["error" => $stmt->error]);
 }
 
-echo json_encode($response);
-
+$stmt->close();
 $conn->close();
 ?>

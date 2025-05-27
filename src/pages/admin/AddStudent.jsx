@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 export default function AddStudent() {
   const [formData, setFormData] = useState({
@@ -16,34 +15,37 @@ export default function AddStudent() {
     province: '',
     zipcode: '',
     country: '',
-    section_id: ''
+    section_id: '',
   });
 
   const [imageFile, setImageFile] = useState(null);
   const [instructors, setInstructors] = useState([]);
   const [sections, setSections] = useState([]);
   const [programDetails, setProgramDetails] = useState([]);
-
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php')
-      .then(res => setInstructors(res.data))
-      .catch(err => console.error(err));
-
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php')
-      .then(res => setSections(res.data))
-      .catch(err => console.error(err));
-
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php')
-      .then(res => setProgramDetails(res.data))
-      .catch(err => console.error(err));
+    const fetchData = async () => {
+      try {
+        const [instRes, secRes, progRes] = await Promise.all([
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php'),
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+        ]);
+        setInstructors(instRes.data);
+        setSections(secRes.data);
+        setProgramDetails(progRes.data);
+      } catch (error) {
+        console.error('Error fetching dropdown data:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
@@ -52,151 +54,156 @@ export default function AddStudent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const submissionData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-  submissionData.append(key, value);
-});
-submissionData.append("instructor_id", selectedInstructor);
-submissionData.append("program_details_id", selectedProgram);
-submissionData.append("section_id", formData.section_id);
-
-
-    if (imageFile) {
-      submissionData.append("image", imageFile);
-    }
+      submissionData.append(key, value);
+    });
+    submissionData.append('instructor_id', selectedInstructor);
+    submissionData.append('program_details_id', selectedProgram);
+    if (imageFile) submissionData.append('image', imageFile);
 
     try {
-      const response = await axios.post("http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php", submissionData);
-      alert(response.data.message || "Student added successfully!");
+      const res = await axios.post(
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php',
+        submissionData
+      );
+      alert(res.data.message || 'Student added successfully!');
     } catch (error) {
-      console.error("Failed to add student:", error);
-      alert("Error adding student. Check the console for details.");
+      console.error('Failed to add student:', error);
+      alert('Error adding student. Please check the console.');
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl"
-        encType="multipart/form-data"
-      >
-        <h2 className="text-3xl font-bold mb-6 text-blue-700 text-center">Add New Student</h2>
+    <div
+      className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex"
+      style={{ overflowY: 'auto' }}
+    >
+      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
+        {/* Header Container */}
+        <div
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          style={{
+            backgroundImage: "url('assets/teacher_vector.png')",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right',
+            backgroundSize: 'contain',
+          }}
+        >
+          <h1 className="text-2xl text-blue-700 font-bold">Add New Student</h1>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Form Container */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
+          encType="multipart/form-data"
+        >
+          {/* Student Inputs */}
           {[
-            { name: "firstname", label: "First Name", required: true },
-            { name: "middlename", label: "Middle Name" },
-            { name: "lastname", label: "Last Name", required: true },
-            { name: "date_of_birth", label: "Date of Birth", type: "date", required: true },
-            { name: "contact_number", label: "Contact Number", required: true },
-            { name: "email", label: "Email", type: "email", required: true },
-            { name: "password", label: "Password", type: "password", required: true },
-            { name: "street", label: "Street" },
-            { name: "city", label: "City" },
-            { name: "province", label: "Province" },
-            { name: "zipcode", label: "Zipcode" },
-            { name: "country", label: "Country" }
-          ].map(({ name, label, type = "text", required }) => (
+            ['firstname', 'First Name'],
+            ['middlename', 'Middle Name'],
+            ['lastname', 'Last Name'],
+            ['date_of_birth', 'Date of Birth', 'date'],
+            ['contact_number', 'Contact Number'],
+            ['email', 'Email', 'email'],
+            ['password', 'Password', 'password'],
+            ['street', 'Street'],
+            ['city', 'City'],
+            ['province', 'Province'],
+            ['zipcode', 'Zipcode'],
+            ['country', 'Country'],
+          ].map(([name, label, type = 'text']) => (
             <div key={name}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{label}:</label>
+              <label className="block text-sm font-semibold text-blue-700">{label}</label>
               <input
                 type={type}
                 name={name}
                 value={formData[name]}
                 onChange={handleChange}
-                required={required}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required={['firstname', 'lastname', 'date_of_birth', 'contact_number', 'email', 'password'].includes(name)}
+                className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
               />
             </div>
           ))}
-        </div>
 
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image:</label>
-          <input
-            type="file"
-            name="image"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full"
-          />
-        </div>
-
-        <hr className="my-6 border-t-2 border-gray-300" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Profile Image */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Instructor:</label>
+            <label className="block text-sm font-semibold text-blue-700">Profile Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Instructor Dropdown */}
+          <div>
+            <label className="block text-sm font-semibold text-blue-700">Instructor</label>
             <select
               value={selectedInstructor}
               onChange={(e) => setSelectedInstructor(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2"
               required
+              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">Select Instructor</option>
-              {instructors.map((instructor) => (
-                instructor.instructor_id && (
-                  <option key={`instructor-${instructor.instructor_id}`} value={instructor.instructor_id}>
-                    {instructor.firstname} {instructor.lastname}
-                  </option>
-                )
+              {instructors.map((inst) => (
+                <option key={inst.instructor_id} value={inst.instructor_id}>
+                  {inst.firstname} {inst.lastname}
+                </option>
               ))}
             </select>
-
           </div>
 
+          {/* Program Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Program:</label>
+            <label className="block text-sm font-semibold text-blue-700">Program</label>
             <select
               value={selectedProgram}
               onChange={(e) => setSelectedProgram(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2"
               required
+              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">Select Program</option>
-              {programDetails.map((program) => (
-                program.program_details_id && (
-                  <option key={`program-${program.program_details_id}`} value={program.program_details_id}>
-                    {program.program_name}
-                  </option>
-                )
+              {programDetails.map((prog) => (
+                <option key={prog.program_details_id} value={prog.program_details_id}>
+                  {prog.program_name}
+                </option>
               ))}
             </select>
-
           </div>
-        </div>
 
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Section:</label>
-          <select
-            name="section_id"
-            value={formData.section_id}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md p-2"
-            required
-          >
-            <option value="">Select Section</option>
-            {sections.map((section) => (
-              section.section_id && (
-                <option key={`section-${section.section_id}`} value={section.section_id}>
-                  {section.section_name}
+          {/* Section Dropdown */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-blue-700">Section</label>
+            <select
+              name="section_id"
+              value={formData.section_id}
+              onChange={handleChange}
+              required
+              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+            >
+              <option value="">Select Section</option>
+              {sections.map((sec) => (
+                <option key={sec.section_id} value={sec.section_id}>
+                  {sec.section_name}
                 </option>
-              )
-            ))}
-          </select>
+              ))}
+            </select>
+          </div>
 
-        </div>
-
-        <button
-          type="submit"
-          className="mt-6 w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition duration-200"
-        >
-          Add Student
-        </button>
-      </form>
+          {/* Submit Button */}
+          <div className="md:col-span-2 text-right">
+            <button
+              type="submit"
+              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+            >
+              Save Student
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   );
 }
-

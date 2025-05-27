@@ -41,6 +41,8 @@ export default function Admin_Courses() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto">
+      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
 
         {/* Header */}
         <div
