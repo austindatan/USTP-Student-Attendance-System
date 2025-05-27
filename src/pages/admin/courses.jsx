@@ -12,37 +12,29 @@ export default function Admin_Courses() {
   useEffect(() => {
     axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then(res => {
-        // You've correctly handled potential different data structures here
         if (Array.isArray(res.data)) {
           setCourses(res.data);
         } else if (Array.isArray(res.data.courses)) {
           setCourses(res.data.courses);
         } else {
-          // If neither is an array, log the unexpected data and set courses to empty array
           console.error("Unexpected data format from get_course.php:", res.data);
           setCourses([]);
         }
       })
       .catch((err) => {
-        console.error("Error fetching courses:", err); // Log the actual error
+        console.error("Error fetching courses:", err);
         setError("Failed to fetch courses. Please check the server.");
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // ADJUSTMENT: Safely filter by course_code
   const filteredCourses = courses.filter(course =>
-    // Use optional chaining (?.) to safely access course_code
-    // Use nullish coalescing (?? '') to default to an empty string if course_code is null/undefined
-    // This prevents calling .toLowerCase() on undefined
     (course.course_code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto">
-      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-6xl mx-auto">
 
         {/* Header */}
         <div
@@ -84,13 +76,16 @@ export default function Admin_Courses() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
+                aria-label="Search courses"
               />
-            <button
-              onClick={() => navigate("/admin-courses/add")}
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
-            >
-              + Add Course
-            </button>
+              <button
+                type="button"
+                onClick={() => navigate("/admin-courses/add")}
+                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+                aria-label="Add new course"
+              >
+                + Add Course
+              </button>
             </div>
           </div>
 
@@ -104,7 +99,6 @@ export default function Admin_Courses() {
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    {/* ADJUSTMENT: Changed header to Course Code */}
                     <th className="px-4 py-2 whitespace-nowrap">Course Code</th>
                     <th className="px-4 py-2 whitespace-nowrap">Description</th>
                     <th className="px-4 py-2 whitespace-nowrap">Action</th>
@@ -120,21 +114,17 @@ export default function Admin_Courses() {
                   ) : (
                     filteredCourses.map((course) => (
                       <tr
-                        // ADJUSTMENT: Use course.course_id as key if available and unique
-                        // If course_id is not guaranteed unique, you might stick with index,
-                        // but course_id is generally preferred for stable keys.
-                        key={course.course_id || course.course_code} // Fallback to course_code if id isn't there
+                        key={course.course_id ?? course.course_code}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        {/* ADJUSTMENT: Display course_code instead of course_name */}
                         <td className="px-4 py-2 max-w-xs truncate">{course.course_code}</td>
                         <td className="px-4 py-2 max-w-md truncate">{course.description}</td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           <button
-                            // ADJUSTMENT: Pass course_id for edit navigation
-                            // Ensure your edit course route in App.js expects course_id
+                            type="button"
                             onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                            aria-label={`Edit course ${course.course_code}`}
                           >
                             Edit
                           </button>
