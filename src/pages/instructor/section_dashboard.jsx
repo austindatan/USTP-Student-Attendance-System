@@ -9,7 +9,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [students, setStudents] = useState([]);
     const [presentStudents, setPresentStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    // Initialize sectionInfo from location.state if available, otherwise null
     const location = useLocation();
     const [sectionInfo, setSectionInfo] = useState(location.state?.sectionInfo || null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +27,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     // Fetch section info for header (only if not passed via location state)
     useEffect(() => {
-        // If sectionInfo is already available from location.state, no need to fetch again
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
@@ -40,12 +38,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     setSectionInfo(data);
                 } catch (err) {
                     console.error("Error fetching section info:", err);
-                    // Handle error state for section info, maybe show a generic header
                 }
             }
             fetchSectionInfo();
         }
-    }, [sectionId, sectionInfo]); // Added sectionInfo to dependency array to prevent unnecessary fetches
+    }, [sectionId, sectionInfo]);
 
     useEffect(() => {
         if (!instructor?.instructor_id) return;
@@ -55,7 +52,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}`
                 );
 
                 if (!response.ok) {
@@ -109,7 +106,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
             console.log('Attendance saved:', result);
         } catch (error) {
             console.error('Error saving attendance:', error);
-            // Optionally revert the UI state if saving fails
             setPresentStudents(currentList =>
                 currentList.includes(student.student_details_id)
                     ? currentList.filter(id => id !== student.student_details_id)
@@ -123,55 +119,53 @@ export default function Teacher_Dashboard({ selectedDate }) {
     );
 
     useEffect(() => {
-    const fetchDropdownStudents = async () => {
-        try {
-            const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const data = await res.json();
-            setDropdownStudents(data);
-        } catch (error) {
-            console.error("Error fetching dropdown students:", error);
-        }
-    };
+        const fetchDropdownStudents = async () => {
+            try {
+                const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
+                setDropdownStudents(data);
+            } catch (error) {
+                console.error("Error fetching dropdown students:", error);
+            }
+        };
 
-    fetchDropdownStudents();
-}, [instructor?.instructor_id, sectionId]);
-
+        fetchDropdownStudents();
+    }, [instructor?.instructor_id, sectionId]);
 
     const handleAddDropRequest = async () => {
-    if (!selectedStudentForRequest || !requestReason.trim()) {
-        alert("Please select a student and enter a reason.");
-        return;
-    }
-
-    const requestData = {
-        student_details_id: selectedStudentForRequest,
-        reason: requestReason,
-    };
-
-    try {
-        const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData),
-        });
-
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-            alert("Drop request submitted successfully.");
-            setShowRequestModal(false);
-            setSelectedStudentForRequest('');
-            setRequestReason('');
-        } else {
-            alert("Failed to submit: " + (result.error || "Unknown error"));
+        if (!selectedStudentForRequest || !requestReason.trim()) {
+            alert("Please select a student and enter a reason.");
+            return;
         }
-    } catch (error) {
-        console.error("Submission error:", error);
-        alert("An error occurred while submitting the drop request.");
-    }
-};
 
+        const requestData = {
+            student_details_id: selectedStudentForRequest,
+            reason: requestReason,
+        };
+
+        try {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData),
+            });
+
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                alert("Drop request submitted successfully.");
+                setShowRequestModal(false);
+                setSelectedStudentForRequest('');
+                setRequestReason('');
+            } else {
+                alert("Failed to submit: " + (result.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("An error occurred while submitting the drop request.");
+        }
+    };
 
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
@@ -204,7 +198,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             <FiSettings className="text-xl cursor-pointer" />
                         </div>
                         <div>
-                            {/* Adjusted to display course_name as main title and section_name below it */}
                             <h1 className="text-2xl font-bold">
                                 {sectionInfo?.course_name || 'Course Title'}
                             </h1>
@@ -240,6 +233,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 id="table-search"
                                 className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
                                 placeholder="Search for students."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
                             />
                         </div>
                         <button
@@ -252,66 +247,48 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 )}
 
                 {/* Student Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
-                    {isLoading
-                        ? Array.from({ length: 12 }).map((_, i) => (
-                            <div key={i} className={`cursor-pointer animate-pulse bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between w-24 sm:w-36`}>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                    {filteredStudents.map((student, index) => {
+                        const isPresent = presentStudents.includes(student.student_details_id);
+                        const name = student.name || 'No Name';
+                        return (
+                            <div
+                                key={index}
+                                onClick={() => toggleAttendance(student)}
+                                className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
+                                    bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
+                                    ${isPresent ? 'opacity-100' : 'opacity-60'}`}
+                            >
                                 <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                     <img
-                                        src={`${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`}
-                                        className="w-full h-full object-cover grayscale"
-                                        alt="Loading..."
+                                        src={`http://localhost/USTP-Student-Attendance-System/uploads/${student.image}?${new Date().getTime()}`}
+                                        className={`w-full h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
+                                        alt={name}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = `${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`;
+                                            console.warn(`Failed to load image for ${name}. Using fallback.`);
+                                        }}
                                     />
                                 </div>
-                                <div className="p-3">
-                                    <p className="font-[Barlow] text-xs font-bold ml-[5px] text-[#737373] bg-gray-200 rounded h-4 mb-2"></p>
+                                <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
+                                        ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
+                                        {isPresent ? 'Present' : 'Absent'}
+                                    </p>
                                     <div className="flex items-center justify-between">
-                                        <div className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2] bg-gray-200 rounded w-2/3 h-4"></div>
+                                        <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
+                                            {name.includes(" ") ? (
+                                                <>
+                                                    {name.split(" ")[0]} <br /> {name.split(" ")[1]}
+                                                </>
+                                            ) : name}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-                        ))
-                        : filteredStudents.map((student, index) => {
-                            const isPresent = presentStudents.includes(student.student_details_id);
-                            const name = student.name || 'No Name';
-                            return (
-                                <div
-                                    key={index}
-                                    onClick={() => toggleAttendance(student)}
-                                    className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                        bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
-                                        ${isPresent ? 'opacity-100' : 'opacity-60'}`}
-                                >
-                                    <div className="overflow-hidden rounded-t-[20px] flex justify-center">
-                                        <img
-                                            src={`http://localhost/USTP-Student-Attendance-System/api/${student.image}?${new Date().getTime()}`} // Added cache busting
-                                            className={`w-full h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
-                                            alt={name}
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = `${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`;
-                                                console.warn(`Failed to load image for ${name}. Using fallback.`);
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="pl-3 pr-4 pt-2 pb-4 items-center">
-                                        <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
-                                            ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
-                                            {isPresent ? 'Present' : 'Absent'}
-                                        </p>
-                                        <div className="flex items-center justify-between">
-                                            <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
-                                                {name.includes(" ") ? (
-                                                    <>
-                                                        {name.split(" ")[0]} <br /> {name.split(" ")[1]}
-                                                    </>
-                                                ) : name}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                        );
+                    })}
                 </div>
             </section>
 
@@ -319,11 +296,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
             {showRequestModal && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
-                    onClick={() => setShowRequestModal(false)} // Click outside to close
+                    onClick={() => setShowRequestModal(false)}
                 >
                     <div
                         className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md mx-auto"
-                        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing modal
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-xl font-bold text-[#0097b2] mb-4">Add Request</h2>
 
@@ -338,16 +315,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 value={selectedStudentForRequest}
                                 onChange={(e) => setSelectedStudentForRequest(e.target.value)}
                             >
-                                <option value="" disabled>Select Student</option> {/* Placeholder */}
+                                <option value="" disabled>Select Student</option>
                                 {dropdownStudents.map((student) => (
                                     <option key={student.student_details_id} value={student.student_details_id}>
                                         {student.student_name}
                                     </option>
                                 ))}
                             </select>
-
                         </div>
-
 
                         {/* Reason Textarea */}
                         <div className="mb-6">

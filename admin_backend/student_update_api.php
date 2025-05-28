@@ -73,15 +73,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 
     // Handle image upload if exists
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $target_dir = __DIR__ . '/../uploads/student_images/';
+        $target_dir = __DIR__ . '/../uploads/';
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
         $filename = basename($_FILES["image"]["name"]);
         $target_file = $target_dir . $filename;
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // Save path to DB if needed
-            // Example: update student_images table or student table image column
+            $imagePath = $filename;
+            
+            $stmt3 = $conn->prepare("UPDATE student SET image=? WHERE student_id=?");
+        $stmt3->bind_param("si", $imagePath, $student_id);
+        $success = $success && $stmt3->execute();
+        $stmt3->close();
         } else {
             http_response_code(500);
             echo json_encode(["message" => "Failed to upload image"]);
