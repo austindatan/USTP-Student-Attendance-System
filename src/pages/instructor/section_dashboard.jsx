@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -9,7 +9,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [students, setStudents] = useState([]);
     const [presentStudents, setPresentStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    // Initialize sectionInfo from location.state if available, otherwise null
     const location = useLocation();
     const [sectionInfo, setSectionInfo] = useState(location.state?.sectionInfo || null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +16,10 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [selectedStudentForRequest, setSelectedStudentForRequest] = useState('');
     const [requestReason, setRequestReason] = useState('');
     const [dropdownStudents, setDropdownStudents] = useState([]);
+    const [showColorModal, setShowColorModal] = useState(false);
+    const [selectedColor, setSelectedColor] = useState(sectionInfo?.hexcode || '#0097b2');
+    const colorModalRef = useRef(null);
+    const settingsButtonRef = useRef(null);
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
@@ -205,7 +208,64 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                 </svg>
                             </button>
-                            <FiSettings className="text-xl cursor-pointer" />
+                            <div className="relative">
+                                <FiSettings
+                                    ref={settingsButtonRef} // Attach ref here
+                                    className="text-xl cursor-pointer"
+                                    onClick={() => setShowColorModal(prev => !prev)} // Change to toggle
+                                />
+
+                                {showColorModal && (
+                                    <div ref={colorModalRef} className="absolute right-0 mt-2 w-60 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200">
+                                        
+                                        <h2 className="text-sectionInfo?.hexcode font-bold text-lg mb-4" style={{ color: sectionInfo?.hexcode }}>Change Section Color</h2>
+                                        <input
+                                            type="color"
+                                            value={selectedColor}
+                                            onChange={(e) => setSelectedColor(e.target.value)}
+                                            className="w-24 h-12 border rounded mb-4"
+                                        />
+                                        <div className="flex justify-center gap-4">
+                                            <button
+                                            onClick={async () => {
+                                                // Save to backend
+                                                try {
+                                                const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                    section_id: sectionId,
+                                                    hexcode: selectedColor
+                                                    }),
+                                                });
+
+                                                const result = await res.json();
+                                                if (result.success) {
+                                                    setSectionInfo(prev => ({ ...prev, hexcode: selectedColor }));
+                                                    alert('Color updated successfully!');
+                                                    setShowColorModal(false);
+                                                } else {
+                                                    alert('Update failed: ' + (result.error || 'Unknown error'));
+                                                }
+                                                } catch (err) {
+                                                console.error('Failed to update color:', err);
+                                                alert('Error updating color.');
+                                                }
+                                            }}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                            >
+                                            Save
+                                            </button>
+                                            <button
+                                            onClick={() => setShowColorModal(false)}
+                                            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                                            >
+                                            Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                    )}
+                </div>
                         </div>
                         <div>
                             {/* Adjusted to display course_name as main title and section_name below it */}
@@ -392,6 +452,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 </div>
             )}
+            
+            
+
         </div>
+
+        
     );
 }
