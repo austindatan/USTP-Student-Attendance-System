@@ -31,7 +31,7 @@ const EditSection = () => {
     // 1. Load existing section
     // Change to GET request, sending section_id in query params
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         console.log("Response from get_single_section.php:", res.data); // Debugging
         if (res.data.success && res.data.section) {

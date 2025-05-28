@@ -24,7 +24,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     try {
       console.log('Fetching sections...');
       const response = await fetch(
-        `http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
+        `http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -110,7 +110,7 @@ export default function Classes_Dashboard({ selectedDate }) {
               }
             }}
             bgImage={`${process.env.PUBLIC_URL}/${section?.image}`}
-            bgClass={`bg-[${section?.hexcode}]`}
+            bgColor={section?.hexcode || "#0097b2"}
           />
         ))}
       </div>

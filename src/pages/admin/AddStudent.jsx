@@ -120,7 +120,7 @@ export default function AddStudent() {
 
     try {
       const res = await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php',
+        'http://localhost/ustp-student-attendance/admin_backend/student_add_api.php',
         submissionData
       );
       alert(res.data.message || 'Student added successfully!');

@@ -1,4 +1,4 @@
-function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, bgClass = "bg-[#0097b2]"}) {
+function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, bgColor = "bg-[#0097b2]"}) {
     return (
         <button 
             type="button" 
@@ -7,11 +7,12 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
         >
             <div
                 className={`p-4 flex items-start justify-between rounded-t-xl relative ${
-                    isLoading ? 'bg-white animate-pulse' : bgClass
+                    isLoading ? 'bg-white animate-pulse' : ''
                 }`}
                 style={
                     !isLoading
                         ? {
+                              backgroundColor: bgColor,
                               backgroundImage: `url(${bgImage})`,
                               backgroundRepeat: "no-repeat",
                               backgroundPosition: "right 5px bottom",
