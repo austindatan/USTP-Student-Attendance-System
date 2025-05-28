@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; 
 
 export default function EditStudent() {
   const { student_id } = useParams();
@@ -28,7 +27,6 @@ export default function EditStudent() {
   const [sections, setSections] = useState([]);
   const [programDetails, setProgramDetails] = useState([]);
 
-  // New states for Year Level and Semester
   const [yearLevels, setYearLevels] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [selectedYearLevel, setSelectedYearLevel] = useState('');
@@ -37,8 +35,6 @@ export default function EditStudent() {
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
 
-  // fetch sections based on filters
-  // currentSectionId is passed to help determine if the selected section should be reset
   const fetchSections = useCallback(async (yearLevelId, semesterId, currentSectionId) => {
     try {
       const params = {};
@@ -51,18 +47,15 @@ export default function EditStudent() {
       const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
       setSections(secRes.data);
 
-      // Determine if the current section_id is still valid in the new list of sections
       const isCurrentSectionValid = secRes.data.some(sec => String(sec.section_id) === String(currentSectionId));
 
-      // If there's a currentSectionId but it's not in the new list, clear it.
-      // Otherwise, keep the current section_id.
       if (currentSectionId && !isCurrentSectionValid) {
         setFormData(prev => ({ ...prev, section_id: '' }));
       } else if (currentSectionId && isCurrentSectionValid) {
-        // Explicitly set it if it's valid, ensures it doesn't get cleared by other effects
+
         setFormData(prev => ({ ...prev, section_id: currentSectionId }));
       } else if (!currentSectionId) {
-        // If there was no currentSectionId, ensure it's empty
+
         setFormData(prev => ({ ...prev, section_id: '' }));
       }
 
@@ -70,7 +63,7 @@ export default function EditStudent() {
       console.error('Error fetching filtered sections:', error);
       alert('Failed to load sections. Please try again.');
     }
-  }, []); // Removed formData.section_id from dependency array for useCallback
+  }, []); 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,18 +73,16 @@ export default function EditStudent() {
           axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
           axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
           axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
-          // IMPORTANT: Ensure student_get_api.php returns year_level_id and semester_id
           axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`),
         ]);
 
         setInstructors(instRes.data);
         setProgramDetails(progRes.data);
-        setYearLevels(yearRes.data);
-        setSemesters(semRes.data);
+        setYearLevels(yearRes.data.year_levels);
+        setSemesters(semRes.data.semesters || []); 
 
         const student = studentRes.data;
-        
-        // Store the original section_id before potentially modifying formData
+
         const initialSectionId = student.section_id || '';
         const initialYearLevel = student.year_level_id || '';
         const initialSemester = student.semester_id || '';
@@ -103,42 +94,37 @@ export default function EditStudent() {
           date_of_birth: student.date_of_birth || '',
           contact_number: student.contact_number || '',
           email: student.email || '',
-          password: '', // Password should ideally not be pre-filled for security
+          password: '',
           street: student.street || '',
           city: student.city || '',
           province: student.province || '',
           zipcode: student.zipcode || '',
           country: student.country || '',
-          section_id: initialSectionId, // Set initial section_id here
+          section_id: initialSectionId,
         });
 
         setSelectedInstructor(student.instructor_id || '');
         setSelectedProgram(student.program_details_id || '');
-        setSelectedYearLevel(initialYearLevel); // Set initial year level
-        setSelectedSemester(initialSemester);   // Set initial semester
+        setSelectedYearLevel(initialYearLevel);
+        setSelectedSemester(initialSemester);
 
-        // Explicitly fetch sections after setting initial year/semester and formData.section_id
-        // Pass the student's initial section_id to fetchSections to handle its validity
         await fetchSections(initialYearLevel, initialSemester, initialSectionId);
-
       } catch (err) {
         console.error('Failed to fetch data:', err);
         alert('Failed to load student or dropdown data.');
         navigate('/admin-students');
       }
     };
-    fetchData();
-  }, [student_id, navigate, fetchSections]); // fetchSections is a dependency because it's used inside fetchData
 
-  // This useEffect handles changes ONLY when the user selects year/semester
+    fetchData();
+  }, [student_id, navigate, fetchSections]); 
+
   useEffect(() => {
-      // Only fetch sections if year level or semester has been selected
-      // and it's not the initial load where fetchData already handled it.
-      // We check if selectedYearLevel or selectedSemester are not empty strings.
+
       if (selectedYearLevel || selectedSemester) {
           fetchSections(selectedYearLevel, selectedSemester, formData.section_id);
       }
-  }, [selectedYearLevel, selectedSemester, fetchSections]); // formData.section_id is not a dependency here to avoid loops
+  }, [selectedYearLevel, selectedSemester, fetchSections]); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -149,32 +135,14 @@ export default function EditStudent() {
     setImageFile(e.target.files[0]);
   };
 
- 
-  const handleOpenEditStudentModal = (e) => {
-    e.preventDefault(); 
-
-    if (!formData.firstname || !formData.lastname || !formData.email || !formData.date_of_birth || !formData.contact_number) {
-        alert('Please fill in all required fields.');
-        return;
-    }
-    setIsEditStudentModalOpen(true);
-  };
-
-  const handleConfirmEditStudent = async () => {
-    setIsLoading(true); 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const submissionData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       submissionData.append(key, value);
     });
     submissionData.append('instructor_id', selectedInstructor);
     submissionData.append('program_details_id', selectedProgram);
-    // Note: year_level_id and semester_id are only for filtering sections on the frontend,
-    // they are not directly updated in the student's database record.
-    // They don't need to be sent in the update API if they are not fields in the student or student_details tables.
-    // However, if your student_update_api.php expects them for some reason, keep them.
-    // Based on your student_update_api.php, these are not directly used for update.
-    // submissionData.append('year_level_id', selectedYearLevel);
-    // submissionData.append('semester_id', selectedSemester);
     
     if (imageFile) submissionData.append('image', imageFile);
 
@@ -189,16 +157,11 @@ export default function EditStudent() {
         }
       );
       alert(res.data.message || 'Student updated successfully!');
-      setIsEditStudentModalOpen(false); 
       navigate('/admin-students');
     } catch (error) {
       console.error('Failed to update student:', error.response?.data || error.message);
       alert(`Error updating student: ${error.response?.data?.message || 'Please check the console.'}`);
     }
-  };
-
-  const handleCloseEditStudentModal = () => {
-    setIsEditStudentModalOpen(false);
   };
 
   return (
@@ -208,7 +171,7 @@ export default function EditStudent() {
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('/assets/teacher_vector.png')",
+            backgroundImage: "url('assets/teacher_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -219,7 +182,7 @@ export default function EditStudent() {
 
         {/* Form */}
         <form
-          onSubmit={handleOpenEditStudentModal} 
+          onSubmit={handleSubmit}
           className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
           encType="multipart/form-data"
         >
@@ -299,22 +262,23 @@ export default function EditStudent() {
           <div>
             <label className="block text-sm font-semibold text-blue-700">Year Level</label>
             <select
-              value={selectedYearLevel}
-              onChange={(e) => {
-                setSelectedYearLevel(e.target.value);
-                // Clear selected section when year level changes to prompt re-selection
-                setFormData(prev => ({ ...prev, section_id: '' }));
-              }}
-              required
-              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
-            >
-              <option value="">Select Year Level</option>
-              {yearLevels.map((yl) => (
-                <option key={yl.year_id} value={yl.year_id}>
-                  {yl.year_level_name}
-                </option>
-              ))}
-            </select>
+            value={selectedYearLevel}
+            onChange={(e) => {
+              setSelectedYearLevel(e.target.value);
+
+              setFormData(prev => ({ ...prev, section_id: '' }));
+            }}
+            required
+            className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+          >
+            <option value="">Select Year Level</option>
+            {Array.isArray(yearLevels) && yearLevels.map((yl) => (
+              <option key={yl.year_id} value={yl.year_id}>
+                {yl.year_level_name}
+              </option>
+            ))}
+          </select>
+
           </div>
 
           {/*Semester Dropdown */}
@@ -324,7 +288,7 @@ export default function EditStudent() {
               value={selectedSemester}
               onChange={(e) => {
                 setSelectedSemester(e.target.value);
-                // Clear selected section when semester changes to prompt re-selection
+
                 setFormData(prev => ({ ...prev, section_id: '' }));
               }}
               required
@@ -383,18 +347,7 @@ export default function EditStudent() {
           </div>
         </form>
       </section>
-
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isEditStudentModalOpen}
-        onClose={handleCloseEditStudentModal}
-        onConfirm={handleConfirmEditStudent}
-        title="Confirm Edit Student"
-        message={`Are you sure you want to update the student "${formData.firstname} ${formData.lastname}"?`}
-        confirmText="Update Student"
-        loading={isLoading}
-        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
-      />
     </div>
   );
 }
+
