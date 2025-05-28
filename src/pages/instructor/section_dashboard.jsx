@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -9,7 +9,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [students, setStudents] = useState([]);
     const [presentStudents, setPresentStudents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    // Initialize sectionInfo from location.state if available, otherwise null
     const location = useLocation();
     const [sectionInfo, setSectionInfo] = useState(location.state?.sectionInfo || null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +16,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [selectedStudentForRequest, setSelectedStudentForRequest] = useState('');
     const [requestReason, setRequestReason] = useState('');
     const [dropdownStudents, setDropdownStudents] = useState([]);
+    const [showColorModal, setShowColorModal] = useState(false);
+    const [selectedColor, setSelectedColor] = useState(sectionInfo?.hexcode || '#0097b2');
+    const colorModalRef = useRef(null);
+    const settingsButtonRef = useRef(null);
+    const [lateStudents, setLateStudents] = useState([]);
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
@@ -31,7 +35,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     // Fetch section info for header (only if not passed via location state)
     useEffect(() => {
-        // If sectionInfo is already available from location.state, no need to fetch again
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
@@ -43,12 +46,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     setSectionInfo(data);
                 } catch (err) {
                     console.error("Error fetching section info:", err);
-                    // Handle error state for section info, maybe show a generic header
                 }
             }
             fetchSectionInfo();
         }
-    }, [sectionId, sectionInfo]); // Added sectionInfo to dependency array to prevent unnecessary fetches
+    }, [sectionId, sectionInfo]);
 
     useEffect(() => {
         if (!instructor?.instructor_id) return;
@@ -70,6 +72,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                 const presentIds = data.filter(student => student.status === 'Present').map(s => s.student_details_id);
                 setPresentStudents(presentIds);
+                const lateIds = data.filter(student => student.status === 'Late').map(s => s.student_details_id);
+                setLateStudents(lateIds);
                 setTimeout(() => setIsLoading(false), 1500);
             } catch (error) {
                 console.error("Error fetching students:", error);
@@ -81,11 +85,31 @@ export default function Teacher_Dashboard({ selectedDate }) {
     }, [selectedDate, instructor?.instructor_id, sectionId]);
 
     const toggleAttendance = async (student) => {
-        const updatedList = presentStudents.includes(student.student_details_id)
-            ? presentStudents.filter(id => id !== student.student_details_id)
-            : [...presentStudents, student.student_details_id];
+        const isPresent = presentStudents.includes(student.student_details_id);
+        const isLate = lateStudents.includes(student.student_details_id);
 
-        setPresentStudents(updatedList);
+        let newPresent = presentStudents;
+        let newLate = lateStudents;
+        let newStatus = 'Absent';
+
+        if (isLate) {
+            // If currently late, clicking sets to Absent
+            newLate = lateStudents.filter(id => id !== student.student_details_id);
+            newPresent = presentStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Absent'; // <-- FIXED HERE
+        } else if (isPresent) {
+            // If currently present, clicking sets to Absent
+            newPresent = presentStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Absent';
+        } else {
+            // If currently absent, clicking sets to Present
+            newPresent = [...presentStudents, student.student_details_id];
+            newLate = lateStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Present';
+        }
+
+        setPresentStudents(newPresent);
+        setLateStudents(newLate);
 
         const attendanceData = {
             student_details_id: student.student_details_id,
@@ -94,7 +118,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             program_details_id: student.program_details_id,
             admin_id: student.admin_id,
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
-            status: updatedList.includes(student.student_details_id) ? 'Present' : 'Absent',
+            status: newStatus,
         };
 
         try {
@@ -113,16 +137,13 @@ export default function Teacher_Dashboard({ selectedDate }) {
         } catch (error) {
             console.error('Error saving attendance:', error);
             // Optionally revert the UI state if saving fails
-            setPresentStudents(currentList =>
-                currentList.includes(student.student_details_id)
-                    ? currentList.filter(id => id !== student.student_details_id)
-                    : [...currentList, student.student_details_id]
-            );
         }
     };
 
     const filteredStudents = students.filter(student =>
-        student.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (student.name || '')
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
     );
 
     useEffect(() => {
@@ -140,17 +161,50 @@ export default function Teacher_Dashboard({ selectedDate }) {
     fetchDropdownStudents();
 }, [instructor?.instructor_id, sectionId]);
 
+    const markAsLate = async (student) => {
+        const attendanceData = {
+            student_details_id: student.student_details_id,
+            instructor_id: instructor.instructor_id,
+            section_id: student.section_id,
+            program_details_id: student.program_details_id,
+            admin_id: student.admin_id,
+            date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+            status: 'Late',
+        };
+
+        try {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData)
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const result = await res.json();
+            console.log('Marked as Late:', result);
+
+            // Update local state: add to lateStudents, remove from presentStudents if needed
+            setLateStudents((prev) => [...new Set([...prev, student.student_details_id])]);
+            setPresentStudents((prev) => prev.filter(id => id !== student.student_details_id));
+        } catch (error) {
+            console.error('Error marking as late:', error);
+        }
+    };
+
 
     const handleAddDropRequest = async () => {
-    if (!selectedStudentForRequest || !requestReason.trim()) {
-        alert("Please select a student and enter a reason.");
-        return;
-    }
+        if (!selectedStudentForRequest || !requestReason.trim()) {
+            alert("Please select a student and enter a reason.");
+            return;
+        }
 
-    const requestData = {
-        student_details_id: selectedStudentForRequest,
-        reason: requestReason,
-    };
+        const requestData = {
+            student_details_id: selectedStudentForRequest,
+            reason: requestReason,
+        };
 
     try {
         const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
@@ -159,22 +213,21 @@ export default function Teacher_Dashboard({ selectedDate }) {
             body: JSON.stringify(requestData),
         });
 
-        const result = await res.json();
+            const result = await res.json();
 
-        if (res.ok && result.success) {
-            alert("Drop request submitted successfully.");
-            setShowRequestModal(false);
-            setSelectedStudentForRequest('');
-            setRequestReason('');
-        } else {
-            alert("Failed to submit: " + (result.error || "Unknown error"));
+            if (res.ok && result.success) {
+                alert("Drop request submitted successfully.");
+                setShowRequestModal(false);
+                setSelectedStudentForRequest('');
+                setRequestReason('');
+            } else {
+                alert("Failed to submit: " + (result.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("An error occurred while submitting the drop request.");
         }
-    } catch (error) {
-        console.error("Submission error:", error);
-        alert("An error occurred while submitting the drop request.");
-    }
-};
-
+    };
 
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
@@ -205,10 +258,66 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                 </svg>
                             </button>
-                            <FiSettings className="text-xl cursor-pointer" />
+                            <div className="relative">
+                                <FiSettings
+                                    ref={settingsButtonRef} // Attach ref here
+                                    className="text-xl cursor-pointer"
+                                    onClick={() => setShowColorModal(prev => !prev)} // Change to toggle
+                                />
+
+                                {showColorModal && (
+                                    <div ref={colorModalRef} className="absolute right-0 mt-2 w-60 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200">
+                                        
+                                        <h2 className="text-sectionInfo?.hexcode font-bold text-lg mb-4" style={{ color: sectionInfo?.hexcode }}>Change Section Color</h2>
+                                        <input
+                                            type="color"
+                                            value={selectedColor}
+                                            onChange={(e) => setSelectedColor(e.target.value)}
+                                            className="w-24 h-12 border rounded mb-4"
+                                        />
+                                        <div className="flex justify-center gap-4">
+                                            <button
+                                            onClick={async () => {
+                                                // Save to backend
+                                                try {
+                                                const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/update_section_color.php', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                    section_id: sectionId,
+                                                    hexcode: selectedColor
+                                                    }),
+                                                });
+
+                                                const result = await res.json();
+                                                if (result.success) {
+                                                    setSectionInfo(prev => ({ ...prev, hexcode: selectedColor }));
+                                                    alert('Color updated successfully!');
+                                                    setShowColorModal(false);
+                                                } else {
+                                                    alert('Update failed: ' + (result.error || 'Unknown error'));
+                                                }
+                                                } catch (err) {
+                                                console.error('Failed to update color:', err);
+                                                alert('Error updating color.');
+                                                }
+                                            }}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                            >
+                                            Save
+                                            </button>
+                                            <button
+                                            onClick={() => setShowColorModal(false)}
+                                            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                                            >
+                                            Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                    )}
+                </div>
                         </div>
                         <div>
-                            {/* Adjusted to display course_name as main title and section_name below it */}
                             <h1 className="text-2xl font-bold">
                                 {sectionInfo?.course_name || 'Course Title (Missing)'}
                             </h1>
@@ -239,13 +348,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                         d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                             </div>
-                            <input
-                                type="text"
-                                id="table-search"
-                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
-                                placeholder="Search for students."
-                                style={{backgroundColor: sectionInfo?.hexcode || '#0097b2'}}
-                            />
+<input
+    type="text"
+    id="table-search"
+    className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+    placeholder="Search for students."
+    style={{backgroundColor: sectionInfo?.hexcode || '#0097b2'}}
+    value={searchTerm}
+    onChange={e => setSearchTerm(e.target.value)}
+/>
                         </div>
                         <button
                             onClick={() => setShowRequestModal(true)}
@@ -278,15 +389,18 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </div>
                         ))
                         : filteredStudents.map((student, index) => {
+                            // ...inside filteredStudents.map...
                             const isPresent = presentStudents.includes(student.student_details_id);
+                            const isLate = lateStudents.includes(student.student_details_id);
                             const name = student.name || 'No Name';
                             return (
                                 <div
                                     key={index}
                                     onClick={() => toggleAttendance(student)}
+                                    onDoubleClick={() => markAsLate(student)}
                                     className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                        bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
-                                        ${isPresent ? 'opacity-100' : 'opacity-60'}`}
+                                        bg-white border-2 rounded-[20px] flex flex-col justify-between
+                                        ${isLate ? 'border-yellow-400 bg-yellow-100 opacity-100' : isPresent ? 'border-[#e4eae9] opacity-100' : 'border-[#e4eae9] opacity-60'}`}
                                 >
                                     <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                         <img
@@ -302,12 +416,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     </div>
                                     <div className="pl-3 pr-4 pt-2 pb-4 items-center">
                                         <p
-                                            className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`} // Static Tailwind classes here
+                                            className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`}
                                             style={{
-                                                color: isPresent ? (sectionInfo?.hexcode || '#0097b2') : '#737373' // Dynamic color here
+                                                color: isLate
+                                                    ? '#b59b00'
+                                                    : isPresent
+                                                    ? (sectionInfo?.hexcode || '#0097b2')
+                                                    : '#737373'
                                             }}
                                         >
-                                            {isPresent ? 'Present' : 'Absent'}
+                                            {isLate ? 'Late' : isPresent ? 'Present' : 'Absent'}
                                         </p>
                                         <div className="flex items-center justify-between">
                                             <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
@@ -321,6 +439,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     </div>
                                 </div>
                             );
+// ...existing code...
                         })}
                 </div>
             </section>
@@ -329,11 +448,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
             {showRequestModal && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
-                    onClick={() => setShowRequestModal(false)} // Click outside to close
+                    onClick={() => setShowRequestModal(false)}
                 >
                     <div
                         className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md mx-auto"
-                        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing modal
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-xl font-bold text-[#0097b2] mb-4">Add Request</h2>
 
@@ -348,16 +467,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 value={selectedStudentForRequest}
                                 onChange={(e) => setSelectedStudentForRequest(e.target.value)}
                             >
-                                <option value="" disabled>Select Student</option> {/* Placeholder */}
+                                <option value="" disabled>Select Student</option>
                                 {dropdownStudents.map((student) => (
                                     <option key={student.student_details_id} value={student.student_details_id}>
                                         {student.student_name}
                                     </option>
                                 ))}
                             </select>
-
                         </div>
-
 
                         {/* Reason Textarea */}
                         <div className="mb-6">
@@ -392,6 +509,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 </div>
             )}
+            
+            
+
         </div>
+
+        
     );
 }

@@ -3,11 +3,11 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const EditSection = () => {
-  const { id } = useParams(); // 'id' from the URL parameter like /admin-edit-section/:id
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    section_id: '', // Ensure section_id is part of formData to be sent on update
+    section_id: '',
     section_name: '',
     course_id: '',
     schedule_day: '',
@@ -19,41 +19,28 @@ const EditSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set background styles (Consider moving this to a higher-level component or global CSS if it's app-wide)
-    document.body.style.backgroundImage = "url('assets/ustp_theme.png')";
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundRepeat = "no-repeat";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundAttachment = "fixed";
-    document.body.style.margin = "0";
-    document.body.style.height = "100vh";
-
-    // 1. Load existing section
-    // Change to GET request, sending section_id in query params
+    // Load section info
     axios
       .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
-        console.log("Response from get_single_section.php:", res.data); // Debugging
         if (res.data.success && res.data.section) {
-          // Ensure section_id is set in formData for the update request later
           setFormData({ ...res.data.section, section_id: id });
         } else {
-          // This alert will now correctly reflect if section is not found or other PHP issues
           alert(res.data.message || 'Failed to load section data.');
+          navigate('/admin-sections');
         }
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Error fetching section data:", err); // Log the actual error
-        alert('Error fetching section data. Please check console for details.');
+      .catch(() => {
+        alert('Error fetching section data.');
+        navigate('/admin-sections');
         setLoading(false);
       });
 
-    // 2. Load courses
+    // Load course options
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php') // Changed to get_courses.php as per previous file
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
       .then((res) => {
-        console.log("Response from get_courses.php:", res.data); // Debugging
         if (res.data.success) {
           setCourses(res.data.courses);
         } else {
@@ -61,15 +48,13 @@ const EditSection = () => {
         }
       })
       .catch((err) => {
-          console.error("Error fetching courses:", err);
+        console.error("Error fetching courses:", err);
       });
-  }, [id]); // Dependency array: re-run if 'id' changes
+  }, [id, navigate]);
 
   const handleChange = (e) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
@@ -77,117 +62,134 @@ const EditSection = () => {
     axios
       .post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData)
       .then((res) => {
-        console.log("Response from update_section.php:", res.data); // Debugging
         if (res.data.success) {
-          alert('Section updated!');
+          alert('Section updated successfully!');
           navigate('/admin-sections');
         } else {
           alert(res.data.message || 'Update failed.');
         }
       })
-      .catch((err) => {
-        console.error("Error updating section:", err); // Log the actual error
-        alert('Server error during update. Please check console for details.');
+      .catch(() => {
+        alert('Server error during update.');
       });
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
-  // ... rest of your JSX form (it looks correct)
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl"
-      >
-        <h2 className="text-3xl font-bold mb-6 text-blue-700 text-center">
-          Edit Section
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Section Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Section Name:</label>
-            <input
-              type="text"
-              name="section_name"
-              value={formData.section_name}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-
-          {/* Course */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Course:</label>
-            <select
-              name="course_id"
-              value={formData.course_id}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2"
-            >
-              <option value="">Select a course</option>
-              {courses.map((course) => (
-                <option key={course.course_id} value={course.course_id}>
-                  {course.course_code}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Schedule Day */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Day:</label>
-            <select
-              name="schedule_day"
-              value={formData.schedule_day}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2"
-            >
-              <option value="">Select a day</option>
-              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
-                <option key={day} value={day}>{day}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Start Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Time:</label>
-            <input
-              type="time"
-              name="start_time"
-              value={formData.start_time}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-
-          {/* End Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">End Time:</label>
-            <input
-              type="time"
-              name="end_time"
-              value={formData.end_time}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
+        {/* Header */}
+        <div
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          style={{
+            backgroundImage: "url('assets/teacher_vector.png')",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right',
+            backgroundSize: 'contain',
+          }}
+        >
+          <h1 className="text-2xl text-blue-700 font-bold">Edit Section</h1>
         </div>
 
-        <button
-          type="submit"
-          className="mt-6 w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-800"
-        >
-          Update Section
-        </button>
-      </form>
+        {/* Form Container */}
+        <div className="bg-white shadow-md p-8 rounded-lg">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Hidden ID */}
+            <input type="hidden" name="section_id" value={formData.section_id} />
+
+            {/* Section Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Section Name</label>
+              <input
+                type="text"
+                name="section_name"
+                value={formData.section_name}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+              />
+            </div>
+
+            {/* Course Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Course</label>
+              <select
+                name="course_id"
+                value={formData.course_id}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+              >
+                <option value="">Select a course</option>
+                {courses.map((course) => (
+                  <option key={course.course_id} value={course.course_id}>
+                    {course.course_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Schedule Day */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Schedule Day</label>
+              <input
+                type="text"
+                name="schedule_day"
+                value={formData.schedule_day}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+              />
+            </div>
+
+            {/* Start Time */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Start Time</label>
+              <input
+                type="time"
+                name="start_time"
+                value={formData.start_time}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+              />
+            </div>
+
+            {/* End Time */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">End Time</label>
+              <input
+                type="time"
+                name="end_time"
+                value={formData.end_time}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="md:col-span-2 flex justify-end items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/admin-sections')}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
+              >
+                Update Section
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
     </div>
   );
 };
