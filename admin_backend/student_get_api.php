@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['student_id'])) {
     // Adjust query to fetch all needed fields
     $stmt = $conn->prepare("
         SELECT 
-            s.student_id, s.firstname, s.middlename, s.lastname, s.date_of_birth, s.contact_number, s.email, s.street, s.city, s.province, s.zipcode, s.country,
+            s.student_id, s.firstname, s.middlename, s.lastname, s.date_of_birth, s.contact_number, s.email, s.street, s.city, s.province, s.zipcode, s.country, s.image, 
             sd.section_id, sd.instructor_id, sd.program_details_id
         FROM student s
         INNER JOIN student_details sd ON s.student_id = sd.student_id

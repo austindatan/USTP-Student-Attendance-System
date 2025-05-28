@@ -9,8 +9,17 @@ include __DIR__ . '/../src/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $query = "
-       SELECT section.section_name, course.course_name, section.schedule_day, section.start_time, section.end_time FROM section
-INNER JOIN course ON course.course_id = section.course_id
+        SELECT
+            section.section_id,  -- <--- ADD THIS LINE
+            section.section_name,
+            course.course_name,
+            section.schedule_day,
+            section.start_time,
+            section.end_time
+        FROM
+            section
+        INNER JOIN
+            course ON course.course_id = section.course_id
     ";
 
     $result = $conn->query($query);
@@ -22,8 +31,13 @@ INNER JOIN course ON course.course_id = section.course_id
         }
     }
 
-    echo json_encode($sections);
+    echo json_encode(["success" => true, "sections" => $sections]);
 } else {
     http_response_code(405);
-    echo json_encode(["error" => "Invalid request method."]);
+    echo json_encode(["success" => false, "error" => "Invalid request method."]);
 }
+
+if ($conn) {
+    $conn->close();
+}
+?>

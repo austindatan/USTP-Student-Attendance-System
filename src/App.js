@@ -7,6 +7,7 @@ import EditProfile from "./pages/instructor/EditProfile";
 import LeftSidebar from './components/leftsidebar';
 import AdminLeftSidebar from './components/AdminLeftSidebar';
 import RightSidebar from './components/rightsidebar';
+import StudentLeftSideBar from './components/StudentLeftSideBar';
 
 // AUTH
 import LoginStudent from "./pages/login/LoginStudent";
@@ -31,11 +32,13 @@ import InstructorAdminPage from './pages/admin/instructorAdminpage';
 import AddStudent from './pages/admin/AddStudent';
 import EditStudent from './pages/admin/EditStudent';
 import Sections from './pages/admin/sections';
-import Courses from './pages/admin/Courses';
+import Courses from './pages/admin/courses';
 import AddInstructor from './pages/admin/AddInstructor';
 import EditInstructor from './pages/admin/EditInstructor';
 import AddCourse from './pages/admin/AddCourse';
 import AddSection from './pages/admin/AddSection';
+import EditSection from './pages/admin/EditSection';
+import EditCourse from './pages/admin/EditCourse';
 
 // ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -72,9 +75,19 @@ function AdminLayout({ children }) {
   );
 }
 
+function StudentLayout({ children }) {
+  return (
+    <div className="flex h-screen w-full">
+      <StudentLeftSideBar />
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  // Corrected line: Use backticks for the entire CSS url() string
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
   return (
@@ -92,12 +105,18 @@ function App() {
           path="/student-dashboard"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
+              <StudentLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
                 <StudentDashboard />
-              </DashboardLayout>
+              </StudentLayout>
             </ProtectedRoute>
           }
         />
+
 
         {/* Instructor Protected Routes */}
         <Route
@@ -217,7 +236,19 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
-                <AddSection /> 
+                <AddSection />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ROUTE FOR EDITING SECTIONS */}
+        <Route
+          path="/admin-edit-section/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <EditSection />
               </AdminLayout>
             </ProtectedRoute>
           }
@@ -241,6 +272,18 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
               <AdminLayout>
                 <AddCourse />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ROUTE FOR EDITING COURSES */}
+        <Route
+          path="/admin-courses/edit/:id"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+              <AdminLayout>
+                <EditCourse />
               </AdminLayout>
             </ProtectedRoute>
           }

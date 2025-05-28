@@ -1,58 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; 
+import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal';
 
-export default function AddCourse() {
+export default function EditCourse() {
   const [formData, setFormData] = useState({
+    course_id: '',
     course_name: '',
     description: '',
   });
 
+  const { id } = useParams(); 
   const navigate = useNavigate();
-  const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false); 
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isEditCourseModalOpen, setIsEditCourseModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
+      .then((response) => {
+        setFormData(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching course:', error);
+        alert('Failed to fetch course data.');
+      });
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleOpenAddCourseModal = (e) => {
+  const handleOpenEditCourseModal = (e) => {
     e.preventDefault();
-
     if (!formData.course_name || !formData.description) {
       alert('Please fill in both the Course Name and Description.');
       return;
     }
-    setIsAddCourseModalOpen(true);
+    setIsEditCourseModalOpen(true);
   };
 
-  const handleConfirmAddCourse = async () => {
-    setIsLoading(true); 
+  const handleConfirmEditCourse = async () => {
+    setIsLoading(true);
     try {
-      await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add.php',
-        formData
-      );
-      alert('Course added successfully!');
-      setIsAddCourseModalOpen(false); 
-
-      setFormData({
-        course_name: '',
-        description: '',
-      });
+      await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
+      alert('Course updated successfully!');
+      setIsEditCourseModalOpen(false);
       navigate('/admin-courses');
     } catch (error) {
-      console.error('Error adding course:', error.response?.data || error.message);
-      alert(`Failed to add course: ${error.response?.data?.message || 'Please check the console.'}`);
+      console.error('Error updating course:', error);
+      alert(`Failed to update course: ${error.response?.data?.message || 'Please check the console.'}`);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
-  const handleCloseAddCourseModal = () => {
-    setIsAddCourseModalOpen(false); 
+  const handleCloseEditCourseModal = () => {
+    setIsEditCourseModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -65,22 +69,20 @@ export default function AddCourse() {
       style={{ backgroundImage: "url('/assets/ustp_theme.png')" }}
     >
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-5xl mx-auto">
-
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('/assets/classroom_vector.png')", 
+            backgroundImage: "url('/assets/classroom_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
           }}
         >
-          <h1 className="text-2xl text-blue-700 font-bold">Add New Course</h1>
+          <h1 className="text-2xl text-blue-700 font-bold">Edit Course</h1>
         </div>
 
         <div className="bg-white shadow-md p-8 rounded-lg">
-          <form onSubmit={handleOpenAddCourseModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+          <form onSubmit={handleOpenEditCourseModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700">Course Name</label>
               <input
@@ -113,28 +115,27 @@ export default function AddCourse() {
               >
                 Cancel
               </button>
-
               <button
-                type="submit" 
+                type="submit"
                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
               >
-                Add Course
+                Save Changes
               </button>
             </div>
           </form>
         </div>
       </section>
 
-      {/* Confirmation Modal for Add Course */}
+      {/* Confirmation Modal */}
       <ConfirmationModal
-        isOpen={isAddCourseModalOpen}
-        onClose={handleCloseAddCourseModal}
-        onConfirm={handleConfirmAddCourse}
-        title="Confirm Course Addition"
-        message={`Are you sure you want to add the course "${formData.course_name}"?`}
-        confirmText="Add Course"
-        loading={isLoading} 
-        confirmButtonClass="bg-blue-700 hover:bg-blue-800" 
+        isOpen={isEditCourseModalOpen}
+        onClose={handleCloseEditCourseModal}
+        onConfirm={handleConfirmEditCourse}
+        title="Confirm Edit"
+        message={`Are you sure you want to update the course "${formData.course_name}"?`}
+        confirmText="Update Course"
+        loading={isLoading}
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
       />
     </div>
   );

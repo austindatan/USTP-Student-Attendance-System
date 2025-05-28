@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -16,8 +16,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [selectedStudentForRequest, setSelectedStudentForRequest] = useState('');
     const [requestReason, setRequestReason] = useState('');
     const [dropdownStudents, setDropdownStudents] = useState([]);
+    const [showColorModal, setShowColorModal] = useState(false);
+    const [selectedColor, setSelectedColor] = useState(sectionInfo?.hexcode || '#0097b2');
+    const colorModalRef = useRef(null);
+    const settingsButtonRef = useRef(null);
+    const [lateStudents, setLateStudents] = useState([]);
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
+
+    console.log("sectionInfo", sectionInfo);
+    console.log("Image:", sectionInfo?.image);
 
     useEffect(() => {
         if (!instructor) {
@@ -30,7 +38,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -52,7 +60,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}`
+                    `http://localhost/ustp-student-attendance-system/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
                 );
 
                 if (!response.ok) {
@@ -64,6 +72,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                 const presentIds = data.filter(student => student.status === 'Present').map(s => s.student_details_id);
                 setPresentStudents(presentIds);
+                const lateIds = data.filter(student => student.status === 'Late').map(s => s.student_details_id);
+                setLateStudents(lateIds);
                 setTimeout(() => setIsLoading(false), 1500);
             } catch (error) {
                 console.error("Error fetching students:", error);
@@ -75,11 +85,31 @@ export default function Teacher_Dashboard({ selectedDate }) {
     }, [selectedDate, instructor?.instructor_id, sectionId]);
 
     const toggleAttendance = async (student) => {
-        const updatedList = presentStudents.includes(student.student_details_id)
-            ? presentStudents.filter(id => id !== student.student_details_id)
-            : [...presentStudents, student.student_details_id];
+        const isPresent = presentStudents.includes(student.student_details_id);
+        const isLate = lateStudents.includes(student.student_details_id);
 
-        setPresentStudents(updatedList);
+        let newPresent = presentStudents;
+        let newLate = lateStudents;
+        let newStatus = 'Absent';
+
+        if (isLate) {
+            // If currently late, clicking sets to Absent
+            newLate = lateStudents.filter(id => id !== student.student_details_id);
+            newPresent = presentStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Absent'; // <-- FIXED HERE
+        } else if (isPresent) {
+            // If currently present, clicking sets to Absent
+            newPresent = presentStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Absent';
+        } else {
+            // If currently absent, clicking sets to Present
+            newPresent = [...presentStudents, student.student_details_id];
+            newLate = lateStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Present';
+        }
+
+        setPresentStudents(newPresent);
+        setLateStudents(newLate);
 
         const attendanceData = {
             student_details_id: student.student_details_id,
@@ -88,11 +118,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
             program_details_id: student.program_details_id,
             admin_id: student.admin_id,
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
-            status: updatedList.includes(student.student_details_id) ? 'Present' : 'Absent',
+            status: newStatus,
         };
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -106,32 +136,64 @@ export default function Teacher_Dashboard({ selectedDate }) {
             console.log('Attendance saved:', result);
         } catch (error) {
             console.error('Error saving attendance:', error);
-            setPresentStudents(currentList =>
-                currentList.includes(student.student_details_id)
-                    ? currentList.filter(id => id !== student.student_details_id)
-                    : [...currentList, student.student_details_id]
-            );
+            // Optionally revert the UI state if saving fails
         }
     };
 
     const filteredStudents = students.filter(student =>
-        student.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (student.name || '')
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
     );
 
     useEffect(() => {
-        const fetchDropdownStudents = async () => {
-            try {
-                const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                const data = await res.json();
-                setDropdownStudents(data);
-            } catch (error) {
-                console.error("Error fetching dropdown students:", error);
-            }
+    const fetchDropdownStudents = async () => {
+        try {
+            const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const data = await res.json();
+            setDropdownStudents(data);
+        } catch (error) {
+            console.error("Error fetching dropdown students:", error);
+        }
+    };
+
+    fetchDropdownStudents();
+}, [instructor?.instructor_id, sectionId]);
+
+    const markAsLate = async (student) => {
+        const attendanceData = {
+            student_details_id: student.student_details_id,
+            instructor_id: instructor.instructor_id,
+            section_id: student.section_id,
+            program_details_id: student.program_details_id,
+            admin_id: student.admin_id,
+            date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+            status: 'Late',
         };
 
-        fetchDropdownStudents();
-    }, [instructor?.instructor_id, sectionId]);
+        try {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData)
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const result = await res.json();
+            console.log('Marked as Late:', result);
+
+            // Update local state: add to lateStudents, remove from presentStudents if needed
+            setLateStudents((prev) => [...new Set([...prev, student.student_details_id])]);
+            setPresentStudents((prev) => prev.filter(id => id !== student.student_details_id));
+        } catch (error) {
+            console.error('Error marking as late:', error);
+        }
+    };
+
 
     const handleAddDropRequest = async () => {
         if (!selectedStudentForRequest || !requestReason.trim()) {
@@ -144,12 +206,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
             reason: requestReason,
         };
 
-        try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData),
-            });
+    try {
+        const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/add_drop_request.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData),
+        });
 
             const result = await res.json();
 
@@ -180,11 +242,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 ) : (
                     <div
-                        className="bg-[#0097b2] rounded-lg p-6 text-white font-poppins mb-6 relative"
+                        className="rounded-lg p-6 text-white font-poppins mb-6 relative"
                         style={{
-                            backgroundImage: `url(${process.env.PUBLIC_URL}/assets/classes_vector_2.png)`,
+                            backgroundColor: sectionInfo?.hexcode || '#0097b2',
+                            backgroundImage: `url(${process.env.PUBLIC_URL}/${sectionInfo?.image})`,
                             backgroundRepeat: "no-repeat",
-                            backgroundPosition: "right 50px center",
+                            backgroundPosition: "right 20px center",
                             backgroundSize: "contain",
                         }}
                     >
@@ -195,11 +258,68 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                 </svg>
                             </button>
-                            <FiSettings className="text-xl cursor-pointer" />
+                            <div className="relative">
+                                <FiSettings
+                                    ref={settingsButtonRef} // Attach ref here
+                                    className="text-xl cursor-pointer"
+                                    onClick={() => setShowColorModal(prev => !prev)} // Change to toggle
+                                />
+
+                                {showColorModal && (
+                                    <div ref={colorModalRef} className="absolute right-0 mt-2 w-60 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200">
+                                        
+                                        <h2 className="text-sectionInfo?.hexcode font-bold text-lg mb-4" style={{ color: sectionInfo?.hexcode }}>Change Section Color</h2>
+                                        <input
+                                            type="color"
+                                            value={selectedColor}
+                                            onChange={(e) => setSelectedColor(e.target.value)}
+                                            className="w-24 h-12 border rounded mb-4"
+                                        />
+                                        <div className="flex justify-center gap-4">
+                                            <button
+                                            onClick={async () => {
+                                                // Save to backend
+                                                try {
+                                                const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                    section_id: sectionId,
+                                                    hexcode: selectedColor
+                                                    }),
+                                                });
+
+                                                const result = await res.json();
+                                                if (result.success) {
+                                                    setSectionInfo(prev => ({ ...prev, hexcode: selectedColor }));
+                                                    alert('Color updated successfully!');
+                                                    setShowColorModal(false);
+                                                } else {
+                                                    alert('Update failed: ' + (result.error || 'Unknown error'));
+                                                }
+                                                } catch (err) {
+                                                console.error('Failed to update color:', err);
+                                                alert('Error updating color.');
+                                                }
+                                            }}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                            >
+                                            Save
+                                            </button>
+                                            <button
+                                            onClick={() => setShowColorModal(false)}
+                                            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                                            >
+                                            Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                    )}
+                </div>
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold">
-                                {sectionInfo?.course_name || 'Course Title'}
+                                {sectionInfo?.course_name || 'Course Title (Missing)'}
                             </h1>
                             <h2 className="text-xl font-semibold">
                                 {sectionInfo?.section_name || 'Section Name'}
@@ -231,15 +351,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             <input
                                 type="text"
                                 id="table-search"
-                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg bg-[#0097b2] focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
                                 placeholder="Search for students."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
+                                style={{backgroundColor: sectionInfo?.hexcode || '#0097b2'}}
                             />
                         </div>
                         <button
                             onClick={() => setShowRequestModal(true)}
-                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 border-[#0097b2] bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                            style={{borderColor: sectionInfo?.hexcode || '#0097b2', color: sectionInfo?.hexcode || '#0097b2'}}
                         >
                             Add Request
                         </button>
@@ -247,48 +367,78 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 )}
 
                 {/* Student Cards */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                    {filteredStudents.map((student, index) => {
-                        const isPresent = presentStudents.includes(student.student_details_id);
-                        const name = student.name || 'No Name';
-                        return (
-                            <div
-                                key={index}
-                                onClick={() => toggleAttendance(student)}
-                                className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                    bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
-                                    ${isPresent ? 'opacity-100' : 'opacity-60'}`}
-                            >
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
+                    {isLoading
+                        ? Array.from({ length: 12 }).map((_, i) => (
+                            <div key={i} className={`cursor-pointer animate-pulse bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between w-24 sm:w-36`}>
                                 <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                     <img
-                                        src={`http://localhost/USTP-Student-Attendance-System/uploads/${student.image}?${new Date().getTime()}`}
-                                        className={`w-full h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
-                                        alt={name}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = `${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`;
-                                            console.warn(`Failed to load image for ${name}. Using fallback.`);
-                                        }}
+                                        src={`${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`}
+                                        className="w-full h-full object-cover grayscale"
+                                        alt="Loading..."
                                     />
                                 </div>
-                                <div className="pl-3 pr-4 pt-2 pb-4 items-center">
-                                    <p className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]
-                                        ${isPresent ? 'text-[#0097b2]' : 'text-[#737373]'}`}>
-                                        {isPresent ? 'Present' : 'Absent'}
-                                    </p>
+                                <div className="p-3">
+                                    <p className="font-[Barlow] text-xs font-bold ml-[5px] text-[#737373] bg-gray-200 rounded h-4 mb-2"></p>
                                     <div className="flex items-center justify-between">
-                                        <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
-                                            {name.includes(" ") ? (
-                                                <>
-                                                    {name.split(" ")[0]} <br /> {name.split(" ")[1]}
-                                                </>
-                                            ) : name}
-                                        </p>
+                                        <div className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2] bg-gray-200 rounded w-2/3 h-4"></div>
                                     </div>
                                 </div>
                             </div>
-                        );
-                    })}
+                        ))
+                        : filteredStudents.map((student, index) => {
+                            // ...inside filteredStudents.map...
+                            const isPresent = presentStudents.includes(student.student_details_id);
+                            const isLate = lateStudents.includes(student.student_details_id);
+                            const name = student.name || 'No Name';
+                            return (
+                                <div
+                                    key={index}
+                                    onClick={() => toggleAttendance(student)}
+                                    onDoubleClick={() => markAsLate(student)}
+                                    className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
+                                        bg-white border-2 rounded-[20px] flex flex-col justify-between
+                                        ${isLate ? 'border-yellow-400 bg-yellow-100 opacity-100' : isPresent ? 'border-[#e4eae9] opacity-100' : 'border-[#e4eae9] opacity-60'}`}
+                                >
+                                    <div className="overflow-hidden rounded-t-[20px] flex justify-center">
+                                        <img
+                                            src={`http://localhost/ustp-student-attendance-system/api/${student.image}?${new Date().getTime()}`}
+                                            className={`w-full h-36 object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
+                                            alt={name}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = `${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`;
+                                                console.warn(`Failed to load image for ${name}. Using fallback.`);
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="pl-3 pr-4 pt-2 pb-4 items-center">
+                                        <p
+                                            className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`}
+                                            style={{
+                                                color: isLate
+                                                    ? '#b59b00'
+                                                    : isPresent
+                                                    ? (sectionInfo?.hexcode || '#0097b2')
+                                                    : '#737373'
+                                            }}
+                                        >
+                                            {isLate ? 'Late' : isPresent ? 'Present' : 'Absent'}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
+                                                {name.includes(" ") ? (
+                                                    <>
+                                                        {name.split(" ")[0]} {name.split(" ")[1]} <br /> {name.split(" ")[2]} {name.split(" ")[3]}
+                                                    </>
+                                                ) : name}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+// ...existing code...
+                        })}
                 </div>
             </section>
 
@@ -357,6 +507,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 </div>
             )}
+            
+            
+
         </div>
+
+        
     );
 }

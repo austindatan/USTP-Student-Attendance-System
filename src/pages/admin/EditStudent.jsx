@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; 
 
 export default function EditStudent() {
   const { student_id } = useParams();
@@ -29,6 +30,9 @@ export default function EditStudent() {
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
 
+  const [isEditStudentModalOpen, setIsEditStudentModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const fetchDropdowns = axios.all([
       axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
@@ -54,7 +58,7 @@ export default function EditStudent() {
           date_of_birth: student.date_of_birth || '',
           contact_number: student.contact_number || '',
           email: student.email || '',
-          password: '',
+          password: '', 
           street: student.street || '',
           city: student.city || '',
           province: student.province || '',
@@ -82,8 +86,19 @@ export default function EditStudent() {
     setImageFile(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ 
+  const handleOpenEditStudentModal = (e) => {
+    e.preventDefault(); 
+
+    if (!formData.firstname || !formData.lastname || !formData.email || !formData.date_of_birth || !formData.contact_number) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+    setIsEditStudentModalOpen(true);
+  };
+
+  const handleConfirmEditStudent = async () => {
+    setIsLoading(true); 
     const submissionData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       submissionData.append(key, value);
@@ -93,21 +108,28 @@ export default function EditStudent() {
     if (imageFile) submissionData.append('image', imageFile);
 
     try {
-const res = await axios.post(
-  `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
-  submissionData,
-  {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  }
-);
+      const res = await axios.post(
+        `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
+        submissionData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
       alert(res.data.message || 'Student updated successfully!');
+      setIsEditStudentModalOpen(false); 
       navigate('/admin-students');
     } catch (error) {
       console.error('Failed to update student:', error);
-      alert('Error updating student. Please check the console.');
+      alert(`Error updating student: ${error.response?.data?.message || 'Please check the console.'}`);
+    } finally {
+      setIsLoading(false); 
     }
+  };
+
+  const handleCloseEditStudentModal = () => {
+    setIsEditStudentModalOpen(false);
   };
 
   return (
@@ -117,7 +139,7 @@ const res = await axios.post(
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('assets/teacher_vector.png')",
+            backgroundImage: "url('/assets/teacher_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -128,7 +150,7 @@ const res = await axios.post(
 
         {/* Form */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleOpenEditStudentModal} 
           className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
           encType="multipart/form-data"
         >
@@ -222,16 +244,37 @@ const res = await axios.post(
             </select>
           </div>
 
-          <div className="md:col-span-2 text-right">
+          {/* Buttons: Submit and Cancel */}
+          <div className="md:col-span-2 flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={() => navigate('/admin-students')}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
+            >
+              Cancel
+            </button>
+
             <button
               type="submit"
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
             >
               Update Student
             </button>
           </div>
         </form>
       </section>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isEditStudentModalOpen}
+        onClose={handleCloseEditStudentModal}
+        onConfirm={handleConfirmEditStudent}
+        title="Confirm Edit Student"
+        message={`Are you sure you want to update the student "${formData.firstname} ${formData.lastname}"?`}
+        confirmText="Update Student"
+        loading={isLoading}
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
+      />
     </div>
   );
 }
