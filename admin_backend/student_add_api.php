@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $targetFile = $uploadDir . $filename;
 
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-            $imagePath = 'uploads/' . $filename;
+            $imagePath = $filename;
         } else {
             http_response_code(500);
             echo json_encode(["message" => "Failed to upload image."]);

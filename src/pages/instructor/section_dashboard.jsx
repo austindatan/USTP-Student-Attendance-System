@@ -35,7 +35,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     // Fetch section info for header (only if not passed via location state)
     useEffect(() => {
-        // If sectionInfo is already available from location.state, no need to fetch again
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
@@ -47,12 +46,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     setSectionInfo(data);
                 } catch (err) {
                     console.error("Error fetching section info:", err);
-                    // Handle error state for section info, maybe show a generic header
                 }
             }
             fetchSectionInfo();
         }
-    }, [sectionId, sectionInfo]); // Added sectionInfo to dependency array to prevent unnecessary fetches
+    }, [sectionId, sectionInfo]);
 
     useEffect(() => {
         if (!instructor?.instructor_id) return;
@@ -198,15 +196,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
 
     const handleAddDropRequest = async () => {
-    if (!selectedStudentForRequest || !requestReason.trim()) {
-        alert("Please select a student and enter a reason.");
-        return;
-    }
+        if (!selectedStudentForRequest || !requestReason.trim()) {
+            alert("Please select a student and enter a reason.");
+            return;
+        }
 
-    const requestData = {
-        student_details_id: selectedStudentForRequest,
-        reason: requestReason,
-    };
+        const requestData = {
+            student_details_id: selectedStudentForRequest,
+            reason: requestReason,
+        };
 
     try {
         const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/add_drop_request.php', {
@@ -215,22 +213,21 @@ export default function Teacher_Dashboard({ selectedDate }) {
             body: JSON.stringify(requestData),
         });
 
-        const result = await res.json();
+            const result = await res.json();
 
-        if (res.ok && result.success) {
-            alert("Drop request submitted successfully.");
-            setShowRequestModal(false);
-            setSelectedStudentForRequest('');
-            setRequestReason('');
-        } else {
-            alert("Failed to submit: " + (result.error || "Unknown error"));
+            if (res.ok && result.success) {
+                alert("Drop request submitted successfully.");
+                setShowRequestModal(false);
+                setSelectedStudentForRequest('');
+                setRequestReason('');
+            } else {
+                alert("Failed to submit: " + (result.error || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("An error occurred while submitting the drop request.");
         }
-    } catch (error) {
-        console.error("Submission error:", error);
-        alert("An error occurred while submitting the drop request.");
-    }
-};
-
+    };
 
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
@@ -321,7 +318,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 </div>
                         </div>
                         <div>
-                            {/* Adjusted to display course_name as main title and section_name below it */}
                             <h1 className="text-2xl font-bold">
                                 {sectionInfo?.course_name || 'Course Title (Missing)'}
                             </h1>
@@ -450,11 +446,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
             {showRequestModal && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
-                    onClick={() => setShowRequestModal(false)} // Click outside to close
+                    onClick={() => setShowRequestModal(false)}
                 >
                     <div
                         className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md mx-auto"
-                        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing modal
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-xl font-bold text-[#0097b2] mb-4">Add Request</h2>
 
@@ -469,16 +465,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 value={selectedStudentForRequest}
                                 onChange={(e) => setSelectedStudentForRequest(e.target.value)}
                             >
-                                <option value="" disabled>Select Student</option> {/* Placeholder */}
+                                <option value="" disabled>Select Student</option>
                                 {dropdownStudents.map((student) => (
                                     <option key={student.student_details_id} value={student.student_details_id}>
                                         {student.student_name}
                                     </option>
                                 ))}
                             </select>
-
                         </div>
-
 
                         {/* Reason Textarea */}
                         <div className="mb-6">

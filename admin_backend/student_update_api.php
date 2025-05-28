@@ -122,52 +122,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
 
     // Handle image upload if exists
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-    error_log("Image upload triggered");
-
-    $target_dir = __DIR__ . '/../uploads/student_images/';
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true);
-        error_log("Target directory created: " . $target_dir);
-    }
-
-    $filename = basename($_FILES["image"]["name"]);
-    $target_file = $target_dir . $filename;
-    error_log("Target file: " . $target_file);
-
-    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-        error_log("File successfully moved");
-
-        $image_db_path = 'uploads/student_images/' . $filename;
-        error_log("Database image path: " . $image_db_path);
-
-        $stmt_image = $conn->prepare("UPDATE student SET image_path=? WHERE student_id=?");
-        if ($stmt_image) {
-            $stmt_image->bind_param("si", $image_db_path, $student_id);
-            if (!$stmt_image->execute()) {
-                error_log("Execute failed: " . $stmt_image->error);
-                $success = false;
-            } else {
-                error_log("Database updated successfully with image path");
-            }
-            $stmt_image->close();
+        $target_dir = __DIR__ . '/../uploads/';
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        $filename = basename($_FILES["image"]["name"]);
+        $target_file = $target_dir . $filename;
+        if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+            $imagePath = $filename;
+            $stmt3 = $conn->prepare("UPDATE student SET image=? WHERE student_id=?");
+            $stmt3->bind_param("si", $imagePath, $student_id);
+            $success = $success && $stmt3->execute();
+            $stmt3->close();
         } else {
-            error_log("Failed to prepare statement: " . $conn->error);
+            error_log("Failed to move uploaded file");
             $success = false;
         }
-    } else {
-        error_log("Failed to move uploaded file");
-        http_response_code(500);
-        echo json_encode(["message" => "Failed to upload image"]);
-        exit();
-    }
-} else {
-    if (!isset($_FILES['image'])) {
-        error_log("Image file not set in request.");
-    } elseif ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+    } else if (isset($_FILES['image'])) {
+        // If image is set but has an error
         error_log("Image upload error code: " . $_FILES['image']['error']);
+        $success = false;
     }
-}
 
+    // Respond with success or failure
     if ($success) {
         echo json_encode(["message" => "Student updated successfully"]);
     } else {
