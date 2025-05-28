@@ -16,20 +16,23 @@ if (!$instructor_id || !$section_id) { // MODIFIED: Check for section_id
 
 $query = "
     SELECT
-        sd.student_details_id,
-        s.student_id,
-        s.firstname,
-        s.middlename,
-        s.lastname,
-        s.image,
-        a.status
-    FROM student_details sd
-    JOIN student s ON sd.student_id = s.student_id
-    LEFT JOIN attendance a ON sd.student_details_id = a.student_details_id AND a.date = ?
-    WHERE sd.instructor_id = ?
-    AND sd.section_id = ?  -- NEW: Filter by section_id here
-    ORDER BY s.lastname, s.firstname
+    sd.student_details_id,
+    s.student_id,
+    s.firstname,
+    s.middlename,
+    s.lastname,
+    s.image,
+    a.status
+FROM student_details sd
+INNER JOIN student s ON sd.student_id = s.student_id
+LEFT JOIN attendance a ON sd.student_details_id = a.student_details_id AND a.date = ?
+LEFT JOIN drop_request dr ON sd.student_details_id = dr.student_details_id
+WHERE sd.instructor_id = ?
+AND sd.section_id = ?  -- Filter by section_id
+AND (dr.status IS NULL OR dr.status != 'Dropped')  -- Ensure dropped students are excluded
+ORDER BY s.lastname, s.firstname
 ";
+
 
 $stmt = $conn->prepare($query);
 $stmt->bind_param("sii", $date, $instructor_id, $section_id); // MODIFIED: Added 'i' for section_id
