@@ -1,62 +1,78 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
 
-const StudentDashboard = () => {
+// Helper components
+function DashboardCard({ icon, label, count }) {
+  return (
+    <div className="font-dm-sans bg-white backdrop-blur-md p-5 rounded-2xl shadow-lg flex items-center gap-4 hover:scale-[1.02] transition-transform min-w-[130px]">
+      <div className="text-indigo-600">{icon}</div>
+      <div>
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-xl font-semibold text-gray-800">{count ?? 0}</p>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return <div className="bg-gray-200 rounded-2xl h-20 animate-pulse"></div>;
+}
+
+function StudentDashboard() {
   const navigate = useNavigate();
-  const [presentCount, setPresentCount] = useState(null);
-  const [absentCount, setAbsentCount] = useState(null);
-  const [excusedCount, setExcusedCount] = useState(null);
-  const [lateCount, setLateCount] = useState(null);
+
+  const [present, setPresent] = useState(null);
+  const [absent, setAbsent] = useState(null);
+  const [excused, setExcused] = useState(null);
+  const [missed, setMissed] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [student, setStudent] = useState(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem("student");
-    localStorage.removeItem("userRole");
-    navigate("/login-student");
-  };
+  const [messages, setMessages] = useState([]);
+  const [classes, setClasses] = useState([]);
 
   useEffect(() => {
     const rawStudentData = localStorage.getItem("student");
 
     if (!rawStudentData) {
-      console.warn("No student data found.");
       navigate("/login-student");
       return;
     }
 
-    let student;
+    let parsedStudent;
     try {
-      student = JSON.parse(rawStudentData);
-      if (!student || !student.id) {
+      parsedStudent = JSON.parse(rawStudentData);
+      if (!parsedStudent || !parsedStudent.id) {
         navigate("/login-student");
         return;
       }
+      setStudent(parsedStudent);
     } catch (e) {
-      console.error("Failed to parse student data:", e);
       navigate("/login-student");
       return;
     }
 
     const endpoints = [
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
-        setter: setPresentCount,
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
+        setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_absent_count.php",
-        setter: setAbsentCount,
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
+        setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_excused_count.php",
-        setter: setExcusedCount,
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
+        setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_late_count.php",
-        setter: setLateCount,
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
+        setter: setMissed,
         key: "total_late",
       },
     ];
@@ -66,7 +82,7 @@ const StudentDashboard = () => {
         fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ student_id: student.id }),
+          body: JSON.stringify({ student_id: parsedStudent.id }),
         })
           .then(async (res) => {
             if (!res.ok) {
@@ -84,85 +100,147 @@ const StudentDashboard = () => {
           })
       )
     )
+      .then(() => {
+        setMessages([
+          { id: 1, subject: "Exam Schedule", sender: "Professor Smith", time: "2h ago" },
+          { id: 2, subject: "Project Update", sender: "Team Lead", time: "1d ago" },
+          { id: 3, subject: "Holiday Announcement", sender: "Admin Office", time: "3d ago" },
+        ]);
+
+        setClasses([
+          {
+            section_id: 101,
+            subject: "Introduction to IT",
+            teacher: "Mr. Smith",
+            present: 20,
+            absent: 2,
+            late: 1,
+            excused: 0,
+          },
+          {
+            section_id: 102,
+            subject: "Data Structures",
+            teacher: "Ms. Garcia",
+            present: 18,
+            absent: 4,
+            late: 2,
+            excused: 1,
+          },
+          {
+            section_id: 103,
+            subject: "Discrete Mathematics",
+            teacher: "Mr. Lee",
+            present: 22,
+            absent: 0,
+            late: 0,
+            excused: 1,
+          },
+        ]);
+      })
       .catch((err) => {
-        console.error("Fetch error:", err);
         setError(err.message || "Failed to fetch attendance.");
       })
       .finally(() => setLoading(false));
   }, [navigate]);
 
-  const currentYear = new Date().getFullYear();
+  const handleLogout = () => {
+    localStorage.removeItem("student");
+    localStorage.removeItem("userRole");
+    navigate("/login-student");
+  };
 
   return (
-    <div className="p-6 min-h-screen bg-gray-100 space-y-6">
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">
-          Your Present Attendance Count ({currentYear})
-        </h2>
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : error ? (
-          <p className="text-red-600 font-medium">Error: {error}</p>
-        ) : (
-          <p className="text-lg font-medium text-green-700">
-            Total Present: {presentCount}
-          </p>
-        )}
-      </div>
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
+        {/* Header + Attendance Cards in Flex Row */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start mb-8">
+          {/* Welcome Header */}
+          <div
+            className="bg-[#7685fc] rounded-lg p-6 text-white font-poppins relative overflow-hidden w-full lg:w-1/2 aspect-square lg:aspect-auto"
+            style={
+              !loading
+                ? {
+                    backgroundImage: "url('assets/student_vector.png')",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right",
+                    backgroundSize: "contain",
+                  }
+                : {}
+            }
+          >
+            <div className="leading-none">
+              {loading ? (
+                <div className="animate-pulse space-y-3">
+                  <div className="w-1/3 h-4 bg-white/50 rounded"></div>
+                  <div className="w-1/2 h-8 bg-white/60 rounded"></div>
+                  <div className="w-1/4 h-4 mt-10 bg-white/40 rounded"></div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-base font-semibold">Welcome back,</h2>
+                  <h1 className="text-3xl font-bold">{student?.firstname || "Student"}</h1>
+                  <p className="text-sm mt-12">Ready to learn today?</p>
+                </>
+              )}
+            </div>
+          </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">
-          Your Absent Attendance Count ({currentYear})
-        </h2>
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : error ? (
-          <p className="text-red-600 font-medium">Error: {error}</p>
-        ) : (
-          <p className="text-lg font-medium text-red-700">
-            Total Absent: {absentCount}
-          </p>
-        )}
-      </div>
+          {/* Attendance Cards beside welcome */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 w-full lg:w-1/2">
+            {loading ? (
+              [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
+            ) : error ? (
+              <p className="text-red-600 font-medium col-span-4 text-center">{error}</p>
+            ) : (
+              <>
+                <DashboardCard icon={<FiCheckCircle size={28} />} label="Present" count={present} />
+                <DashboardCard icon={<FiXCircle size={28} />} label="Absent" count={absent} />
+                <DashboardCard icon={<FiCalendar size={28} />} label="Excused" count={excused} />
+                <DashboardCard icon={<FiBookOpen size={28} />} label="Missed" count={missed} />
+              </>
+            )}
+          </div>
+        </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">
-          Your Excused Attendance Count ({currentYear})
-        </h2>
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : error ? (
-          <p className="text-red-600 font-medium">Error: {error}</p>
-        ) : (
-          <p className="text-lg font-medium text-yellow-600">
-            Total Excused: {excusedCount}
-          </p>
-        )}
-      </div>
+        {/* Attendance Summary Table */}
+        <div className="bg-white shadow-lg rounded-lg p-6 mt-10 overflow-auto">
+          <h2 className="text-xl font-semibold mb-4">Attendance Summary by Subject</h2>
+          <table className="min-w-full table-auto border border-gray-200">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="px-4 py-2 border">Subject</th>
+                <th className="px-4 py-2 border">Teacher</th>
+                <th className="px-4 py-2 border">Present</th>
+                <th className="px-4 py-2 border">Absent</th>
+                <th className="px-4 py-2 border">Late</th>
+                <th className="px-4 py-2 border">Excused</th>
+              </tr>
+            </thead>
+            <tbody>
+              {classes.map((cls) => (
+                <tr key={cls.section_id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border">{cls.subject}</td>
+                  <td className="px-4 py-2 border">{cls.teacher}</td>
+                  <td className="px-4 py-2 border">{cls.present}</td>
+                  <td className="px-4 py-2 border">{cls.absent}</td>
+                  <td className="px-4 py-2 border">{cls.late}</td>
+                  <td className="px-4 py-2 border">{cls.excused}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">
-          Your Late Attendance Count ({currentYear})
-        </h2>
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : error ? (
-          <p className="text-red-600 font-medium">Error: {error}</p>
-        ) : (
-          <p className="text-lg font-medium text-orange-600">
-            Total Late: {lateCount}
-          </p>
-        )}
-      </div>
-
-      <button
-        onClick={handleLogout}
-        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Logout
-      </button>
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="mt-10 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Logout
+        </button>
+      </section>
     </div>
   );
-};
+}
 
 export default StudentDashboard;

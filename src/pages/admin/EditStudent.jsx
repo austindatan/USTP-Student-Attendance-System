@@ -31,9 +31,9 @@ export default function EditStudent() {
 
   useEffect(() => {
     const fetchDropdowns = axios.all([
-      axios.get('http://localhost/ustp-student-attendance-system/admin_backend/instructor_dropdown.php'),
-      axios.get('http://localhost/ustp-student-attendance-system/admin_backend/section_dropdown.php'),
-      axios.get('http://localhost/ustp-student-attendance-system/admin_backend/pd_dropdown.php'),
+      axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
+      axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php'),
+      axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
     ]);
 
     const fetchStudent = axios.get(
@@ -94,7 +94,7 @@ export default function EditStudent() {
 
     try {
       const res = await axios.post(
-        `http://localhost/ustp-student-attendance-system/admin_backend/student_update_api.php?student_id=${student_id}`,
+        `http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`,
         submissionData,
         {
           headers: {

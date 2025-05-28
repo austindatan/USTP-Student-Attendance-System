@@ -31,53 +31,13 @@ const AdminDashboard = () => {
   const [lineLabels, setLineLabels] = useState([]);
   const [lineCounts, setLineCounts] = useState([]);
   const [chartLoadingError, setChartLoadingError] = useState(''); 
-
-  useEffect(() => {
-
-    const apiUrl = 'http://localhost/ustp-student-attendance-system/admin_backend/get_students_by_program.php';
-    console.log('Attempting to fetch pie chart data from:', apiUrl);
-
-    fetch(apiUrl)
-      .then((res) => {
-        console.log('Network response status:', res.status, res.statusText);
-        if (!res.ok) {
-
-          return res.text().then(text => {
-            console.error('Server response was not OK:', text);
-            throw new Error(`Network response was not ok. Status: ${res.status}, Message: ${text.substring(0, 100)}...`);
-          });
-        }
-        return res.json(); 
-      })
-      .then((data) => {
-        console.log('Enrollment data from backend (parsed JSON):', data);
-        if (data.labels && Array.isArray(data.labels) && data.counts && Array.isArray(data.counts)) {
-          setPieLabels(data.labels);
-          setPieCounts(data.counts);
-          setChartLoadingError(''); 
-        } else if (data.error) {
-            setChartLoadingError(`Backend error: ${data.error} - ${data.details || ''}`);
-            console.error('Backend reported an error:', data.error, data.details);
-        } else {
-          setChartLoadingError('Data format from backend is unexpected.');
-          console.error('Unexpected data format:', data);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching pie chart data (catch block):', error);
-        setChartLoadingError(`Failed to fetch chart data: ${error.message || error}`);
-      });
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('admin');
-    navigate('/login-admin');
-  };
+  const [lineChartError, setLineChartError] = useState(''); 
+  const [loading, setLoading] = useState(true);
 
   const blueBase = '#1D4ED8';
 
   useEffect(() => {
-    const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_students_by_program.php';
+    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_students_by_program.php';
     console.log('Fetching pie chart data from:', apiUrl);
 
     fetch(apiUrl)
@@ -112,7 +72,7 @@ const AdminDashboard = () => {
 
   // Fetch Line Chart Data (Monthly Attendance)
   useEffect(() => {
-    const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_monthly_attendance.php';
+    const apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/get_monthly_attendance.php';
     console.log('Fetching line chart data from:', apiUrl);
 
     fetch(apiUrl)
