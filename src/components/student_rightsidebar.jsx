@@ -55,7 +55,7 @@ const StudentRightSidebar = () => {
               <button
                 onClick={() => {
                   setDropdownOpen(false);
-                  navigate("/edit-profile");
+                  navigate("/student-edit-profile");
                 }}
                 className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
               >
