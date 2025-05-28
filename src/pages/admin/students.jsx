@@ -14,7 +14,7 @@ export default function Admin_Students() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
+        "http://localhost/ustp-student-attendance/admin_backend/student_api.php"
       );
 
       let data = [];
@@ -109,21 +109,25 @@ export default function Admin_Students() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="w-full overflow-x-auto">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
+              {/* Added table-fixed and w-full */}
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2 whitespace-nowrap">Student ID</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Full Name</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Program</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Birthdate</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Contact Number</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Address</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Action</th>
+                    {/* Define proportional widths for each column and center headers */}
+                    {/* Sum of widths should be 100% */}
+                    <th className="px-3 py-2 w-[8%]">Stu. ID</th>
+                    <th className="px-3 py-2 w-[22%]">Full Name</th>
+                    <th className="px-3 py-2 w-[15%]">Program</th>
+                    <th className="px-3 py-2 w-[12%]">Birthdate</th>
+                    <th className="px-3 py-2 w-[13%]">Contact Number</th>
+                    <th className="px-3 py-2 w-[20%]">Address</th>
+                    <th className="px-3 py-2 w-[10%]">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.length === 0 ? (
                     <tr>
+                      {/* Updated colSpan to 7 for all columns */}
                       <td colSpan={7} className="px-3 py-4 text-center text-gray-500">
                         No students found.
                       </td>
@@ -131,25 +135,27 @@ export default function Admin_Students() {
                   ) : (
                     filteredStudents.map((student) => (
                       <tr
-                        key={student.student_id}
+                        key={student.student_id} // Assuming student_id is unique
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-3 py-2 truncate">{student.student_id}</td>
-                        <td className="px-3 py-2 truncate">
+                        {/* Data cells: Added truncate and min-w-0 */}
+                        <td className="px-3 py-2 truncate min-w-0">{student.student_id}</td>
+                        <td className="px-3 py-2 truncate min-w-0">
                           {student.firstname} {student.middlename} {student.lastname}
                         </td>
-                        <td className="px-3 py-2 truncate">{student.program_name}</td>
-                        <td className="px-3 py-2 truncate">{student.date_of_birth}</td>
-                        <td className="px-3 py-2 truncate">{student.contact_number}</td>
-                        <td className="px-3 py-2 truncate">
+                        <td className="px-3 py-2 truncate min-w-0">{student.program_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.date_of_birth}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.contact_number}</td>
+                        <td className="px-3 py-2 truncate min-w-0">
                           {student.street} {student.city} {student.province} {student.zipcode}
                         </td>
-                        <td className="px-3 py-2 truncate">
+                        <td className="px-3 py-2">
+                          {/* Centered button using mx-auto block */}
                           <button
                             onClick={() =>
                               navigate(`/admin-students/edit/${student.student_id}`)
                             }
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm mx-auto block"
                           >
                             Edit
                           </button>

@@ -12,7 +12,6 @@ export default function Admin_Courses() {
   useEffect(() => {
     axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
       .then(res => {
-
         if (Array.isArray(res.data)) {
           setCourses(res.data);
         } else if (Array.isArray(res.data.courses)) {
@@ -95,18 +94,20 @@ export default function Admin_Courses() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="overflow-x-auto max-w-full">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
-                <thead className="bg-blue-100 uppercase text-blue-700">
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full"> {/* KEEP table-fixed and w-full */}
+                <thead className="items-center bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2">Course Code</th>
-                    <th className="px-3 py-2">Course Name</th> 
-                    <th className="px-3 py-2">Action</th>
+                    {/* Assign percentage widths that add up to 100% */}
+                    <th className="px-3 py-2 w-[15%]">Course Code</th> {/* ~15% */}
+                    <th className="px-3 py-2 w-[20%]">Course Name</th> {/* ~35% */}
+                    <th className="px-3 py-2 w-[50%]">Description</th> {/* ~40% */}
+                    <th className="px-3 py-2 w-[10%]">Action</th>    {/* ~10% (adjust based on button size) */}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredCourses.length === 0 ? (
                     <tr>
-                      <td colSpan="3" className="px-4 py-4 text-center text-gray-500">
+                      <td colSpan="4" className="px-4 py-4 text-center text-gray-500">
                         No courses found.
                       </td>
                     </tr>
@@ -116,8 +117,9 @@ export default function Admin_Courses() {
                         key={course.course_id ?? course.course_code}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-3 py-2 max-w-[120px] truncate">{course.course_code}</td>
-                        <td className="px-3 py-2 max-w-[200px] truncate">{course.course_name}</td> {/* CHANGED: From "course.description" to "course.course_name" */}
+                        <td className="px-3 py-2 truncate min-w-0">{course.course_code}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{course.course_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{course.description}</td>
                         <td className="px-3 py-2">
                           <button
                             onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}

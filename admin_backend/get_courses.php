@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 include __DIR__ . '/../src/conn.php'; // Your database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $sql = "SELECT course_id, course_code, course_name FROM course ORDER BY course_code ASC"; // Assuming your table is 'course'
+    $sql = "SELECT course_id, course_code, course_name, description FROM course ORDER BY course_code ASC"; // Assuming your table is 'course'
     $result = $conn->query($sql);
 
     $courses = [];
