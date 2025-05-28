@@ -5,7 +5,7 @@ import ConfirmationModal from '../../components/confirmationmodal';
 
 export default function AddCourse() {
   const [formData, setFormData] = useState({
-    course_code: '', // Added course_code to initial state
+    course_code: '', 
     course_name: '',
     description: '',
   });
