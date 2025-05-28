@@ -23,6 +23,7 @@ import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
 
 // STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
+import StudentRightSidebar from './components/student_rightsidebar';
 
 // ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -82,6 +83,7 @@ function StudentLayout({ children }) {
       <div className="flex-1 overflow-y-auto">
         {children}
       </div>
+      <StudentRightSidebar />
     </div>
   );
 }
