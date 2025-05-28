@@ -1,8 +1,10 @@
 <?php
-header('Content-Type: application/json');
+// student_update_api.php
+
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: PUT, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json");
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -12,171 +14,141 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 include __DIR__ . '/../src/conn.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    parse_str(file_get_contents("php://input"), $put_vars);
-
-    if (!isset($_GET['student_id'])) {
-        http_response_code(400);
-        echo json_encode(["message" => "Missing student_id"]);
-        exit();
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['student_id'])) {
     $student_id = intval($_GET['student_id']);
 
-    // Because PUT + multipart is tricky, better to accept POST with _method=PUT or
-    // Use POST method for updates if possible, or switch to AJAX with JSON payload without file upload.
-
-    // For simplicity, consider changing to POST for update if you want file upload.
-
-    http_response_code(400);
-    echo json_encode(["message" => "PUT method with multipart/form-data is not supported by PHP by default. Use POST instead."]);
-    exit();
-} else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Handle update on POST instead
-
-    if (!isset($_GET['student_id'])) {
-        http_response_code(400);
-        echo json_encode(["message" => "Missing student_id"]);
-        exit();
-    }
-    $student_id = intval($_GET['student_id']);
-
+    // Get data from POST request (multipart/form-data)
     $firstname = $_POST['firstname'] ?? '';
     $middlename = $_POST['middlename'] ?? '';
     $lastname = $_POST['lastname'] ?? '';
     $date_of_birth = $_POST['date_of_birth'] ?? '';
     $contact_number = $_POST['contact_number'] ?? '';
     $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? ''; // Only update if provided and not empty
     $street = $_POST['street'] ?? '';
     $city = $_POST['city'] ?? '';
     $province = $_POST['province'] ?? '';
     $zipcode = $_POST['zipcode'] ?? '';
     $country = $_POST['country'] ?? '';
-    $instructor_id = $_POST['instructor_id'] ?? null;
-    $program_details_id = $_POST['program_details_id'] ?? null;
-    $section_id = $_POST['section_id'] ?? null;
+    
+    // These are the only IDs you should update in student_details related to academic details
+    $section_id = $_POST['section_id'] ?? '';
+    $instructor_id = $_POST['instructor_id'] ?? '';
+    $program_details_id = $_POST['program_details_id'] ?? '';
 
-    // Initialize an array to hold parts of the SQL query for dynamic updates
-    $update_fields = [];
-    $bind_params = [];
-    $bind_types = "";
+    // year_level_id and semester_id are NOT stored in student_details,
+    // they are used on the frontend to FILTER sections for selection.
+    // They are NOT directly updated in the database for the student.
+    // So, you don't need to try to get them from $_POST here.
 
-    // Add fields from POST to update if they are not empty
-    if (!empty($firstname)) { $update_fields[] = "firstname=?"; $bind_params[] = $firstname; $bind_types .= "s"; }
-    if (!empty($middlename)) { $update_fields[] = "middlename=?"; $bind_params[] = $middlename; $bind_types .= "s"; }
-    if (!empty($lastname)) { $update_fields[] = "lastname=?"; $bind_params[] = $lastname; $bind_types .= "s"; }
-    if (!empty($date_of_birth)) { $update_fields[] = "date_of_birth=?"; $bind_params[] = $date_of_birth; $bind_types .= "s"; }
-    if (!empty($contact_number)) { $update_fields[] = "contact_number=?"; $bind_params[] = $contact_number; $bind_types .= "s"; }
-    if (!empty($email)) { $update_fields[] = "email=?"; $bind_params[] = $email; $bind_types .= "s"; }
-    if (!empty($street)) { $update_fields[] = "street=?"; $bind_params[] = $street; $bind_types .= "s"; }
-    if (!empty($city)) { $update_fields[] = "city=?"; $bind_params[] = $city; $bind_types .= "s"; }
-    if (!empty($province)) { $update_fields[] = "province=?"; $bind_params[] = $province; $bind_types .= "s"; }
-    if (!empty($zipcode)) { $update_fields[] = "zipcode=?"; $bind_params[] = $zipcode; $bind_types .= "s"; }
-    if (!empty($country)) { $update_fields[] = "country=?"; $bind_params[] = $country; $bind_types .= "s"; }
-
-    $success = true; // Assume success until an error occurs
-
-    // Update student table if there are fields to update
-    if (!empty($update_fields)) {
-        $sql = "UPDATE student SET " . implode(", ", $update_fields) . " WHERE student_id=?";
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
-            // Add student_id to bind parameters
-            $bind_params[] = $student_id;
-            $bind_types .= "i";
-
-            $stmt->bind_param($bind_types, ...$bind_params);
-            $success = $stmt->execute();
-            $stmt->close();
-        } else {
-            $success = false;
-            error_log("Failed to prepare statement for student update: " . $conn->error);
-        }
-    }
-
-    // Update student_details table
-    if ($instructor_id !== null || $program_details_id !== null || $section_id !== null) {
-        $update_details_fields = [];
-        $bind_details_params = [];
-        $bind_details_types = "";
-
-        if ($instructor_id !== null) { $update_details_fields[] = "instructor_id=?"; $bind_details_params[] = $instructor_id; $bind_details_types .= "i"; }
-        if ($program_details_id !== null) { $update_details_fields[] = "program_details_id=?"; $bind_details_params[] = $program_details_id; $bind_details_types .= "i"; }
-        if ($section_id !== null) { $update_details_fields[] = "section_id=?"; $bind_details_params[] = $section_id; $bind_details_types .= "i"; }
-
-        if (!empty($update_details_fields)) {
-            $sql2 = "UPDATE student_details SET " . implode(", ", $update_details_fields) . " WHERE student_id=?";
-            $stmt2 = $conn->prepare($sql2);
-            if ($stmt2) {
-                $bind_details_params[] = $student_id;
-                $bind_details_types .= "i";
-
-                $stmt2->bind_param($bind_details_types, ...$bind_details_params);
-                $success = $success && $stmt2->execute();
-                $stmt2->close();
-            } else {
-                $success = false;
-                error_log("Failed to prepare statement for student_details update: " . $conn->error);
-            }
-        }
-    }
-
-    // Handle image upload if exists
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-    error_log("Image upload triggered");
-
-    $target_dir = __DIR__ . '/../uploads/student_images/';
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true);
-        error_log("Target directory created: " . $target_dir);
-    }
-
-    $filename = basename($_FILES["image"]["name"]);
-    $target_file = $target_dir . $filename;
-    error_log("Target file: " . $target_file);
-
-    if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-        error_log("File successfully moved");
-
-        $image_db_path = 'uploads/student_images/' . $filename;
-        error_log("Database image path: " . $image_db_path);
-
-        $stmt_image = $conn->prepare("UPDATE student SET image_path=? WHERE student_id=?");
-        if ($stmt_image) {
-            $stmt_image->bind_param("si", $image_db_path, $student_id);
-            if (!$stmt_image->execute()) {
-                error_log("Execute failed: " . $stmt_image->error);
-                $success = false;
-            } else {
-                error_log("Database updated successfully with image path");
-            }
-            $stmt_image->close();
-        } else {
-            error_log("Failed to prepare statement: " . $conn->error);
-            $success = false;
-        }
-    } else {
-        error_log("Failed to move uploaded file");
-        http_response_code(500);
-        echo json_encode(["message" => "Failed to upload image"]);
+    // Basic validation for required fields
+    if (empty($firstname) || empty($lastname) || empty($date_of_birth) || empty($contact_number) || empty($email) || empty($section_id) || empty($instructor_id) || empty($program_details_id)) {
+        http_response_code(400);
+        echo json_encode(["message" => "Please fill all required fields (personal info, section, instructor, program)."]);
         exit();
     }
-} else {
-    if (!isset($_FILES['image'])) {
-        error_log("Image file not set in request.");
-    } elseif ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-        error_log("Image upload error code: " . $_FILES['image']['error']);
-    }
-}
 
-    if ($success) {
-        echo json_encode(["message" => "Student updated successfully"]);
-    } else {
+    $conn->begin_transaction();
+
+    try {
+        // Update student table
+        $update_student_sql_parts = [];
+        $params_student = [];
+        $types_student = "";
+
+        // Dynamically build the update query for student table
+        $update_student_sql_parts[] = "firstname = ?"; $params_student[] = $firstname; $types_student .= "s";
+        $update_student_sql_parts[] = "middlename = ?"; $params_student[] = $middlename; $types_student .= "s";
+        $update_student_sql_parts[] = "lastname = ?"; $params_student[] = $lastname; $types_student .= "s";
+        $update_student_sql_parts[] = "date_of_birth = ?"; $params_student[] = $date_of_birth; $types_student .= "s";
+        $update_student_sql_parts[] = "contact_number = ?"; $params_student[] = $contact_number; $types_student .= "s";
+        $update_student_sql_parts[] = "email = ?"; $params_student[] = $email; $types_student .= "s";
+        $update_student_sql_parts[] = "street = ?"; $params_student[] = $street; $types_student .= "s";
+        $update_student_sql_parts[] = "city = ?"; $params_student[] = $city; $types_student .= "s";
+        $update_student_sql_parts[] = "province = ?"; $params_student[] = $province; $types_student .= "s";
+        $update_student_sql_parts[] = "zipcode = ?"; $params_student[] = $zipcode; $types_student .= "s";
+        $update_student_sql_parts[] = "country = ?"; $params_student[] = $country; $types_student .= "s";
+        
+        // Handle password update only if provided and not empty
+        if (!empty($password)) {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $update_student_sql_parts[] = "password = ?";
+            $params_student[] = $hashed_password;
+            $types_student .= "s";
+        }
+
+        $update_student_sql = "UPDATE student SET " . implode(", ", $update_student_sql_parts) . " WHERE student_id = ?";
+        $params_student[] = $student_id; // Add student_id to the parameters
+        $types_student .= "i"; // Add type for student_id
+
+        $stmt_student = $conn->prepare($update_student_sql);
+        // Use call_user_func_array for binding parameters dynamically
+        call_user_func_array([$stmt_student, 'bind_param'], array_merge([$types_student], $params_student));
+        
+        if (!$stmt_student->execute()) {
+            throw new Exception("Error updating student table: " . $stmt_student->error);
+        }
+        $stmt_student->close();
+
+
+        // Update student_details table
+        // We only update section_id, instructor_id, and program_details_id here
+        $update_student_details_sql = "UPDATE student_details SET section_id = ?, instructor_id = ?, program_details_id = ? WHERE student_id = ?";
+        $stmt_details = $conn->prepare($update_student_details_sql);
+        $stmt_details->bind_param("iiii", $section_id, $instructor_id, $program_details_id, $student_id);
+
+        if (!$stmt_details->execute()) {
+            throw new Exception("Error updating student_details table: " . $stmt_details->error);
+        }
+        $stmt_details->close();
+
+        // Handle image upload
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $file_tmp_name = $_FILES['image']['tmp_name'];
+            $file_name = $_FILES['image']['name'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+
+            if (in_array($file_ext, $allowed_ext)) {
+                $unique_filename = uniqid('student_') . '.' . $file_ext;
+                $upload_dir = __DIR__ . '/../uploads/student_images/'; // Use __DIR__ for absolute path
+                
+                // Ensure directory exists
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
+                }
+
+                $destination = $upload_dir . $unique_filename;
+
+                if (move_uploaded_file($file_tmp_name, $destination)) {
+                    // Update image path in the database
+                    $update_image_sql = "UPDATE student SET image = ? WHERE student_id = ?";
+                    $stmt_image = $conn->prepare($update_image_sql);
+                    $stmt_image->bind_param("si", $unique_filename, $student_id);
+                    if (!$stmt_image->execute()) {
+                        throw new Exception("Error updating student image: " . $stmt_image->error);
+                    }
+                    $stmt_image->close();
+                } else {
+                    throw new Exception("Failed to move uploaded file.");
+                }
+            } else {
+                throw new Exception("Invalid file type for image. Only JPG, JPEG, PNG, GIF are allowed.");
+            }
+        }
+
+        $conn->commit();
+        echo json_encode(["message" => "Student updated successfully!"]);
+
+    } catch (Exception $e) {
+        $conn->rollback();
         http_response_code(500);
-        echo json_encode(["message" => "Failed to update student"]);
+        echo json_encode(["message" => $e->getMessage()]);
     }
+
 } else {
-    http_response_code(405);
-    echo json_encode(["message" => "Method Not Allowed"]);
+    http_response_code(400);
+    echo json_encode(["message" => "Invalid request. student_id is required."]);
 }
 
 $conn->close();
