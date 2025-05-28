@@ -68,7 +68,12 @@ export default function Admin_Students() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-black">Student List</h1>
+              <h1
+                className="text-2xl text-blue-700 font-bold"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Student List
+              </h1>
             )}
           </div>
         </div>

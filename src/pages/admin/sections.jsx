@@ -130,7 +130,7 @@ export default function Admin_Sections() {
                         <td className="px-3 py-2">
                           <button
                             onClick={() => navigate(`/admin-edit-section/${section.section_id}`)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
+                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
                           >
                             Edit
                           </button>

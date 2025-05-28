@@ -7,7 +7,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
-$conn = new mysqli("localhost", "root", "austinreverie", "attendance_monitoring");
+include __DIR__ . '/../src/conn.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
 $section_id = $data['section_id'] ?? null;
