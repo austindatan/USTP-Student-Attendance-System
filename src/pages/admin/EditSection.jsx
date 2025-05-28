@@ -31,7 +31,7 @@ const EditSection = () => {
     // 1. Load existing section
     // Change to GET request, sending section_id in query params
     axios
-      .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         console.log("Response from get_single_section.php:", res.data); // Debugging
         if (res.data.success && res.data.section) {
@@ -51,7 +51,7 @@ const EditSection = () => {
 
     // 2. Load courses
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_courses.php') // Changed to get_courses.php as per previous file
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php') // Changed to get_courses.php as per previous file
       .then((res) => {
         console.log("Response from get_courses.php:", res.data); // Debugging
         if (res.data.success) {
@@ -75,7 +75,7 @@ const EditSection = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData)
+      .post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData)
       .then((res) => {
         console.log("Response from update_section.php:", res.data); // Debugging
         if (res.data.success) {

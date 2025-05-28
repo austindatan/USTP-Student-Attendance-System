@@ -32,7 +32,7 @@ export default function AddCourse() {
     setIsLoading(true); 
     try {
       await axios.post(
-        'http://localhost/ustp-student-attendance/admin_backend/course_add.php',
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add.php',
         formData
       );
       alert('Course added successfully!');

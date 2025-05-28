@@ -106,7 +106,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   useEffect(() => {
     const fetchWeeklyAttendance = async () => {
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setAttendanceData(data);
       } catch (err) {

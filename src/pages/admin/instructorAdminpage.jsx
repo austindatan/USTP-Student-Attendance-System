@@ -11,7 +11,7 @@ export default function InstructorAdminPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_instructor_info.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php')
       .then((res) => {
         if (!res.data.error) {
           setInstructors(res.data);

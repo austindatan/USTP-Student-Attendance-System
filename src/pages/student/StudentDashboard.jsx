@@ -40,22 +40,22 @@ const StudentDashboard = () => {
 
     const endpoints = [
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
         setter: setPresentCount,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_absent_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsentCount,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_excused_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
         setter: setExcusedCount,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_late_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
         setter: setLateCount,
         key: "total_late",
       },

@@ -43,7 +43,7 @@ export default function DropRequests() {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/admin_backend/update_drop_req.php",
+          "http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
