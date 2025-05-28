@@ -35,7 +35,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -58,7 +58,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+                    `http://localhost/ustp-student-attendance-system/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
                 );
 
                 if (!response.ok) {
@@ -210,7 +210,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         <div>
                             {/* Adjusted to display course_name as main title and section_name below it */}
                             <h1 className="text-2xl font-bold">
-                                {sectionInfo?.course_name || 'Course Title'}
+                                {sectionInfo?.course_name || 'Course Title (Missing)'}
                             </h1>
                             <h2 className="text-xl font-semibold">
                                 {sectionInfo?.section_name || 'Section Name'}
