@@ -16,7 +16,7 @@ export default function EditCourse() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost/ustp-student-attendance/admin_backend/course_get.php?id=${id}`)
+    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
       .then((response) => {
         setFormData(response.data);
       })
