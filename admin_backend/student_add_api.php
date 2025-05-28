@@ -11,13 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 include __DIR__ . '/../src/conn.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Fields for student table
     $studentFields = [
         'firstname', 'middlename', 'lastname', 'date_of_birth',
         'contact_number', 'email', 'password', 'street',
@@ -28,26 +22,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $$field = isset($_POST[$field]) ? $conn->real_escape_string($_POST[$field]) : '';
     }
 
-    // Fields for student_details table
     $instructor_id = isset($_POST['instructor_id']) ? $conn->real_escape_string($_POST['instructor_id']) : '';
     $section_id = isset($_POST['section_id']) ? $conn->real_escape_string($_POST['section_id']) : '';
     $program_details_id = isset($_POST['program_details_id']) ? $conn->real_escape_string($_POST['program_details_id']) : '';
 
-    // Validate foreign keys
     if (empty($instructor_id) || empty($section_id) || empty($program_details_id)) {
         http_response_code(400);
         echo json_encode([
             "message" => "Missing instructor/section/program ID",
-            "debug" => [
-                "instructor_id" => $instructor_id,
-                "section_id" => $section_id,
-                "program_details_id" => $program_details_id
-            ]
         ]);
         exit();
     }
 
-    // Handle image upload
+    // 🔍 Check for existing student with matching core identity
+    $checkExisting = $conn->prepare("
+        SELECT s.student_id 
+        FROM student s 
+        JOIN student_details sd ON s.student_id = sd.student_id
+        WHERE s.firstname = ? AND s.middlename = ? AND s.lastname = ? 
+        AND s.date_of_birth = ?
+        AND sd.instructor_id = ? AND sd.section_id = ? AND sd.program_details_id = ?
+    ");
+    $checkExisting->bind_param("ssssiii", $firstname, $middlename, $lastname, $date_of_birth, $instructor_id, $section_id, $program_details_id);
+    $checkExisting->execute();
+    $existingResult = $checkExisting->get_result();
+
+    if ($existingResult->num_rows > 0) {
+        echo json_encode(["message" => "This student already exists in this section."]);
+        exit(); // 🚫 STOP: No insert
+    }
+
+    // ✅ Handle image upload
     $imagePath = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = __DIR__ . '/../uploads/';
@@ -67,41 +72,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert into `student` table
+    // ✅ Insert into student
     $sql = "INSERT INTO student (
-                email, password, firstname, middlename, lastname,
-                date_of_birth, contact_number, street, city, province,
-                zipcode, country, image
-            ) VALUES (
-                '$email', '$password', '$firstname', '$middlename', '$lastname',
-                '$date_of_birth', '$contact_number', '$street', '$city', '$province',
-                '$zipcode', '$country', '$imagePath'
-            )";
+        email, password, firstname, middlename, lastname,
+        date_of_birth, contact_number, street, city, province,
+        zipcode, country, image
+    ) VALUES (
+        '$email', '$password', '$firstname', '$middlename', '$lastname',
+        '$date_of_birth', '$contact_number', '$street', '$city', '$province',
+        '$zipcode', '$country', '$imagePath'
+    )";
 
     if ($conn->query($sql) === TRUE) {
         $student_id = $conn->insert_id;
 
-        // Insert into `student_details` table
-        $detailsSql = "INSERT INTO student_details (
-            student_id, instructor_id, section_id, program_details_id
-        ) VALUES (
-            '$student_id', '$instructor_id', '$section_id', '$program_details_id'
-        )";
-
-        if ($conn->query($detailsSql) === TRUE) {
-            echo json_encode(["message" => "Student added successfully"]);
+        $insertStmt = $conn->prepare("INSERT INTO student_details (student_id, instructor_id, section_id, program_details_id) VALUES (?, ?, ?, ?)");
+        $insertStmt->bind_param("iiii", $student_id, $instructor_id, $section_id, $program_details_id);
+        if ($insertStmt->execute()) {
+            echo json_encode(["message" => "Student and details added successfully"]);
         } else {
             http_response_code(500);
-            echo json_encode([
-                "message" => "Student added but failed to insert details",
-                "error" => $conn->error
-            ]);
+            echo json_encode(["message" => "Student added, but failed to insert details", "error" => $insertStmt->error]);
         }
-
+        $insertStmt->close();
     } else {
         http_response_code(500);
         echo json_encode(["message" => "Failed to add student", "error" => $conn->error]);
     }
+
+    $checkExisting->close();
 
 } else {
     http_response_code(405);
