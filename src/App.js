@@ -24,6 +24,7 @@ import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
 // STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRightSidebar from './components/student_rightsidebar';
+import StudentEditProfile from './pages/student/StudentEditProfile';
 
 // ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -88,6 +89,8 @@ function StudentLayout({ children }) {
   );
 }
 
+
+
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
@@ -114,6 +117,17 @@ function App() {
                 setBgImage={setBgImage}
               >
                 <StudentDashboard />
+              </StudentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student-edit-profile"
+          element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+              <StudentLayout>
+                <StudentEditProfile />
               </StudentLayout>
             </ProtectedRoute>
           }

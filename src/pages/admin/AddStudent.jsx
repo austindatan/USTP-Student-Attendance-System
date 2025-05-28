@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; 
+import ConfirmationModal from '../../components/confirmationmodal';
 
 export default function AddStudent() {
   const navigate = useNavigate();
@@ -26,30 +26,70 @@ export default function AddStudent() {
   const [instructors, setInstructors] = useState([]);
   const [sections, setSections] = useState([]);
   const [programDetails, setProgramDetails] = useState([]);
+
+  // New states for Year Level and Semester
+  const [yearLevels, setYearLevels] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [selectedYearLevel, setSelectedYearLevel] = useState('');
+  const [selectedSemester, setSelectedSemester] = useState('');
+
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
 
-  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false); 
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // fetch sections based on filters
+  const fetchSections = useCallback(async (yearLevelId, semesterId) => {
+    try {
+      const params = {};
+      if (yearLevelId) {
+        params.year_level_id = yearLevelId;
+      }
+      if (semesterId) {
+        params.semester_id = semesterId;
+      }
+      const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+      setSections(secRes.data);
+
+      if (formData.section_id && !secRes.data.some(sec => sec.section_id === formData.section_id)) {
+          setFormData(prev => ({ ...prev, section_id: '' }));
+      }
+    } catch (error) {
+      console.error('Error fetching filtered sections:', error);
+      alert('Failed to load sections. Please try again.');
+    }
+  }, [formData.section_id]);
+
+  // Initial data fetching for all dropdowns
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [instRes, secRes, progRes] = await Promise.all([
-          axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
-          axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php'),
-          axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
+        const [instRes, progRes, yearRes, semRes] = await Promise.all([
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
+          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
         ]);
         setInstructors(instRes.data);
-        setSections(secRes.data);
         setProgramDetails(progRes.data);
+        setYearLevels(yearRes.data);
+        setSemesters(semRes.data);
+
+        fetchSections('', '');
+
       } catch (error) {
-        console.error('Error fetching dropdown data:', error);
+        console.error('Error fetching initial dropdown data:', error);
         alert('Failed to load necessary data for dropdowns. Please try again.');
       }
     };
     fetchData();
-  }, []);
+  }, [fetchSections]);
+
+  useEffect(() => {
+    fetchSections(selectedYearLevel, selectedSemester);
+  }, [selectedYearLevel, selectedSemester, fetchSections]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,18 +119,20 @@ export default function AddStudent() {
     setImageFile(null);
     setSelectedInstructor('');
     setSelectedProgram('');
+    setSelectedYearLevel('');
+    setSelectedSemester('');
   };
 
-  
+
   const handleCancel = () => {
-    handleResetForm(); 
-    navigate('/admin-students'); 
+    handleResetForm();
+    navigate('/admin-students');
   };
 
-  
+
   const handleOpenAddStudentModal = (e) => {
-    e.preventDefault(); 
-  
+    e.preventDefault();
+
     if (
       !formData.firstname ||
       !formData.lastname ||
@@ -100,16 +142,18 @@ export default function AddStudent() {
       !formData.password ||
       !selectedInstructor ||
       !selectedProgram ||
+      !selectedYearLevel || 
+      !selectedSemester || 
       !formData.section_id
     ) {
-      alert('Please fill in all required fields (First Name, Last Name, Date of Birth, Contact, Email, Password, Instructor, Program, Section).');
+      alert('Please fill in all required fields (First Name, Last Name, Date of Birth, Contact, Email, Password, Instructor, Program, Year Level, Semester, Section).');
       return;
     }
     setIsAddStudentModalOpen(true);
   };
 
   const handleConfirmAddStudent = async () => {
-    setIsLoading(true); 
+    setIsLoading(true);
     const submissionData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       submissionData.append(key, value);
@@ -120,23 +164,23 @@ export default function AddStudent() {
 
     try {
       const res = await axios.post(
-        'http://localhost/ustp-student-attendance/admin_backend/student_add_api.php',
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php',
         submissionData
       );
       alert(res.data.message || 'Student added successfully!');
-      setIsAddStudentModalOpen(false); 
-      handleResetForm(); 
-      navigate('/admin-students'); 
+      setIsAddStudentModalOpen(false);
+      handleResetForm();
+      navigate('/admin-students');
     } catch (error) {
       console.error('Failed to add student:', error.response?.data || error.message);
       alert(`Error adding student: ${error.response?.data?.message || 'Please check the console for details.'}`);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
   const handleCloseAddStudentModal = () => {
-    setIsAddStudentModalOpen(false); 
+    setIsAddStudentModalOpen(false);
   };
 
   return (
@@ -149,7 +193,7 @@ export default function AddStudent() {
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative flex items-center"
           style={{
-            backgroundImage: "url('/assets/teacher_vector.png')", 
+            backgroundImage: "url('/assets/teacher_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -160,7 +204,7 @@ export default function AddStudent() {
 
         {/* Form Container */}
         <form
-          onSubmit={handleOpenAddStudentModal} 
+          onSubmit={handleOpenAddStudentModal}
           className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
           encType="multipart/form-data"
         >
@@ -239,6 +283,48 @@ export default function AddStudent() {
             </select>
           </div>
 
+          {/* Year Level Dropdown */}
+          <div>
+            <label className="block text-sm font-semibold text-blue-700">Year Level</label>
+            <select
+              value={selectedYearLevel}
+              onChange={(e) => {
+                setSelectedYearLevel(e.target.value);
+                setFormData(prev => ({ ...prev, section_id: '' })); // Reset section when year level changes
+              }}
+              required
+              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+            >
+              <option value="">Select Year Level</option>
+              {yearLevels.map((yl) => (
+                <option key={yl.year_id} value={yl.year_id}> {/* Changed from yl.id to yl.year_id */}
+                  {yl.year_level_name} {/* Changed from yl.year_level to yl.year_level_name */}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/*Semester Dropdown */}
+          <div>
+            <label className="block text-sm font-semibold text-blue-700">Semester</label>
+            <select
+              value={selectedSemester}
+              onChange={(e) => {
+                setSelectedSemester(e.target.value);
+                setFormData(prev => ({ ...prev, section_id: '' })); // Reset section when semester changes
+              }}
+              required
+              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+            >
+              <option value="">Select Semester</option>
+              {semesters.map((sem) => (
+                <option key={sem.semester_id} value={sem.semester_id}> {/* Changed from sem.id to sem.semester_id */}
+                  {sem.semester_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Section Dropdown */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-blue-700">Section</label>
@@ -246,15 +332,21 @@ export default function AddStudent() {
               name="section_id"
               value={formData.section_id}
               onChange={handleChange}
-              required 
+              required
               className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">Select Section</option>
-              {sections.map((sec) => (
-                <option key={sec.section_id} value={sec.section_id}>
-                  {sec.section_name}
+              {sections.length > 0 ? (
+                sections.map((sec) => (
+                  <option key={sec.section_id} value={sec.section_id}>
+                    {sec.section_name} - {sec.course_code} ({sec.course_name})
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  {selectedYearLevel && selectedSemester ? "No sections found for selected Year Level and Semester" : "Please select Year Level and Semester first"}
                 </option>
-              ))}
+              )}
             </select>
           </div>
 
@@ -262,13 +354,13 @@ export default function AddStudent() {
           <div className="md:col-span-2 flex justify-end items-center space-x-4">
             <button
               type="button"
-              onClick={handleCancel} 
+              onClick={handleCancel}
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
             >
               Cancel
             </button>
             <button
-              type="submit" 
+              type="submit"
               className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
             >
               Save Student
@@ -285,8 +377,8 @@ export default function AddStudent() {
         title="Confirm Student Addition"
         message={`Are you sure you want to add ${formData.firstname} ${formData.lastname} as a new student?`}
         confirmText="Add Student"
-        loading={isLoading} 
-        confirmButtonClass="bg-blue-700 hover:bg-blue-800" 
+        loading={isLoading}
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
       />
     </div>
   );
