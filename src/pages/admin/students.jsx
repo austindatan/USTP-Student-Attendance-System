@@ -14,7 +14,7 @@ export default function Admin_Students() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost/ustp-student-attendance/admin_backend/student_api.php"
+        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
       );
 
       let data = [];
@@ -68,7 +68,12 @@ export default function Admin_Students() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-black">Student List</h1>
+              <h1
+                className="text-2xl text-blue-700 font-bold"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Student List
+              </h1>
             )}
           </div>
         </div>
