@@ -21,7 +21,7 @@ const EditSection = () => {
   useEffect(() => {
     // Load section info
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         if (res.data.success && res.data.section) {
           setFormData({ ...res.data.section, section_id: id });
@@ -39,7 +39,7 @@ const EditSection = () => {
 
     // Load course options
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_courses.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -60,7 +60,7 @@ const EditSection = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData)
+      .post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData)
       .then((res) => {
         if (res.data.success) {
           alert('Section updated successfully!');
@@ -133,17 +133,36 @@ const EditSection = () => {
 
             {/* Schedule Day */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700">Schedule Day</label>
-              <input
-                type="text"
-                name="schedule_day"
-                value={formData.schedule_day}
-                onChange={handleChange}
-                required
-                autoComplete="off"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Day:</label>
+            <select
+              name="schedule_day"
+              value={formData.schedule_day}
+              onChange={handleChange}
+              required
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Select a day</option>
+              {[
+                'Monday & Tuesday',
+                'Monday & Wednesday',
+                'Monday & Thursday',
+                'Monday & Friday',
+                'Monday & Saturday',
+                'Tuesday & Wednesday',
+                'Tuesday & Thursday',
+                'Tuesday & Friday',
+                'Tuesday & Saturday',
+                'Wednesday & Thursday',
+                'Wednesday & Friday',
+                'Wednesday & Saturday',
+                'Thursday & Friday',
+                'Thursday & Saturday',
+                'Friday & Saturday'
+              ].map((day) => (
+                <option key={day} value={day}>{day}</option>
+              ))}
+            </select>
+          </div>
 
             {/* Start Time */}
             <div>
