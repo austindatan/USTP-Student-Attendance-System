@@ -17,6 +17,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [selectedStudentForRequest, setSelectedStudentForRequest] = useState('');
     const [requestReason, setRequestReason] = useState('');
     const [dropdownStudents, setDropdownStudents] = useState([]);
+    const [lateStudents, setLateStudents] = useState([]);
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
@@ -35,7 +36,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -58,7 +59,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+                    `http://localhost/ustp-student-attendance-system/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
                 );
 
                 if (!response.ok) {
@@ -70,6 +71,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                 const presentIds = data.filter(student => student.status === 'Present').map(s => s.student_details_id);
                 setPresentStudents(presentIds);
+                const lateIds = data.filter(student => student.status === 'Late').map(s => s.student_details_id);
+                setLateStudents(lateIds);
                 setTimeout(() => setIsLoading(false), 1500);
             } catch (error) {
                 console.error("Error fetching students:", error);
@@ -81,11 +84,31 @@ export default function Teacher_Dashboard({ selectedDate }) {
     }, [selectedDate, instructor?.instructor_id, sectionId]);
 
     const toggleAttendance = async (student) => {
-        const updatedList = presentStudents.includes(student.student_details_id)
-            ? presentStudents.filter(id => id !== student.student_details_id)
-            : [...presentStudents, student.student_details_id];
+        const isPresent = presentStudents.includes(student.student_details_id);
+        const isLate = lateStudents.includes(student.student_details_id);
 
-        setPresentStudents(updatedList);
+        let newPresent = presentStudents;
+        let newLate = lateStudents;
+        let newStatus = 'Absent';
+
+        if (isLate) {
+            // If currently late, clicking sets to Absent
+            newLate = lateStudents.filter(id => id !== student.student_details_id);
+            newPresent = presentStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Absent'; // <-- FIXED HERE
+        } else if (isPresent) {
+            // If currently present, clicking sets to Absent
+            newPresent = presentStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Absent';
+        } else {
+            // If currently absent, clicking sets to Present
+            newPresent = [...presentStudents, student.student_details_id];
+            newLate = lateStudents.filter(id => id !== student.student_details_id);
+            newStatus = 'Present';
+        }
+
+        setPresentStudents(newPresent);
+        setLateStudents(newLate);
 
         const attendanceData = {
             student_details_id: student.student_details_id,
@@ -94,11 +117,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
             program_details_id: student.program_details_id,
             admin_id: student.admin_id,
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
-            status: updatedList.includes(student.student_details_id) ? 'Present' : 'Absent',
+            status: newStatus,
         };
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -113,22 +136,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
         } catch (error) {
             console.error('Error saving attendance:', error);
             // Optionally revert the UI state if saving fails
-            setPresentStudents(currentList =>
-                currentList.includes(student.student_details_id)
-                    ? currentList.filter(id => id !== student.student_details_id)
-                    : [...currentList, student.student_details_id]
-            );
         }
     };
 
     const filteredStudents = students.filter(student =>
-        student.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (student.name || '')
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
     );
 
     useEffect(() => {
     const fetchDropdownStudents = async () => {
         try {
-            const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+            const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             setDropdownStudents(data);
@@ -139,6 +159,39 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     fetchDropdownStudents();
 }, [instructor?.instructor_id, sectionId]);
+
+    const markAsLate = async (student) => {
+        const attendanceData = {
+            student_details_id: student.student_details_id,
+            instructor_id: instructor.instructor_id,
+            section_id: student.section_id,
+            program_details_id: student.program_details_id,
+            admin_id: student.admin_id,
+            date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
+            status: 'Late',
+        };
+
+        try {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData)
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const result = await res.json();
+            console.log('Marked as Late:', result);
+
+            // Update local state: add to lateStudents, remove from presentStudents if needed
+            setLateStudents((prev) => [...new Set([...prev, student.student_details_id])]);
+            setPresentStudents((prev) => prev.filter(id => id !== student.student_details_id));
+        } catch (error) {
+            console.error('Error marking as late:', error);
+        }
+    };
 
 
     const handleAddDropRequest = async () => {
@@ -153,7 +206,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     try {
-        const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/add_drop_request.php', {
+        const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/add_drop_request.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData),
@@ -278,20 +331,23 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </div>
                         ))
                         : filteredStudents.map((student, index) => {
+                            // ...inside filteredStudents.map...
                             const isPresent = presentStudents.includes(student.student_details_id);
+                            const isLate = lateStudents.includes(student.student_details_id);
                             const name = student.name || 'No Name';
                             return (
                                 <div
                                     key={index}
                                     onClick={() => toggleAttendance(student)}
+                                    onDoubleClick={() => markAsLate(student)}
                                     className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                        bg-white border-2 border-[#e4eae9] rounded-[20px] flex flex-col justify-between
-                                        ${isPresent ? 'opacity-100' : 'opacity-60'}`}
+                                        bg-white border-2 rounded-[20px] flex flex-col justify-between
+                                        ${isLate ? 'border-yellow-400 bg-yellow-100 opacity-100' : isPresent ? 'border-[#e4eae9] opacity-100' : 'border-[#e4eae9] opacity-60'}`}
                                 >
                                     <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                         <img
-                                            src={`http://localhost/ustp-student-attendance/api/${student.image}?${new Date().getTime()}`} // Added cache busting
-                                            className={`w-full h-36 object-cover ${isPresent ? '' : 'grayscale'}`}
+                                            src={`http://localhost/ustp-student-attendance-system/api/${student.image}?${new Date().getTime()}`}
+                                            className={`w-full h-36 object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
                                             alt={name}
                                             onError={(e) => {
                                                 e.target.onerror = null;
@@ -302,12 +358,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     </div>
                                     <div className="pl-3 pr-4 pt-2 pb-4 items-center">
                                         <p
-                                            className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`} // Static Tailwind classes here
+                                            className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`}
                                             style={{
-                                                color: isPresent ? (sectionInfo?.hexcode || '#0097b2') : '#737373' // Dynamic color here
+                                                color: isLate
+                                                    ? '#b59b00'
+                                                    : isPresent
+                                                    ? (sectionInfo?.hexcode || '#0097b2')
+                                                    : '#737373'
                                             }}
                                         >
-                                            {isPresent ? 'Present' : 'Absent'}
+                                            {isLate ? 'Late' : isPresent ? 'Present' : 'Absent'}
                                         </p>
                                         <div className="flex items-center justify-between">
                                             <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
@@ -321,6 +381,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                     </div>
                                 </div>
                             );
+// ...existing code...
                         })}
                 </div>
             </section>
