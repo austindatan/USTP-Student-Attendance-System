@@ -39,7 +39,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -62,7 +62,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance-system/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
                 );
 
                 if (!response.ok) {
@@ -124,7 +124,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -151,7 +151,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     useEffect(() => {
     const fetchDropdownStudents = async () => {
         try {
-            const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+            const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             setDropdownStudents(data);
@@ -175,7 +175,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -209,7 +209,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     try {
-        const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/add_drop_request.php', {
+        const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData),
@@ -283,7 +283,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                             onClick={async () => {
                                                 // Save to backend
                                                 try {
-                                                const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
+                                                const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/update_section_color.php', {
                                                     method: 'POST',
                                                     headers: { 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({
@@ -352,13 +352,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                         d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                 </svg>
                             </div>
-                            <input
-                                type="text"
-                                id="table-search"
-                                className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
-                                placeholder="Search for students."
-                                style={{backgroundColor: sectionInfo?.hexcode || '#0097b2'}}
-                            />
+<input
+    type="text"
+    id="table-search"
+    className="font-poppins block w-full ps-10 py-2 text-sm text-white rounded-lg focus:ring-pink-500 focus:border-pink-500 placeholder-white/50"
+    placeholder="Search for students."
+    style={{backgroundColor: sectionInfo?.hexcode || '#0097b2'}}
+    value={searchTerm}
+    onChange={e => setSearchTerm(e.target.value)}
+/>
                         </div>
                         <button
                             onClick={() => setShowRequestModal(true)}
@@ -406,7 +408,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 >
                                     <div className="overflow-hidden rounded-t-[20px] flex justify-center">
                                         <img
-                                            src={`http://localhost/ustp-student-attendance-system/api/${student.image}?${new Date().getTime()}`}
+                                            src={`http://localhost/USTP-Student-Attendance-System/api/${student.image}?${new Date().getTime()}`}
                                             className={`w-full h-36 object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
                                             alt={name}
                                             onError={(e) => {
