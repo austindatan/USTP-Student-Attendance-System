@@ -7,6 +7,7 @@ import EditProfile from "./pages/instructor/EditProfile";
 import LeftSidebar from './components/leftsidebar';
 import AdminLeftSidebar from './components/AdminLeftSidebar';
 import RightSidebar from './components/rightsidebar';
+import StudentLeftSideBar from './components/StudentLeftSideBar';
 
 // AUTH
 import LoginStudent from "./pages/login/LoginStudent";
@@ -22,6 +23,7 @@ import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
 
 // STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
+import StudentRightSidebar from './components/student_rightsidebar';
 
 // ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -74,6 +76,18 @@ function AdminLayout({ children }) {
   );
 }
 
+function StudentLayout({ children }) {
+  return (
+    <div className="flex h-screen w-full">
+      <StudentLeftSideBar />
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
+      <StudentRightSidebar />
+    </div>
+  );
+}
+
 function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
@@ -93,12 +107,18 @@ function App() {
           path="/student-dashboard"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
+              <StudentLayout
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                bgImage={bgImage}
+                setBgImage={setBgImage}
+              >
                 <StudentDashboard />
-              </DashboardLayout>
+              </StudentLayout>
             </ProtectedRoute>
           }
         />
+
 
         {/* Instructor Protected Routes */}
         <Route
