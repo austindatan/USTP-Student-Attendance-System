@@ -23,7 +23,7 @@ export default function AddSection() {
 
   useEffect(() => {
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -70,7 +70,7 @@ export default function AddSection() {
 
     try { // <-- Start of the try block
       const res = await axios.post( // <-- Await the axios call and assign response to 'res'
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
+        'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
           headers: { 'Content-Type': 'application/json' },

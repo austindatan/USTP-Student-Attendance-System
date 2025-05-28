@@ -35,13 +35,13 @@ export default function EditStudent() {
 
   useEffect(() => {
     const fetchDropdowns = axios.all([
-      axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-      axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php'),
-      axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+      axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
+      axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php'),
+      axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
     ]);
 
     const fetchStudent = axios.get(
-      `http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`
+      `http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`
     );
 
     Promise.all([fetchDropdowns, fetchStudent])
@@ -109,7 +109,7 @@ export default function EditStudent() {
 
     try {
       const res = await axios.post(
-        `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
+        `http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`,
         submissionData,
         {
           headers: {

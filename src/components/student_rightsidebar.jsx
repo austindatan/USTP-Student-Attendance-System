@@ -15,7 +15,7 @@ const StudentRightSidebar = () => {
     : "Tony Stark";
   const email = student?.email || "tonytark@gmail.com";
   const imagePath = student?.image
-    ? `http://localhost/ustp-student-attendance-system/api/uploads/${student.image.replace(
+    ? `http://localhost/ustp-student-attendance/api/uploads/${student.image.replace(
         "uploads/",
         ""
       )}`
