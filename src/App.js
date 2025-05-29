@@ -22,7 +22,7 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRightSidebar from './components/student_rightsidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
 import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
-import StudentSectionDashboard from "./pages/instructor/StudentSectionDashboard";
+import StudentSectionDashboard from "./pages/student/StudentSectionDashboard";
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
