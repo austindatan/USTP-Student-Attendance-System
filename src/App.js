@@ -22,6 +22,7 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRightSidebar from './components/student_rightsidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
 import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
+import StudentSectionDashboard from "./pages/instructor/StudentSectionDashboard";
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
@@ -121,6 +122,17 @@ function App() {
               <StudentLayout>
                 <StudentClassesDashboard />
               </StudentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student-section-dashboard/:sectionId"
+          element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
+                <StudentSectionDashboard selectedDate={selectedDate} />
+              </DashboardLayout>
             </ProtectedRoute>
           }
         />
