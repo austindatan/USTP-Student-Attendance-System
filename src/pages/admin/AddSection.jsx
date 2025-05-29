@@ -35,7 +35,7 @@ export default function AddSection() {
   // Fetch Courses
   useEffect(() => {
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -55,7 +55,7 @@ export default function AddSection() {
   // Fetch Year Levels
   useEffect(() => {
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php')
       .then((res) => {
         if (res.data.success) {
           setYearLevels(res.data.year_levels);
@@ -75,7 +75,7 @@ export default function AddSection() {
   // Fetch Semesters
   useEffect(() => {
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php')
       .then((res) => {
         if (res.data.success) {
           setSemesters(res.data.semesters);
@@ -131,7 +131,7 @@ export default function AddSection() {
 
     try {
       const res = await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
+        'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
           headers: { 'Content-Type': 'application/json' },
@@ -238,12 +238,21 @@ export default function AddSection() {
                 className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select a day</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
+                  <option value="Monday & Tuesday">Monday & Tuesday</option>
+                  <option value="Monday & Wednesday">Monday & Wednesday</option>
+                  <option value="Monday & Thursday">Monday & Thursday</option>
+                  <option value="Monday & Friday">Monday & Friday</option>
+                  <option value="Monday & Saturday">Monday & Saturday</option>
+                  <option value="Tuesday & Wednesday">Tuesday & Wednesday</option>
+                  <option value="Tuesday & Thursday">Tuesday & Thursday</option>
+                  <option value="Tuesday & Friday">Tuesday & Friday</option>
+                  <option value="Tuesday & Saturday">Tuesday & Saturday</option>
+                  <option value="Wednesday & Thursday">Wednesday & Thursday</option>
+                  <option value="Wednesday & Friday">Wednesday & Friday</option>
+                  <option value="Wednesday & Saturday">Wednesday & Saturday</option>
+                  <option value="Thursday & Friday">Thursday & Friday</option>
+                  <option value="Thursday & Saturday">Thursday & Saturday</option>
+                  <option value="Friday & Saturday">Friday & Saturday</option>
               </select>
             </div>
 

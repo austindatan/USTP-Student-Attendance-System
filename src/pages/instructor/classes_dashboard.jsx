@@ -22,7 +22,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     try {
       console.log('Fetching sections...');
       const response = await fetch(
-        `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
+        `http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,7 +84,7 @@ return (
       />
     </div>
 
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6 mb-12">
       {(isLoading ? Array.from({ length: 6 }) : filteredSections).map((section, i) => (
         <ClassCard
           key={section?.section_id || i}

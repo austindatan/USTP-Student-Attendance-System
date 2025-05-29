@@ -68,7 +68,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     if (!sectionInfo && sectionId) {
       async function fetchSectionInfo() {
         try {
-          const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+          const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
           }
@@ -90,7 +90,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         setIsLoading(true);
         const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
         const response = await fetch(
-          `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
+          `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&_t=${new Date().getTime()}` // Added cache busting
         );
 
         if (!response.ok) {
@@ -152,7 +152,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     try {
-      const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+      const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(attendanceData)
@@ -179,7 +179,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   useEffect(() => {
     const fetchDropdownStudents = async () => {
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setDropdownStudents(data);
@@ -203,7 +203,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     try {
-      const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+      const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(attendanceData)
@@ -237,7 +237,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     try {
-      const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
+      const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/add_drop_request.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
@@ -310,7 +310,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         onClick={async () => {
                           // Save to backend
                           try {
-                            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/update_section_color.php', {
+                            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({
@@ -443,7 +443,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     >
                         <div className="overflow-hidden rounded-t-[20px] flex justify-center aspect-w-1 aspect-h-1 w-full"> {/* Added aspect-w-1 aspect-h-1 and w-full */}
                             <img
-                                src={`http://localhost/USTP-Student-Attendance-System/uploads/${student.image}?${new Date().getTime()}`}
+                                src={`http://localhost/ustp-student-attendance/uploads/${student.image}?${new Date().getTime()}`}
                                 className={`object-cover ${isPresent || isLate ? '' : 'grayscale'}`} // Removed w-full and h-36
                                 alt={displayedName} // Use displayedName for alt text
                                 onError={(e) => {

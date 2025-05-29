@@ -34,7 +34,7 @@ export default function AddCourse() {
     setIsLoading(true);
     try {
       await axios.post(
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add.php',
+        'http://localhost/ustp-student-attendance/admin_backend/course_add.php',
         formData // formData now includes course_code
       );
       alert('Course added successfully!');
@@ -91,18 +91,6 @@ export default function AddCourse() {
               <input
                 type="text"
                 name="course_code" // Name matches formData key
-                value={formData.course_code}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700">Course Code</label>
-              <input
-                type="text"
-                name="course_code"
                 value={formData.course_code}
                 onChange={handleChange}
                 required

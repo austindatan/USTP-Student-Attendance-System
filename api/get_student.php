@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
-$conn = new mysqli("localhost", "root", "", "attendance_monitoring");
+$conn = new mysqli("localhost", "root", "austinreverie", "attendance_monitoring");
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed."]);

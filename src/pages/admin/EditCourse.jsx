@@ -17,7 +17,7 @@ export default function EditCourse() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
+    axios.get(`http://localhost/ustp-student-attendance/admin_backend/course_get.php?id=${id}`)
       .then((response) => {
         if (response.data.success === false) { // Handle case where course might not be found
             alert(response.data.message);
@@ -52,7 +52,7 @@ export default function EditCourse() {
     setIsLoading(true);
     try {
       // formData now correctly includes course_code
-      const response = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/course_edit.php', formData);
+      const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
       if (response.data.success) {
           alert('Course updated successfully!');
           setIsEditCourseModalOpen(false);
@@ -108,18 +108,6 @@ export default function EditCourse() {
                 type="text"
                 name="course_code"
                 value={formData.course_code}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700">Course Name</label>
-              <input
-                type="text"
-                name="course_name"
-                value={formData.course_name}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
