@@ -69,11 +69,11 @@ export default function EditStudent() {
     const fetchData = async () => {
       try {
         const [instRes, progRes, yearRes, semRes, studentRes] = await Promise.all([
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
-          axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
+          axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`),
         ]);
 
         setInstructors(instRes.data);

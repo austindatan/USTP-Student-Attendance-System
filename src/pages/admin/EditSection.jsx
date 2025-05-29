@@ -21,7 +21,7 @@ const EditSection = () => {
   useEffect(() => {
     // Load section info
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         if (res.data.success && res.data.section) {
           setFormData({ ...res.data.section, section_id: id });
@@ -39,7 +39,7 @@ const EditSection = () => {
 
     // Load course options
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_courses.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -60,7 +60,7 @@ const EditSection = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData)
+      .post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData)
       .then((res) => {
         if (res.data.success) {
           alert('Section updated successfully!');

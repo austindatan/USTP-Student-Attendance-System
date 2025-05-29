@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include __DIR__ . '/../src/conn.php';
+$conn = new mysqli("localhost", "root", "austinreverie", "attendance_monitoring");
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['student_id'])) {
     $student_id = intval($_GET['student_id']);

@@ -56,7 +56,7 @@ export default function AddStudent() {
       if (semesterId) {
         params.semester_id = semesterId;
       }
-      const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+      const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
       
       setSections(secRes.data); 
 
