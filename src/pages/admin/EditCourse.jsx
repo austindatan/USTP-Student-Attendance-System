@@ -17,7 +17,7 @@ export default function EditCourse() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost/ustp-student-attendance/admin_backend/course_get.php?id=${id}`)
+    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
       .then((response) => {
         if (response.data.success === false) { // Handle case where course might not be found
             alert(response.data.message);
@@ -52,7 +52,7 @@ export default function EditCourse() {
     setIsLoading(true);
     try {
       // formData now correctly includes course_code
-      const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
+      const response = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/course_edit.php', formData);
       if (response.data.success) {
           alert('Course updated successfully!');
           setIsEditCourseModalOpen(false);
