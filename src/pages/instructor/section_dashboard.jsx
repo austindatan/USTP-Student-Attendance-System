@@ -422,7 +422,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
             : filteredStudents.map((student, index) => {
                 const isPresent = presentStudents.includes(student.student_details_id);
                 const isLate = lateStudents.includes(student.student_details_id);
-                const name = student.name || 'No Name';
+
+                // Construct the display name here
+                const firstName = student.firstname || '';
+                const middleName = student.middlename && student.middlename !== '-' ? student.middlename : ''; // Hide if '-' or empty
+                const lastName = student.lastname || '';
+
+                // Combine parts, ensuring spaces only when needed
+                const displayedNameParts = [firstName, middleName, lastName].filter(Boolean); // Filter out empty strings
+                const displayedName = displayedNameParts.join(' ');
+
                 return (
                     <div
                         key={index}
@@ -436,11 +445,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             <img
                                 src={`http://localhost/ustp-student-attendance/uploads/${student.image}?${new Date().getTime()}`}
                                 className={`object-cover ${isPresent || isLate ? '' : 'grayscale'}`} // Removed w-full and h-36
-                                alt={name}
+                                alt={displayedName} // Use displayedName for alt text
                                 onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = `${process.env.PUBLIC_URL}/assets/white_placeholder2.jpg`;
-                                    console.warn(`Failed to load image for ${name}. Using fallback.`);
+                                    console.warn(`Failed to load image for ${displayedName}. Using fallback.`);
                                 }}
                             />
                         </div>
@@ -459,18 +468,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </p>
                             <div className="flex items-center justify-between">
                                 <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
-                                    {name.includes(" ") ? (
-                                        <>
-                                            {name.split(" ")[0]} {name.split(" ")[1]} <br /> {name.split(" ")[2]} {name.split(" ")[3]}
-                                        </>
-                                    ) : name}
+                                    {/* Conditionally display middle name if it's not '-' */}
+                                    {firstName} {middleName && `${middleName.charAt(0)}.`} <br /> {lastName}
                                 </p>
                             </div>
                         </div>
                     </div>
                 );
             })}
-        </div>
+    </div>
       </section>
 
       {/* Request Modal */}
