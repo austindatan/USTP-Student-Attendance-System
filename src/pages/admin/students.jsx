@@ -14,7 +14,7 @@ export default function Admin_Students() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
+        "http://localhost/ustp-student-attendance/admin_backend/student_api.php"
       );
 
       let data = [];
@@ -105,9 +105,12 @@ export default function Admin_Students() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="w-full overflow-x-auto">
+              {/* Added table-fixed and w-full */}
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
+                    {/* Define proportional widths for each column and center headers */}
+                    {/* Sum of widths should be 100% */}
                     <th className="px-3 py-2 w-[8%]">Stu. ID</th>
                     <th className="px-3 py-2 w-[22%]">Full Name</th>
                     <th className="px-3 py-2 w-[15%]">Program</th>
@@ -120,7 +123,7 @@ export default function Admin_Students() {
                 <tbody>
                   {filteredStudents.length === 0 ? (
                     <tr>
-
+                      {/* Updated colSpan to 7 for all columns */}
                       <td colSpan={7} className="px-3 py-4 text-center text-gray-500">
                         No students found.
                       </td>
@@ -128,10 +131,10 @@ export default function Admin_Students() {
                   ) : (
                     filteredStudents.map((student) => (
                       <tr
-                        key={student.student_id} 
+                        key={student.student_id} // Assuming student_id is unique
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-
+                        {/* Data cells: Added truncate and min-w-0 */}
                         <td className="px-3 py-2 truncate min-w-0">{student.student_id}</td>
                         <td className="px-3 py-2 truncate min-w-0">
                           {student.firstname} {student.middlename} {student.lastname}
@@ -143,7 +146,7 @@ export default function Admin_Students() {
                           {student.street} {student.city} {student.province} {student.zipcode}
                         </td>
                         <td className="px-3 py-2">
-
+                          {/* Centered button using mx-auto block */}
                           <button
                             onClick={() =>
                               navigate(`/admin-students/edit/${student.student_id}`)

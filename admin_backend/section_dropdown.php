@@ -1,5 +1,5 @@
 <?php
-// Enable error reporting for development (disable in production)
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -16,8 +16,31 @@ if ($conn->connect_error) {
     exit();
 }
 
-// Query instructors
-$sql = "SELECT section_id, section_name FROM section";
+$year_level_id = isset($_GET['year_level_id']) ? intval($_GET['year_level_id']) : null;
+$semester_id = isset($_GET['semester_id']) ? intval($_GET['semester_id']) : null;
+
+$sql = "
+    SELECT
+        s.section_id,
+        s.section_name,
+        c.course_code,
+        c.course_name
+    FROM
+        section s
+    JOIN
+        course c ON s.course_id = c.course_id
+    WHERE 1=1
+";
+
+if ($year_level_id !== null && $year_level_id > 0) {
+    $sql .= " AND s.year_level_id = " . $year_level_id;
+}
+if ($semester_id !== null && $semester_id > 0) {
+    $sql .= " AND s.semester_id = " . $semester_id;
+}
+
+$sql .= " ORDER BY s.section_name ASC;";
+
 $result = $conn->query($sql);
 
 $sections = [];

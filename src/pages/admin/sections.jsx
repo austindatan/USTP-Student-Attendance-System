@@ -10,7 +10,7 @@ export default function Admin_Sections() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
+    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_section.php')
       .then(res => {
         console.log("Fetched sections data:", res.data);
         if (Array.isArray(res.data)) {
@@ -97,7 +97,7 @@ export default function Admin_Sections() {
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-
+                    {/* Define proportional widths for each column */}
                     <th className="px-3 py-2 w-[4%]"></th>
                     <th className="px-3 py-2 w-[10%]">Section Name</th>
                     <th className="px-3 py-2 w-[20%]">Course Name</th>

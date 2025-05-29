@@ -7,7 +7,7 @@ const Skeleton = ({ className = "" }) => (
 
 const StudentEditProfile = () => {
   const [formData, setFormData] = useState({
-    student_id: "",
+    student_id: "", // This will be updated with the fetched 'id' later
     email: "",
     password: "",
     firstname: "",
@@ -32,8 +32,9 @@ const StudentEditProfile = () => {
     let studentIdToFetch = null;
     try {
       const storedStudent = JSON.parse(localStorage.getItem("student"));
+      // *** CHANGE IS HERE: Look for 'id' instead of 'student_id' ***
       if (storedStudent && storedStudent.id) {
-        studentIdToFetch = storedStudent.id;
+        studentIdToFetch = storedStudent.id; // Use 'id' from localStorage
       }
     } catch (e) {
       console.error("Error parsing student data from localStorage:", e);
@@ -42,15 +43,20 @@ const StudentEditProfile = () => {
     if (!studentIdToFetch) {
       setMessage("Student ID not found in local storage. Please log in again.");
       setLoading(false);
+      // Optional: Redirect to login page if ID is absolutely required
+      // navigate('/login');
       return;
     }
 
+
+    // Now, `studentIdToFetch` should definitely have a valid ID
     fetch(
-      `http://localhost/USTP-Student-Attendance-System/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/ustp-student-attendance/api/get_student.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
-          return res.text().then(text => {
+          // This catches HTTP errors (e.g., 404, 500)
+          return res.text().then(text => { // Get text response for better error logging
             throw new Error(`HTTP error! Status: ${res.status}, Response: ${text.substring(0, 200)}`);
           });
         }
@@ -58,21 +64,25 @@ const StudentEditProfile = () => {
       })
       .then((data) => {
         if (data.success) {
+          // IMPORTANT: If get_student.php returns 'student_id' as key, ensure formData matches.
+          // Assuming get_student.php returns data.student with 'student_id' as the key
           setFormData(data.student);
 
           const image = data.student.image;
           const resolvedURL = image
             ? (image.includes("uploads/")
-                ? `http://localhost/USTP-Student-Attendance-System/api/${image}`
-                : `http://localhost/USTP-Student-Attendance-System/api/uploads/${image}`)
+                ? `http://localhost/ustp-student-attendance/api/${image}`
+                : `http://localhost/ustp-student-attendance/api/uploads/${image}`)
             : "";
           setPreviewURL(resolvedURL);
         } else {
+          // This captures the PHP-side error messages like "Invalid or missing student ID."
           setMessage(`Failed to fetch student info: ${data.message}`);
         }
         setTimeout(() => setLoading(false), 800);
       })
       .catch((error) => {
+        // This catches network errors or issues with parsing JSON
         console.error("Fetch error during profile load:", error);
         setMessage(`Server error while loading profile: ${error.message}`);
         setTimeout(() => setLoading(false), 800);
@@ -105,7 +115,7 @@ const StudentEditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/USTP-Student-Attendance-System/api/edit_student_profile.php",
+        "http://localhost/ustp-student-attendance/api/edit_student_profile.php",
         {
           method: "POST",
           body: formPayload,
@@ -119,11 +129,13 @@ const StudentEditProfile = () => {
 
       const result = await res.json();
       if (result.success) {
+        // Add id property for compatibility
         const updatedStudent = { ...result.student, id: result.student.student_id };
         localStorage.setItem("student", JSON.stringify(updatedStudent));
         navigate("/student-dashboard");
         alert("Profile updated successfully!");
       } else {
+        // This captures the PHP-side error messages like "Invalid or missing student ID."
         setMessage(`Profile update failed: ${result.message}`);
       }
     } catch (error) {

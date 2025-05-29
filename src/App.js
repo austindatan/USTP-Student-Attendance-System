@@ -114,6 +114,19 @@ function App() {
         />
 
         <Route
+          path="/student-edit-profile"
+          element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+              <StudentLayout>
+                <StudentEditProfile />
+              </StudentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* Instructor Protected Routes */}
+        <Route
           path="/teacher-dashboard"
           element={
             <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">

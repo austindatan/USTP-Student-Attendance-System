@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors', 1); // Enable error display for debugging
+ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
@@ -32,8 +32,6 @@ function deleteOldImage($conn, $student_id) {
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
         $oldImage = $row["image"];
-        // Crucial: Use the same absolute path logic as for new uploads
-        // Assumes 'uploads' is one level up from admin_backend
         $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
         if ($oldImage && file_exists($uploadDir . $oldImage)) {
@@ -45,10 +43,20 @@ function deleteOldImage($conn, $student_id) {
     $stmt->close();
 }
 
-// Get data from the POST request (FormData is in $_POST and $_FILES)
-$student_id = $_GET["student_id"] ?? null; // Corrected to $_GET for student_id from URL
+// Get student_id from URL parameter
+$student_id = $_GET["student_id"] ?? null;
+
+// Basic Validation for student_id
+if (empty($student_id)) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Missing student ID for update."]);
+    $conn->close();
+    exit;
+}
+
+// Get main student data from POST
 $email = $_POST["email"] ?? "";
-$password = $_POST["password"] ?? ""; // This will be hashed or retrieved
+$password = $_POST["password"] ?? "";
 $firstname = $_POST["firstname"] ?? "";
 $middlename = $_POST["middlename"] ?? "";
 $lastname = $_POST["lastname"] ?? "";
@@ -60,38 +68,39 @@ $province = $_POST["province"] ?? "";
 $zipcode = $_POST["zipcode"] ?? "";
 $country = $_POST["country"] ?? "";
 
-// Added these fields from React Form Data
-$instructor_id = isset($_POST['instructor_id']) ? intval($_POST['instructor_id']) : null;
-$program_details_id = isset($_POST['program_details_id']) ? intval($_POST['program_details_id']) : null;
-$section_id = isset($_POST['section_id']) ? intval($_POST['section_id']) : null;
+// Decode the enrollments JSON array
+$enrollments_json = $_POST['enrollments'] ?? '[]';
+$enrollments_data = json_decode($enrollments_json, true);
 
-
-// Basic Validation for student_id
-if (empty($student_id)) {
-    http_response_code(400); // Bad Request
-    echo json_encode(["success" => false, "message" => "Missing student ID for update."]);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Invalid JSON for enrollments: " . json_last_error_msg()]);
     $conn->close();
     exit;
 }
 
-// --- Password Logic: only update if provided and valid length for hashing ---
+if (!is_array($enrollments_data)) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Enrollments data is not an array."]);
+    $conn->close();
+    exit;
+}
+
+// --- Password Logic ---
 $hashed_password_for_update = null;
 if (!empty($password)) {
-    // IMPORTANT: Hash the password before storing!
-    // If the provided password is short, hash it. If it's already a hash (from initial load), use it as is.
-    if (strlen($password) < 60 && !password_needs_rehash($password, PASSWORD_DEFAULT)) { // Use password_needs_rehash for robustness
+    if (strlen($password) < 60 && !password_needs_rehash($password, PASSWORD_DEFAULT)) {
         $hashed_password_for_update = password_hash($password, PASSWORD_DEFAULT);
     } else {
-        $hashed_password_for_update = $password; // Assume it's already a hash or a very long plain text password (unlikely)
+        $hashed_password_for_update = $password;
     }
-    if ($hashed_password_for_update === false) { // Check if hashing failed
+    if ($hashed_password_for_update === false) {
         http_response_code(500);
         echo json_encode(["success" => false, "message" => "Failed to hash password."]);
         $conn->close();
         exit;
     }
 } else {
-    // If password field is empty, fetch the current hashed password from DB
     $stmt_fetch_pw = $conn->prepare("SELECT password FROM student WHERE student_id = ?");
     if ($stmt_fetch_pw === false) {
         http_response_code(500);
@@ -105,7 +114,7 @@ if (!empty($password)) {
     if ($row_pw = $result_pw->fetch_assoc()) {
         $hashed_password_for_update = $row_pw["password"];
     } else {
-        http_response_code(404); // Not Found
+        http_response_code(404);
         echo json_encode(["success" => false, "message" => "Student not found for password retrieval."]);
         $conn->close();
         exit;
@@ -113,32 +122,26 @@ if (!empty($password)) {
     $stmt_fetch_pw->close();
 }
 
+// --- Image Upload Logic ---
+$new_image_filename = null;
+$image_uploaded_this_request = false;
 
-// --- Image Upload Logic (Copied and adapted from your working add_student.php) ---
-$new_image_filename = null; // Default to null, means no change or explicit removal
-$image_uploaded_this_request = false; // Flag to track if a new image was successfully uploaded
-
-// 1. Check if a new image file was sent AND is valid
 if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     $file_tmp_name = $_FILES["image"]["tmp_name"];
-    $file_name_original = basename($_FILES["image"]["name"]); // Original filename
+    $file_name_original = basename($_FILES["image"]["name"]);
     $file_extension = strtolower(pathinfo($file_name_original, PATHINFO_EXTENSION));
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']; // Common image formats
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     if (!in_array($file_extension, $allowed_extensions)) {
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         echo json_encode(["success" => false, "message" => "Invalid image file type. Allowed: " . implode(', ', $allowed_extensions)]);
         $conn->close();
         exit;
     }
 
-    // Define the ABSOLUTE path to the uploads directory based on add_student.php's working logic
-    // __DIR__ is admin_backend/, so ../uploads/ goes up to USTP-Student-Attendance-System/ and into uploads/
     $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
-
-    // Create directory if it doesn't exist (recursive)
     if (!is_dir($uploadDir)) {
-        if (!mkdir($uploadDir, 0755, true)) { // 0755 is typical for web server write
+        if (!mkdir($uploadDir, 0755, true)) {
             http_response_code(500);
             echo json_encode(["success" => false, "message" => "Server error: Failed to create upload directory. Check server permissions."]);
             $conn->close();
@@ -146,15 +149,13 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
         }
     }
 
-    $new_image_filename = uniqid("student_") . "_" . $file_name_original; // Generate unique filename
+    $new_image_filename = uniqid("student_") . "_" . $file_name_original;
     $uploadPath = $uploadDir . $new_image_filename;
 
-    // Attempt to move the uploaded file
     if (move_uploaded_file($file_tmp_name, $uploadPath)) {
-        deleteOldImage($conn, $student_id); // Delete old image only if new one successfully uploaded
+        deleteOldImage($conn, $student_id);
         $image_uploaded_this_request = true;
     } else {
-        // More specific error for file move failure
         $php_error_message = error_get_last();
         http_response_code(500);
         echo json_encode(["success" => false, "message" => "Image upload failed: Could not move file. " . ($php_error_message ? $php_error_message['message'] : 'Check directory permissions for ' . $uploadDir)]);
@@ -162,7 +163,6 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
         exit;
     }
 } else if (isset($_FILES["image"]) && $_FILES["image"]["error"] !== UPLOAD_ERR_NO_FILE) {
-    // Handle other specific upload errors (e.g., file size limits)
     $upload_error_messages = [
         UPLOAD_ERR_INI_SIZE => "File too large (PHP ini size).",
         UPLOAD_ERR_FORM_SIZE => "File too large (HTML form size).",
@@ -178,7 +178,6 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     $conn->close();
     exit;
 } else {
-    // No new image uploaded in this request, retain the existing one from the database
     $stmt_fetch_current_image = $conn->prepare("SELECT image FROM student WHERE student_id = ?");
     if ($stmt_fetch_current_image === false) {
         // Log this error if you have a log, but don't exit, we can proceed without updating image
@@ -187,33 +186,21 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
         $stmt_fetch_current_image->execute();
         $result_current_image = $stmt_fetch_current_image->get_result();
         if ($row_current_image = $result_current_image->fetch_assoc()) {
-            $new_image_filename = $row_current_image['image']; // Retain existing image filename
+            $new_image_filename = $row_current_image['image'];
         }
         $stmt_fetch_current_image->close();
     }
 }
-// --- End Image Upload Logic ---
 
-
-// --- Start Database Transaction for Atomicity ---
+// --- Start Database Transaction ---
 $conn->begin_transaction();
 
 try {
-    // Update student table
+    // 1. Update main student table
     $query_student = "UPDATE student SET
-                email = ?,
-                password = ?,
-                firstname = ?,
-                middlename = ?,
-                lastname = ?,
-                date_of_birth = ?,
-                contact_number = ?,
-                street = ?,
-                city = ?,
-                province = ?,
-                zipcode = ?,
-                country = ?,
-                image = ?
+                email = ?, password = ?, firstname = ?, middlename = ?, lastname = ?,
+                date_of_birth = ?, contact_number = ?, street = ?, city = ?, province = ?,
+                zipcode = ?, country = ?, image = ?
             WHERE student_id = ?";
 
     $stmt_student = $conn->prepare($query_student);
@@ -228,88 +215,150 @@ try {
     $stmt_student->execute();
     $stmt_student->close();
 
-    // Update student_details table
-    // Check if student_details record exists for this student_id, if not, insert (unlikely for update)
-    $stmt_check_sd = $conn->prepare("SELECT student_id FROM student_details WHERE student_id = ?");
-    if ($stmt_check_sd === false) {
-        throw new Exception("Failed to prepare student_details check statement: " . $conn->error);
+    // 2. Handle student_details (Enrollments)
+    // Get current enrollments from DB to compare with new ones
+    $current_db_enrollments = [];
+    $stmt_current_enrollments = $conn->prepare("SELECT student_details_id, section_id, instructor_id, program_details_id FROM student_details WHERE student_id = ?");
+    if ($stmt_current_enrollments === false) {
+        throw new Exception("Failed to prepare current enrollments fetch: " . $conn->error);
     }
-    $stmt_check_sd->bind_param("i", $student_id);
-    $stmt_check_sd->execute();
-    $result_check_sd = $stmt_check_sd->get_result();
-    $stmt_check_sd->close();
+    $stmt_current_enrollments->bind_param("i", $student_id);
+    $stmt_current_enrollments->execute();
+    $result_current_enrollments = $stmt_current_enrollments->get_result();
+    while ($row = $result_current_enrollments->fetch_assoc()) {
+        $current_db_enrollments[$row['student_details_id']] = $row;
+    }
+    $stmt_current_enrollments->close();
 
-    if ($result_check_sd->num_rows > 0) {
-        // Record exists, update it
-        $query_student_details = "UPDATE student_details SET
-                                    section_id = ?,
-                                    instructor_id = ?,
-                                    program_details_id = ?
-                                WHERE student_id = ?";
-        $stmt_student_details = $conn->prepare($query_student_details);
-        if ($stmt_student_details === false) {
-            throw new Exception("Failed to prepare student_details update statement: " . $conn->error);
+    $processed_enrollment_ids = [];
+
+    foreach ($enrollments_data as $enrollment) {
+        $sd_id = $enrollment['student_details_id'] ?? null; // ID will be present for existing enrollments
+        $section_id = intval($enrollment['section_id'] ?? 0);
+        $instructor_id = intval($enrollment['instructor_id'] ?? 0);
+        $program_details_id = intval($enrollment['program_details_id'] ?? 0);
+
+        // Basic validation for enrollment data
+        if (empty($section_id) || empty($instructor_id) || empty($program_details_id)) {
+            throw new Exception("Invalid enrollment data provided (missing section, instructor, or program ID).");
         }
-        $stmt_student_details->bind_param("iiii", $section_id, $instructor_id, $program_details_id, $student_id);
-    } else {
-        // No record exists, insert it (this handles a rare edge case, but should ideally not happen on an edit)
-        $query_student_details = "INSERT INTO student_details (student_id, section_id, instructor_id, program_details_id)
-                                VALUES (?, ?, ?, ?)";
-        $stmt_student_details = $conn->prepare($query_student_details);
-        if ($stmt_student_details === false) {
-            throw new Exception("Failed to prepare student_details insert statement: " . $conn->error);
+
+        if ($sd_id && isset($current_db_enrollments[$sd_id])) {
+            // This is an existing enrollment, check if it needs update
+            $current_db_row = $current_db_enrollments[$sd_id];
+
+            if (
+                $current_db_row['section_id'] != $section_id ||
+                $current_db_row['instructor_id'] != $instructor_id ||
+                $current_db_row['program_details_id'] != $program_details_id
+            ) {
+                // Update existing student_details record
+                $stmt_update_sd = $conn->prepare("UPDATE student_details SET section_id = ?, instructor_id = ?, program_details_id = ? WHERE student_details_id = ? AND student_id = ?");
+                if ($stmt_update_sd === false) {
+                    throw new Exception("Failed to prepare student_details update statement: " . $conn->error);
+                }
+                $stmt_update_sd->bind_param("iiiii", $section_id, $instructor_id, $program_details_id, $sd_id, $student_id);
+                $stmt_update_sd->execute();
+                $stmt_update_sd->close();
+            }
+            $processed_enrollment_ids[] = $sd_id; // Mark as processed
+        } else {
+            // This is a new enrollment, insert it
+            $stmt_insert_sd = $conn->prepare("INSERT INTO student_details (student_id, section_id, instructor_id, program_details_id) VALUES (?, ?, ?, ?)");
+            if ($stmt_insert_sd === false) {
+                throw new Exception("Failed to prepare student_details insert statement: " . $conn->error);
+            }
+            $stmt_insert_sd->bind_param("iiii", $student_id, $section_id, $instructor_id, $program_details_id);
+            $stmt_insert_sd->execute();
+            $stmt_insert_sd->close();
+            // We don't add new ID to processed_enrollment_ids here, as we only need to delete old ones
         }
-        $stmt_student_details->bind_param("iiii", $student_id, $section_id, $instructor_id, $program_details_id);
     }
 
-    $stmt_student_details->execute();
-    $stmt_student_details->close();
+    // 3. Delete enrollments that were not sent in the update request (i.e., removed by user)
+    $enrollments_to_delete = array_diff(array_keys($current_db_enrollments), $processed_enrollment_ids);
 
-    $conn->commit(); // Commit transaction if all updates are successful
+    if (!empty($enrollments_to_delete)) {
+        $placeholders = implode(',', array_fill(0, count($enrollments_to_delete), '?'));
+        $delete_query = "DELETE FROM student_details WHERE student_details_id IN ($placeholders) AND student_id = ?";
+        $stmt_delete_sd = $conn->prepare($delete_query);
+        if ($stmt_delete_sd === false) {
+            throw new Exception("Failed to prepare student_details delete statement: " . $conn->error);
+        }
 
-    // Fetch updated info to return to the frontend
-    $stmt_fetch_updated = $conn->prepare("
-        SELECT
-            s.*,
-            sd.section_id,
+        $types = str_repeat('i', count($enrollments_to_delete)) . 'i'; // All are integers
+        $params = array_merge($enrollments_to_delete, [$student_id]);
+        $stmt_delete_sd->bind_param($types, ...$params);
+        $stmt_delete_sd->execute();
+        $stmt_delete_sd->close();
+    }
+
+
+    $conn->commit();
+
+    // Fetch updated info to return to the frontend (similar to student_get_api.php)
+    // You might want to return the full student object with all enrollments here
+    $response_student = [];
+    $query_student_fetch = "
+        SELECT 
+            student_id, email, firstname, middlename, lastname, date_of_birth,
+            contact_number, street, city, province, zipcode, country, image
+        FROM student
+        WHERE student_id = ?
+    ";
+    $stmt_fetch_student = $conn->prepare($query_student_fetch);
+    $stmt_fetch_student->bind_param("i", $student_id);
+    $stmt_fetch_student->execute();
+    $result_fetch_student = $stmt_fetch_student->get_result();
+    $response_student = $result_fetch_student->fetch_assoc();
+    $stmt_fetch_student->close();
+    unset($response_student["password"]); // Remove password for security
+
+    $query_enrollments_fetch = "
+        SELECT 
+            sd.student_details_id,
             sd.instructor_id,
+            sd.section_id,
             sd.program_details_id,
             sec.year_level_id,
-            sec.semester_id
-        FROM
-            student s
-        LEFT JOIN
-            student_details sd ON s.student_id = sd.student_id
-        LEFT JOIN
+            sec.semester_id,
+            sec.section_name,
+            inst.firstname AS instructor_firstname,
+            inst.lastname AS instructor_lastname,
+            p.program_name
+        FROM 
+            student_details sd
+        JOIN 
             section sec ON sd.section_id = sec.section_id
-        WHERE
-            s.student_id = ?
-        LIMIT 1;
-    ");
-    if ($stmt_fetch_updated === false) {
-        echo json_encode(["success" => false, "message" => "Profile updated, but failed to retrieve updated data (prepare error)."]);
-        $conn->close();
-        exit;
+        JOIN 
+            instructor inst ON sd.instructor_id = inst.instructor_id
+        JOIN 
+            program_details pd ON sd.program_details_id = pd.program_details_id
+        JOIN
+            program p ON pd.program_id = p.program_id
+        WHERE 
+            sd.student_id = ?
+    ";
+    $stmt_fetch_enrollments = $conn->prepare($query_enrollments_fetch);
+    $stmt_fetch_enrollments->bind_param("i", $student_id);
+    $stmt_fetch_enrollments->execute();
+    $result_fetch_enrollments = $stmt_fetch_enrollments->get_result();
+    $response_enrollments = [];
+    while ($row = $result_fetch_enrollments->fetch_assoc()) {
+        $response_enrollments[] = $row;
     }
-    $stmt_fetch_updated->bind_param("i", $student_id);
-    $stmt_fetch_updated->execute();
-    $result_updated = $stmt_fetch_updated->get_result();
+    $stmt_fetch_enrollments->close();
 
-    if ($student = $result_updated->fetch_assoc()) {
-        unset($student["password"]); // Remove password for security
-        echo json_encode(["success" => true, "message" => "Student updated successfully!", "student" => $student]);
-    } else {
-        echo json_encode(["success" => false, "message" => "Student updated, but failed to retrieve updated data."]);
-    }
-    $stmt_fetch_updated->close();
+    $response_student['enrollments'] = $response_enrollments;
+
+    echo json_encode(["success" => true, "message" => "Student and enrollments updated successfully!", "student" => $response_student]);
 
 } catch (Exception $e) {
-    $conn->rollback(); // Rollback transaction on error
-    // If a new image was uploaded in this request but the DB transaction failed, delete the image
-    if ($image_uploaded_this_request && file_exists($uploadPath)) { // Use $uploadPath from above
+    $conn->rollback();
+    if ($image_uploaded_this_request && file_exists($uploadPath)) {
         unlink($uploadPath);
     }
-    http_response_code(500); // Internal Server Error
+    http_response_code(500);
     echo json_encode(["success" => false, "message" => "Database Transaction Failed: " . $e->getMessage()]);
 }
 

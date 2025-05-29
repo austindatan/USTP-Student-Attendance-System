@@ -12,22 +12,22 @@ export default function AddSection() {
     schedule_day: '',
     start_time: '',
     end_time: '',
-    year_level_id: '', 
-    semester_id: '',   
+    year_level_id: '', // Changed to store ID
+    semester_id: '',   // Changed to store ID
   });
 
   const [courses, setCourses] = useState([]);
-  const [yearLevels, setYearLevels] = useState([]); 
-  const [semesters, setSemesters] = useState([]);  
+  const [yearLevels, setYearLevels] = useState([]); // New state for year levels
+  const [semesters, setSemesters] = useState([]);   // New state for semesters
 
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState('');
 
-  const [loadingYearLevels, setLoadingYearLevels] = useState(true);
-  const [errorYearLevels, setErrorYearLevels] = useState('');   
+  const [loadingYearLevels, setLoadingYearLevels] = useState(true); // New loading state
+  const [errorYearLevels, setErrorYearLevels] = useState('');     // New error state
 
-  const [loadingSemesters, setLoadingSemesters] = useState(true);  
-  const [errorSemesters, setErrorSemesters] = useState('');      
+  const [loadingSemesters, setLoadingSemesters] = useState(true);   // New loading state
+  const [errorSemesters, setErrorSemesters] = useState('');       // New error state
 
   const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +52,7 @@ export default function AddSection() {
       });
   }, []);
 
+  // Fetch Year Levels
   useEffect(() => {
     axios
       .get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php')
@@ -71,7 +72,7 @@ export default function AddSection() {
       });
   }, []);
 
-
+  // Fetch Semesters
   useEffect(() => {
     axios
       .get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php')
@@ -108,8 +109,8 @@ export default function AddSection() {
       !formData.schedule_day ||
       !formData.start_time ||
       !formData.end_time ||
-      !formData.year_level_id || 
-      !formData.semester_id      
+      !formData.year_level_id || // Validate the ID
+      !formData.semester_id      // Validate the ID
     ) {
       alert('Please fill in all required fields (Section Name, Course, Schedule Day, Start Time, End Time, Year Level, Semester).');
       return;
@@ -120,6 +121,7 @@ export default function AddSection() {
   const handleConfirmAddSection = async () => {
     setIsLoading(true);
 
+    // Convert IDs to integers for database
     const submitData = {
       ...formData,
       course_id: parseInt(formData.course_id, 10),
@@ -127,9 +129,9 @@ export default function AddSection() {
       semester_id: parseInt(formData.semester_id, 10),
     };
 
-    try { 
-      const res = await axios.post( 
-        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
+    try {
+      const res = await axios.post(
+        'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
           headers: { 'Content-Type': 'application/json' },
@@ -153,11 +155,11 @@ export default function AddSection() {
       } else {
         alert(res.data.message || 'Failed to add section.');
       }
-    } catch (err) { 
+    } catch (err) {
       console.error('An error occurred:', err);
       alert('An error occurred while adding the section.');
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
@@ -269,6 +271,7 @@ export default function AddSection() {
               />
             </div>
 
+            {/* Year Level Dropdown */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Year Level</label>
               {loadingYearLevels ? (
@@ -277,7 +280,7 @@ export default function AddSection() {
                 <p className="text-red-500 mt-2">{errorYearLevels}</p>
               ) : (
                 <select
-                  name="year_level_id"
+                  name="year_level_id" // Use the ID here
                   value={formData.year_level_id}
                   onChange={handleChange}
                   required
@@ -293,7 +296,7 @@ export default function AddSection() {
               )}
             </div>
 
-
+            {/* Semester Dropdown */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Semester</label>
               {loadingSemesters ? (
@@ -302,7 +305,7 @@ export default function AddSection() {
                 <p className="text-red-500 mt-2">{errorSemesters}</p>
               ) : (
                 <select
-                  name="semester_id"
+                  name="semester_id" // Use the ID here
                   value={formData.semester_id}
                   onChange={handleChange}
                   required

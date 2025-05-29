@@ -36,7 +36,7 @@ if ($result) {
     $response['message'] = 'Year levels fetched successfully.';
 } else {
     $response['message'] = 'Query failed: ' . $conn->error;
-    error_log("Error fetching year levels: " . $conn->error); 
+    error_log("Error fetching year levels: " . $conn->error); // Log detailed error
 }
 
 echo json_encode($response);

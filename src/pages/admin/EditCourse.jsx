@@ -6,7 +6,7 @@ import ConfirmationModal from '../../components/confirmationmodal';
 export default function EditCourse() {
   const [formData, setFormData] = useState({
     course_id: '',
-    course_code: '', 
+    course_code: '', // Added course_code to initial state
     course_name: '',
     description: '',
   });
@@ -19,19 +19,19 @@ export default function EditCourse() {
   useEffect(() => {
     axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
       .then((response) => {
-        if (response.data.success === false) { 
+        if (response.data.success === false) { // Handle case where course might not be found
             alert(response.data.message);
-            navigate('/admin-courses'); 
+            navigate('/admin-courses'); // Redirect if not found
             return;
         }
-        setFormData(response.data); 
+        setFormData(response.data); // Data should now include course_code
       })
       .catch((error) => {
         console.error('Error fetching course:', error);
         alert('Failed to fetch course data.');
-        navigate('/admin-courses'); 
+        navigate('/admin-courses'); // Redirect on error
       });
-  }, [id, navigate]); 
+  }, [id, navigate]); // Added navigate to dependency array
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +40,7 @@ export default function EditCourse() {
 
   const handleOpenEditCourseModal = (e) => {
     e.preventDefault();
-    
+    // Validate all fields
     if (!formData.course_code || !formData.course_name || !formData.description) {
       alert('Please fill in all fields: Course Code, Course Name, and Description.');
       return;
@@ -51,14 +51,14 @@ export default function EditCourse() {
   const handleConfirmEditCourse = async () => {
     setIsLoading(true);
     try {
- 
+      // formData now correctly includes course_code
       const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
       if (response.data.success) {
           alert('Course updated successfully!');
           setIsEditCourseModalOpen(false);
           navigate('/admin-courses');
       } else {
-
+          // Display specific error message from the backend
           alert(`Failed to update course: ${response.data.message}`);
       }
     } catch (error) {
@@ -98,8 +98,10 @@ export default function EditCourse() {
         <div className="bg-white shadow-md p-8 rounded-lg">
           <form onSubmit={handleOpenEditCourseModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+            {/* Course ID (hidden) */}
             <input type="hidden" name="course_id" value={formData.course_id} />
 
+            {/* Course Code Field */}
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700">Course Code</label>
               <input

@@ -36,7 +36,7 @@ if ($result) {
     $response['message'] = 'Semesters fetched successfully.';
 } else {
     $response['message'] = 'Query failed: ' . $conn->error;
-    error_log("Error fetching semesters: " . $conn->error);
+    error_log("Error fetching semesters: " . $conn->error); // Log detailed error
 }
 
 echo json_encode($response);
