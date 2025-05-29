@@ -27,7 +27,6 @@ $year = (int) date("Y");
 
 error_log(LOG_PREFIX . " Processing request for student_id: '{$student_id}' for year: {$year}");
 
-// Same structure, but for ABSENT count
 $sql = "
     SELECT COUNT(a.attendance_id) AS total_absent
     FROM attendance a

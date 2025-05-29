@@ -16,7 +16,6 @@ if (!$date || !$status || !$student_details_id) {
     exit;
 }
 
-// Check if attendance already exists
 $checkQuery = "SELECT 1 FROM attendance WHERE student_details_id = ? AND date = ?";
 $stmt = $conn->prepare($checkQuery);
 $stmt->bind_param("is", $student_details_id, $date);
@@ -24,7 +23,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    // Update record
     $updateQuery = "UPDATE attendance SET status = ? WHERE student_details_id = ? AND date = ?";
     $updateStmt = $conn->prepare($updateQuery);
     $updateStmt->bind_param("sis", $status, $student_details_id, $date);
@@ -32,7 +30,6 @@ if ($result->num_rows > 0) {
     echo json_encode(['success' => true, 'action' => 'updated']);
     $updateStmt->close();
 } else {
-    // Insert new record
     $insertQuery = "INSERT INTO attendance (student_details_id, date, status) VALUES (?, ?, ?)";
     $insertStmt = $conn->prepare($insertQuery);
     $insertStmt->bind_param("iss", $student_details_id, $date, $status);

@@ -115,18 +115,6 @@ export default function EditCourse() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700">Course Name</label>
-              <input
-                type="text"
-                name="course_name"
-                value={formData.course_name}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700">Description</label>
               <textarea
                 name="description"
@@ -157,7 +145,6 @@ export default function EditCourse() {
         </div>
       </section>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={isEditCourseModalOpen}
         onClose={handleCloseEditCourseModal}

@@ -142,7 +142,6 @@ export default function AddCourse() {
         </div>
       </section>
 
-      {/* Confirmation Modal for Add Course */}
       <ConfirmationModal
         isOpen={isAddCourseModalOpen}
         onClose={handleCloseAddCourseModal}

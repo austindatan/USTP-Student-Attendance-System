@@ -2,31 +2,27 @@ import React, { useState } from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
-// COMPONENTS
 import EditProfile from "./pages/instructor/EditProfile";
 import LeftSidebar from './components/leftsidebar';
 import AdminLeftSidebar from './components/AdminLeftSidebar';
 import RightSidebar from './components/rightsidebar';
 import StudentLeftSideBar from './components/StudentLeftSideBar';
 
-// AUTH
 import LoginStudent from "./pages/login/LoginStudent";
 import LoginAdmin from "./pages/login/LoginAdmin";
 import LoginInstructor from "./pages/login/LoginInstructor";
 import RegisterInstructor from "./pages/login/RegisterInstructor";
 
-// INSTRUCTOR
 import TeacherDashboard from "./pages/instructor/teacher_dashboard";
 import Classes_Dashboard from "./pages/instructor/classes_dashboard";
 import SectionDashboard from "./pages/instructor/section_dashboard";
 import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
 
-// STUDENT
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRightSidebar from './components/student_rightsidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
+import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
 
-// ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
 import DropRequests from './pages/admin/drop_requests';
@@ -42,10 +38,8 @@ import AddSection from './pages/admin/AddSection';
 import EditSection from './pages/admin/EditSection';
 import EditCourse from './pages/admin/EditCourse';
 
-// ROUTE GUARD
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// 404 Page
 import NotFound from "./components/NotFound";
 
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
@@ -98,14 +92,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login Routes */}
         <Route path="/" element={<LoginStudent />} />
         <Route path="/login-student" element={<LoginStudent />} />
         <Route path="/login-admin" element={<LoginAdmin />} />
         <Route path="/login-instructor" element={<LoginInstructor />} />
         <Route path="/register-instructor" element={<RegisterInstructor />} />
 
-        {/* Student Protected Route */}
         <Route
           path="/student-dashboard"
           element={
@@ -117,6 +109,17 @@ function App() {
                 setBgImage={setBgImage}
               >
                 <StudentDashboard />
+              </StudentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student-classes-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+              <StudentLayout>
+                <StudentClassesDashboard />
               </StudentLayout>
             </ProtectedRoute>
           }
@@ -190,7 +193,6 @@ function App() {
           }
         />
 
-        {/* Admin Protected Routes */}
         <Route
           path="/admin-dashboard"
           element={
@@ -246,7 +248,6 @@ function App() {
           }
         />
 
-        {/* ROUTE FOR ADDING SECTIONS */}
         <Route
           path="/admin-sections/add"
           element={
@@ -258,7 +259,6 @@ function App() {
           }
         />
 
-        {/* ROUTE FOR EDITING SECTIONS */}
         <Route
           path="/admin-edit-section/:id" 
           element={
@@ -281,7 +281,6 @@ function App() {
           }
         />
 
-        {/*Route for Adding Courses */}
         <Route
           path="/admin-courses/add"
           element={
@@ -293,7 +292,6 @@ function App() {
           }
         />
 
-        {/* ROUTE FOR EDITING COURSES */}
         <Route
           path="/admin-courses/edit/:id"
           element={
@@ -349,7 +347,6 @@ function App() {
           }
         />
 
-        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

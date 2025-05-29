@@ -14,7 +14,6 @@ const StudentNavbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex flex-wrap justify-between items-center px-4 sm:px-6 py-3 bg-blue-950 border-b shadow-md">
-      {/* Left side: Logo and University Name */}
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <img
           src="/assets/ustp_logo.png"
@@ -26,7 +25,6 @@ const StudentNavbar = () => {
         </span>
       </div>
 
-      {/* Right side: Student Dropdown */}
       <div
         className="relative w-full sm:w-auto mt-3 sm:mt-0 text-right cursor-pointer"
         onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -47,7 +45,6 @@ const StudentNavbar = () => {
           <span className="truncate max-w-[120px] sm:max-w-none">{studentName}</span>
         </span>
 
-        {/* Dropdown menu */}
         {dropdownOpen && (
           <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50">
             <button

@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
-include '../src/conn.php'; // ✅ ensure correct relative path
+include '../src/conn.php'; 
 
 $instructor_id = isset($_GET['instructor_id']) ? intval($_GET['instructor_id']) : 0;
 $date = isset($_GET['date']) ? $_GET['date'] : null;
@@ -13,7 +13,6 @@ if (!$instructor_id || !$date) {
     exit;
 }
 
-// --- Total Students ---
 $students_result = 0;
 $stmt1 = $conn->prepare("SELECT COUNT(DISTINCT student_details_id) AS total FROM student_details WHERE instructor_id = ?");
 $stmt1->bind_param("i", $instructor_id);
@@ -24,7 +23,6 @@ if ($row1 = $res1->fetch_assoc()) {
 }
 $stmt1->close();
 
-// --- Present Today ---
 $present_result = 0;
 $stmt2 = $conn->prepare("
     SELECT COUNT(*) AS present_today
@@ -43,7 +41,6 @@ if ($row2 = $res2->fetch_assoc()) {
 }
 $stmt2->close();
 
-// --- Total Classes ---
 $classes_result = 0;
 $stmt3 = $conn->prepare("SELECT COUNT(DISTINCT section_id) AS total_classes FROM student_details WHERE instructor_id = ?");
 $stmt3->bind_param("i", $instructor_id);
@@ -54,7 +51,6 @@ if ($row3 = $res3->fetch_assoc()) {
 }
 $stmt3->close();
 
-// --- Upcoming Events ---
 $events_result = 0;
 $events_query = "SELECT COUNT(*) AS upcoming_events FROM attendance WHERE date > CURDATE()";
 $res4 = $conn->query($events_query);

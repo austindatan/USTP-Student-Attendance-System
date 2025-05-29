@@ -41,14 +41,12 @@ const LoginAdmin = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center font-dm-sans">
-      {/* Background Image with dark overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
       <div
         className="absolute inset-0 bg-cover bg-center z-[-1]"
         style={{ backgroundImage: "url('assets/ustp-cdo-2.jpg')" }}
       ></div>
 
-      {/* Login form container */}
       <div className="relative bg-white p-6 sm:p-8 rounded-3xl shadow-md w-full max-w-xs sm:max-w-md mx-4 sm:mx-0 z-10">
         {error && (
           <p className="text-red-500 mb-4 text-center font-semibold">{error}</p>
@@ -68,7 +66,6 @@ const LoginAdmin = () => {
           </div>
 
           <div className="mb-4 relative">
-            {/* Email Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -94,7 +91,6 @@ const LoginAdmin = () => {
           </div>
 
           <div className="mb-6 relative">
-            {/* Password Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

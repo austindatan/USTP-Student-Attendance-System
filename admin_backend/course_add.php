@@ -39,6 +39,13 @@ if ($count > 0) {
     exit;
 }
 
+if ($count > 0) {
+    echo json_encode([
+        "success" => false,
+        "message" => "Course code already exists. Please use a different one."
+    ]);
+    exit;
+}
 
 // Prepare and execute the INSERT statement
 $sql = "INSERT INTO course (course_code, course_name, description) VALUES (?, ?, ?)";

@@ -190,7 +190,7 @@ export default function AddSection() {
         <div className="bg-white shadow-md p-8 rounded-lg">
           <form onSubmit={handleOpenAddSectionModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* Section Name */}
+
             <div>
               <label className="block text-sm font-semibold text-gray-700">Section Name</label>
               <input
@@ -203,7 +203,6 @@ export default function AddSection() {
               />
             </div>
 
-            {/* Course Dropdown */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Course</label>
               {loadingCourses ? (
@@ -228,7 +227,7 @@ export default function AddSection() {
               )}
             </div>
 
-            {/* Schedule Day */}
+
             <div>
               <label className="block text-sm font-semibold text-gray-700">Schedule Day</label>
               <select
@@ -239,16 +238,24 @@ export default function AddSection() {
                 className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select a day</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
+                  <option value="Monday & Tuesday">Monday & Tuesday</option>
+                  <option value="Monday & Wednesday">Monday & Wednesday</option>
+                  <option value="Monday & Thursday">Monday & Thursday</option>
+                  <option value="Monday & Friday">Monday & Friday</option>
+                  <option value="Monday & Saturday">Monday & Saturday</option>
+                  <option value="Tuesday & Wednesday">Tuesday & Wednesday</option>
+                  <option value="Tuesday & Thursday">Tuesday & Thursday</option>
+                  <option value="Tuesday & Friday">Tuesday & Friday</option>
+                  <option value="Tuesday & Saturday">Tuesday & Saturday</option>
+                  <option value="Wednesday & Thursday">Wednesday & Thursday</option>
+                  <option value="Wednesday & Friday">Wednesday & Friday</option>
+                  <option value="Wednesday & Saturday">Wednesday & Saturday</option>
+                  <option value="Thursday & Friday">Thursday & Friday</option>
+                  <option value="Thursday & Saturday">Thursday & Saturday</option>
+                  <option value="Friday & Saturday">Friday & Saturday</option>
               </select>
             </div>
 
-            {/* Start Time */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Start Time</label>
               <input
@@ -261,7 +268,6 @@ export default function AddSection() {
               />
             </div>
 
-            {/* End Time */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">End Time</label>
               <input
@@ -346,7 +352,6 @@ export default function AddSection() {
         </div>
       </section>
 
-      {/* Confirmation Modal for Add Section */}
       <ConfirmationModal
         isOpen={isAddSectionModalOpen}
         onClose={handleCloseAddSectionModal}

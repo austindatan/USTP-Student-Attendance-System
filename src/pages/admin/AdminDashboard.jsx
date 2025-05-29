@@ -70,7 +70,6 @@ const AdminDashboard = () => {
       });
   }, []);
 
-  // Fetch Line Chart Data (Monthly Attendance)
   useEffect(() => {
     const apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/get_monthly_attendance.php';
     console.log('Fetching line chart data from:', apiUrl);
@@ -227,7 +226,6 @@ const AdminDashboard = () => {
     },
   };
 
-  // Overall loading timer for the initial animation
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);

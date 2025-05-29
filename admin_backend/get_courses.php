@@ -1,14 +1,14 @@
 <?php
 header("Content-Type: application/json");
-header('Access-Control-Allow-Origin: *'); // Allow requests from any origin during development
+header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(); // Handle preflight OPTIONS request
+    exit();
 }
 
-include __DIR__ . '/../src/conn.php'; // Your database connection
+include __DIR__ . '/../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $sql = "SELECT course_id, course_code, course_name, description FROM course ORDER BY course_code ASC"; // Assuming your table is 'course'
@@ -21,12 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         echo json_encode(["success" => true, "courses" => $courses]);
     } else {
-        // Log the actual SQL error for debugging on the server
         error_log("Error fetching courses: " . $conn->error);
         echo json_encode(["success" => false, "message" => "Failed to fetch courses from database."]);
     }
 } else {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405);
     echo json_encode(["success" => false, "message" => "Invalid request method."]);
 }
 

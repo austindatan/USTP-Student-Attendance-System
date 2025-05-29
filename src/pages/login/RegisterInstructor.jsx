@@ -99,7 +99,7 @@ const RegisterInstructor = () => {
           <h2 className="text-lg sm:text-xl font-bold">Instructor Registration</h2>
         </div>
 
-        {/* Image preview + upload */}
+
         <div className="text-center">
           {preview && (
             <img
@@ -111,7 +111,7 @@ const RegisterInstructor = () => {
           <input type="file" name="image" accept="image/*" onChange={handleChange} className="text-sm" />
         </div>
 
-        {/* Name Fields */}
+
         <div className="flex flex-col sm:flex-row gap-2">
           {["firstname", "middlename", "lastname"].map(field => (
             <div key={field} className="flex-1">
@@ -128,7 +128,6 @@ const RegisterInstructor = () => {
           ))}
         </div>
 
-        {/* Email + Password */}
         <div className="flex flex-col sm:flex-row gap-2">
           {["email", "password"].map(field => (
             <div key={field} className="flex-1">
@@ -145,7 +144,6 @@ const RegisterInstructor = () => {
           ))}
         </div>
 
-        {/* Date of Birth + Contact */}
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <input
@@ -170,7 +168,6 @@ const RegisterInstructor = () => {
           </div>
         </div>
 
-        {/* Address Fields */}
         <div className="flex flex-col sm:flex-row gap-2">
           {["street", "city"].map(field => (
             <div key={field} className="flex-1">

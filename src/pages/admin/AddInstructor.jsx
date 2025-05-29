@@ -183,8 +183,7 @@ export default function AddInstructor() {
           </form>
         </div>
       </section>
-
-      {/* Confirmation Modal for Add Instructor */}
+      
       <ConfirmationModal
         isOpen={isAddInstructorModalOpen}
         onClose={handleCloseAddInstructorModal}

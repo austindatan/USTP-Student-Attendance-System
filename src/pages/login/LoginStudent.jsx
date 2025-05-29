@@ -21,7 +21,7 @@ const LoginStudent = () => {
         const data = await response.json();
 
         if (data.success) {
-            // Save user session
+
             localStorage.setItem('userRole', 'student');
             localStorage.setItem('student', JSON.stringify(data.user));
             navigate("/student-dashboard");
@@ -32,14 +32,14 @@ const LoginStudent = () => {
 
     return (
         <div className="relative min-h-screen flex items-center justify-center font-dm-sans">
-            {/* Overlay background */}
+
             <div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
             <div
                 className="absolute inset-0 bg-cover bg-center z-[-1]"
                 style={{ backgroundImage: "url('assets/ustp-cdo-3.jpg')" }}
             ></div>
 
-            {/* Login form */}
+ 
             <form
                 onSubmit={handleLogin}
                 className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl shadow-md w-[90%] sm:w-full max-w-md"
@@ -54,7 +54,7 @@ const LoginStudent = () => {
                 {error && <p className="text-red-500 mb-4">{error}</p>}
 
                 <div className="mb-4 relative">
-                    {/* Email icon */}
+              
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -80,7 +80,7 @@ const LoginStudent = () => {
                 </div>
 
                 <div className="mb-6 relative">
-                    {/* Password icon */}
+            
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"

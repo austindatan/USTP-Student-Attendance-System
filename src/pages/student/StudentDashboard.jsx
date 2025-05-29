@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
 
 
-// Helper components
 function DashboardCard({ icon, label, count }) {
   return (
     <div className="font-dm-sans bg-white backdrop-blur-md p-5 rounded-2xl shadow-lg flex items-center gap-4 hover:scale-[1.02] transition-transform min-w-[130px]">
@@ -153,9 +152,7 @@ function StudentDashboard() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
-        {/* Header + Attendance Cards in Flex Row */}
         <div className="flex flex-col lg:flex-row gap-6 items-start mb-8">
-          {/* Welcome Header */}
           <div
             className="bg-[#7685fc] rounded-lg p-6 text-white font-poppins relative overflow-hidden w-full lg:w-1/2 aspect-square lg:aspect-auto"
             style={
@@ -186,7 +183,6 @@ function StudentDashboard() {
             </div>
           </div>
 
-          {/* Attendance Cards beside welcome */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 w-full lg:w-1/2">
             {loading ? (
               [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
@@ -203,7 +199,6 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Attendance Summary Table */}
         <div className="bg-white shadow-lg rounded-lg p-6 mt-10 overflow-auto">
           <h2 className="text-xl font-semibold mb-4">Attendance Summary by Subject</h2>
           <table className="min-w-full table-auto border border-gray-200">
@@ -232,7 +227,6 @@ function StudentDashboard() {
           </table>
         </div>
 
-        {/* Logout Button */}
         <button
           onClick={handleLogout}
           className="mt-10 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"

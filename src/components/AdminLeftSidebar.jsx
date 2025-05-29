@@ -29,21 +29,27 @@ const HamburgerIcon = () => (
 
 const AdminLeftSidebar = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); 
   const [academicsOpen, setAcademicsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false); 
+
 
   const toggleSidebar = () => setIsOpen((prev) => !prev);
-  const toggleAcademics = () => setAcademicsOpen(!academicsOpen);
+  const toggleAcademics = () => setAcademicsOpen((prev) => !prev);
 
   const handleNavigate = (path) => {
     navigate(path);
-    setIsOpen(false); // Auto-close on nav
+    setIsOpen(false);
+    setPaletteOpen(false);
+    setAcademicsOpen(false);
   };
+
 
   const handleLogout = () => {
     localStorage.removeItem("admin");
     navigate("/login-admin");
   };
+
 
   useEffect(() => {
     applyBackground("/assets/ustp_theme.png");
@@ -90,8 +96,8 @@ const AdminLeftSidebar = () => {
             className="w-10 h-auto"
           />
         </div>
-
         <nav>
+
           <button
             onClick={() => handleNavigate("/admin-dashboard")}
             className={`mt-3 group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
@@ -183,53 +189,74 @@ const AdminLeftSidebar = () => {
             )}
           </div>
 
-          <div className="relative group mt-3">
-            <button className="group flex flex-col items-center px-4 py-2 rounded-lg text-[#737373] hover:text-[#7685fc]">
-              <div className="relative w-7 h-7 mb-1">
-                <img
-                  src="/assets/palette.png"
-                  alt="Palette Hover"
-                  className="absolute inset-0 w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                />
-                <img
-                  src="/assets/palette-active.png"
-                  alt="Palette Default"
-                  className="absolute inset-0 w-7 h-7 opacity-100 group-hover:opacity-0 transition-opacity"
-                />
-              </div>
-              <span className="text-xs">Wallpapers</span>
-            </button>
+  
+<div className="relative mt-3">
+  <button
+    onClick={() => setPaletteOpen((prev) => !prev)}
+    className="group flex flex-col items-center px-4 py-2 rounded-lg focus:outline-none"
+  >
+    <div className="relative w-7 h-7 mb-1">
+      <img
+        src="/assets/palette.png"
+        alt="Palette Default"
+        className={`absolute inset-0 w-7 h-7 transition-opacity ${
+          paletteOpen ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <img
+        src="/assets/palette-active.png"
+        alt="Palette Active"
+        className={`absolute inset-0 w-7 h-7 transition-opacity ${
+          paletteOpen ? "opacity-0" : "opacity-100"
+        }`}
+      />
+    </div>
+    <span
+      className={`text-xs transition-colors ${
+        paletteOpen ? "text-[#7685fc]" : "text-[#737373]"
+      }`}
+    >
+      Wallpapers
+    </span>
+  </button>
 
-            <div
-              className={`absolute left-1 font-dm-sans text-sm bg-white border rounded-md shadow-md hidden group-hover:block z-50 ${
-                academicsOpen ? "bottom-12" : "top-full"
-              }`}
-            >
-              {[ 
-                { label: "Water", img: "/assets/water_theme1.png" },
-                { label: "Forest", img: "/assets/forest_theme.png" },
-                { label: "USTP", img: "/assets/ustp_theme.png" },
-                { label: "Default", img: "/assets/white_theme.png" },
-              ].map(({ label, img }) => (
-                <button
-                  key={label}
-                  className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                  onClick={() => applyBackground(img)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            {paletteOpen && (
+              <div
+                className={`absolute left-1 font-dm-sans text-sm bg-white border rounded-md shadow-md z-50 ${
+                  academicsOpen ? "bottom-12" : "top-full"
+                }`}
+              >
+                {[
+                  { label: "Water", img: "/assets/water_theme1.png" },
+                  { label: "Forest", img: "/assets/forest_theme.png" },
+                  { label: "USTP", img: "/assets/ustp_theme.png" },
+                  { label: "Default", img: "/assets/white_theme.png" },
+                ].map(({ label, img }) => (
+                  <button
+                    key={label}
+                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                    onClick={() => {
+                      applyBackground(img);
+                      setPaletteOpen(false);
+                      setIsOpen(false); 
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
+
           <div className="absolute bottom-4 w-full flex justify-center right-0">
-            <div className="mt-3">
+            <div className="mt-3 w-full">
               <button
                 onClick={handleLogout}
                 className="group flex flex-col items-center px-3 py-2 rounded-lg w-full text-center text-red-600 hover:text-white hover:bg-red-600 transition-all"
               >
-                <FaSignOutAlt className="w-6 h-6 mb-1" />
-                <span className="text-xs">Log Out</span>
+                <FaSignOutAlt className="w-7 h-7 mb-1" />
+                <span className="text-xs">Logout</span>
               </button>
             </div>
           </div>

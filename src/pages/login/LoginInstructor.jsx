@@ -86,7 +86,6 @@ const LoginInstructor = () => {
         </div>
 
         <div className="mb-6 relative">
-          {/* Password icon */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

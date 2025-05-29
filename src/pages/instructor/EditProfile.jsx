@@ -55,10 +55,9 @@ const EditProfile = () => {
             setMessage("Failed to fetch instructor info.");
         }
 
-        // ⏱ Force minimum delay for skeleton
         setTimeout(() => {
             setLoading(false);
-        }, 800); // 800ms ensures skeleton is visible
+        }, 800);
         })
         .catch(() => {
         setMessage("Server error while loading profile.");

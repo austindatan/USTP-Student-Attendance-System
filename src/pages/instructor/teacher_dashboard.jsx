@@ -10,7 +10,7 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import ClassCard from './components/class_card'; // adjust path if needed
+import ClassCard from './components/class_card';
 
 
 export default function Teacher_Dashboard({ selectedDate }) {

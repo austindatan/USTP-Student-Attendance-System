@@ -7,6 +7,8 @@ export default function Admin_Students() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const navigate = useNavigate();
 
   const fetchStudents = async () => {
@@ -14,7 +16,7 @@ export default function Admin_Students() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost/ustp-student-attendance/admin_backend/student_api.php"
+        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
       );
 
       let data = [];
@@ -24,7 +26,6 @@ export default function Admin_Students() {
         data = res.data.students;
       }
 
-      // Sort by student_id ascending
       data.sort((a, b) => a.student_id - b.student_id);
       setStudents(data);
     } catch (err) {
@@ -38,7 +39,31 @@ export default function Admin_Students() {
     fetchStudents();
   }, []);
 
-  // Filter students by search term (fullname)
+  const handleDeleteClick = (student) => {
+    setSelectedStudent(student);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_student.php', {
+      _method: 'DELETE',
+      student_id: selectedStudent.student_id,
+    })
+    .then((res) => {
+      if (res.data.success) {
+        // Refresh or filter out the deleted instructor
+        setStudents(students.filter(s => s.student_id !== selectedStudent.student_id));
+      } else {
+        alert(res.data.message || "Failed to delete instructor.");
+      }
+    })
+    .catch(() => alert("An error occurred while deleting."))
+    .finally(() => {
+      setIsModalOpen(false);
+      setSelectedStudent(null);
+    });
+  };
+
   const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
@@ -47,7 +72,7 @@ export default function Admin_Students() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
-        {/* Header */}
+
         <div
           className="bg-white rounded-lg p-6 mb-6 relative overflow-hidden"
           style={
@@ -78,7 +103,6 @@ export default function Admin_Students() {
           </div>
         </div>
 
-        {/* Controls */}
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg overflow-x-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
@@ -102,7 +126,6 @@ export default function Admin_Students() {
             </div>
           </div>
 
-          {/* Table */}
           {loading ? (
             <p className="text-center text-gray-500">Loading students...</p>
           ) : error ? (
@@ -159,6 +182,12 @@ export default function Admin_Students() {
                           >
                             Edit
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick(student)}
+                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -169,6 +198,35 @@ export default function Admin_Students() {
           )}
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {isModalOpen && selectedStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Confirm Delete
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-bold">{selectedStudent.firstname} {selectedStudent.lastname} </span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

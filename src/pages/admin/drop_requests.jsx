@@ -8,7 +8,6 @@ export default function DropRequests() {
   const [modal, setModal] = useState({ isOpen: false, type: null, id: null });
   const [selectedReason, setSelectedReason] = useState("");
 
-  // Fetch drop requests from API
   const fetchRequests = () => {
     setLoading(true);
     fetch("http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php")
@@ -25,7 +24,6 @@ export default function DropRequests() {
     fetchRequests();
   }, []);
 
-  // Open modal with type and id; if reason, set selectedReason too
   const openModal = (type, id, reason = "") => {
     setModal({ isOpen: true, type, id });
     if (type === "reason") setSelectedReason(reason);
@@ -36,7 +34,6 @@ export default function DropRequests() {
     setSelectedReason("");
   };
 
-  // Confirm Drop or Reject action
   const confirmAction = async () => {
     if (modal.type === "drop" || modal.type === "reject") {
       const status = modal.type === "drop" ? "Dropped" : "Rejected";
@@ -66,7 +63,7 @@ export default function DropRequests() {
     }
   };
 
-  // Filter requests by student name or reason
+
   const filteredRequests = requests.filter(
     (req) =>
       req.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -79,7 +76,6 @@ export default function DropRequests() {
       style={{ overflowY: "auto" }}
     >
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-        {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
@@ -105,7 +101,6 @@ export default function DropRequests() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="bg-white shadow-md rounded-lg p-6">
           {loading ? (
             <p className="text-center text-gray-500">Loading drop requests...</p>
@@ -208,7 +203,6 @@ export default function DropRequests() {
           )}
         </div>
 
-        {/* Modal */}
         {modal.isOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">

@@ -7,9 +7,9 @@ require_once('../src/conn.php');
 
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $instructor_id = isset($_GET['instructor_id']) ? (int)$_GET['instructor_id'] : 0;
-$section_id = isset($_GET['section_id']) ? (int)$_GET['section_id'] : 0; // NEW: Get section_id
+$section_id = isset($_GET['section_id']) ? (int)$_GET['section_id'] : 0; 
 
-if (!$instructor_id || !$section_id) { // MODIFIED: Check for section_id
+if (!$instructor_id || !$section_id) { 
     echo json_encode(['success' => false, 'message' => 'Missing instructor_id or section_id']);
     exit;
 }
@@ -35,7 +35,7 @@ ORDER BY s.lastname, s.firstname
 
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param("sii", $date, $instructor_id, $section_id); // MODIFIED: Added 'i' for section_id
+$stmt->bind_param("sii", $date, $instructor_id, $section_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -47,6 +47,5 @@ while ($row = $result->fetch_assoc()) {
 
 echo json_encode($students);
 
-$stmt->close(); // Close statement
-$conn->close(); // Close connection
-?>
+$stmt->close(); 
+$conn->close(); 

@@ -28,7 +28,7 @@ while ($row = $result->fetch_assoc()) {
         'id' => $row['excused_request_id'],
         'subject' => $row['reason'],
         'sender' => $row['name'],
-        'time' => date('M d, Y', strtotime($row['date_requested'])), // e.g., May 26, 2025
+        'time' => date('M d, Y', strtotime($row['date_requested'])),
     ];
 }
 
