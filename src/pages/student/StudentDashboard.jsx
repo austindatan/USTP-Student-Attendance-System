@@ -57,22 +57,22 @@ function StudentDashboard() {
 
     const endpoints = [
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_absent_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_excused_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
         setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_late_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
         setter: setMissed,
         key: "total_late",
       },
@@ -156,8 +156,7 @@ function StudentDashboard() {
         {/* Header + Attendance Cards in Flex Row */}
         <div className="flex flex-col lg:flex-row gap-6 items-start mb-8">
           {/* Welcome Header */}
-          <div
-            className="bg-[#7685fc] rounded-lg p-6 text-white font-poppins relative overflow-hidden w-full lg:w-1/2 aspect-square lg:aspect-auto"
+          <div className="bg-[#7685fc] rounded-lg p-6 text-white font-poppins relative overflow-hidden w-full lg:w-1/3 aspect-square lg:aspect-auto"
             style={
               !loading
                 ? {
@@ -187,7 +186,7 @@ function StudentDashboard() {
           </div>
 
           {/* Attendance Cards beside welcome */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 w-full lg:w-1/2">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 w-full lg:w-1/3">
             {loading ? (
               [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
             ) : error ? (
@@ -203,42 +202,7 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Attendance Summary Table */}
-        <div className="bg-white shadow-lg rounded-lg p-6 mt-10 overflow-auto">
-          <h2 className="text-xl font-semibold mb-4">Attendance Summary by Subject</h2>
-          <table className="min-w-full table-auto border border-gray-200">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="px-4 py-2 border">Subject</th>
-                <th className="px-4 py-2 border">Teacher</th>
-                <th className="px-4 py-2 border">Present</th>
-                <th className="px-4 py-2 border">Absent</th>
-                <th className="px-4 py-2 border">Late</th>
-                <th className="px-4 py-2 border">Excused</th>
-              </tr>
-            </thead>
-            <tbody>
-              {classes.map((cls) => (
-                <tr key={cls.section_id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border">{cls.subject}</td>
-                  <td className="px-4 py-2 border">{cls.teacher}</td>
-                  <td className="px-4 py-2 border">{cls.present}</td>
-                  <td className="px-4 py-2 border">{cls.absent}</td>
-                  <td className="px-4 py-2 border">{cls.late}</td>
-                  <td className="px-4 py-2 border">{cls.excused}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="mt-10 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
-          Logout
-        </button>
       </section>
     </div>
   );

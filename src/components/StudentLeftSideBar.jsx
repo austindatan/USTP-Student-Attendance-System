@@ -13,7 +13,7 @@ const LeftSidebar = ({ setBgImage }) => {
     }, []);
 
     const Classes_Dashboard = () => {
-        navigate("/classes-dashboard");
+        navigate("/student-classes-dashboard");
     };
 
     const Teacher_Dashboard = () => {

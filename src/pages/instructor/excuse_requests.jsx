@@ -10,7 +10,7 @@ const ExcuseRequestsPage = () => {
 
   // Fetch data from the backend
   const fetchRequests = () => {
-    fetch('http://localhost/ustp-student-attendance/instructor_backend/get_excused_req.php')
+    fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -49,7 +49,7 @@ const ExcuseRequestsPage = () => {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/instructor_backend/update_excuse_req.php",
+          "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

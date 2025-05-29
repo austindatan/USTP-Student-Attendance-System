@@ -10,7 +10,7 @@ export default function Admin_Sections() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_section.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
       .then(res => {
         console.log("Fetched sections data:", res.data);
         if (Array.isArray(res.data)) {

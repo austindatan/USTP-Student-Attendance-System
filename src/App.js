@@ -25,6 +25,7 @@ import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRightSidebar from './components/student_rightsidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
+import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
 
 // ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -117,6 +118,17 @@ function App() {
                 setBgImage={setBgImage}
               >
                 <StudentDashboard />
+              </StudentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student-classes-dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+              <StudentLayout>
+                <StudentClassesDashboard />
               </StudentLayout>
             </ProtectedRoute>
           }

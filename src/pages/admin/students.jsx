@@ -14,7 +14,7 @@ export default function Admin_Students() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost/ustp-student-attendance/admin_backend/student_api.php"
+        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
       );
 
       let data = [];

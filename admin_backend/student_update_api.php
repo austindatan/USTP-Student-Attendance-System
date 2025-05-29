@@ -133,7 +133,7 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     }
 
     // Define the ABSOLUTE path to the uploads directory based on add_student.php's working logic
-    // __DIR__ is admin_backend/, so ../uploads/ goes up to ustp-student-attendance/ and into uploads/
+    // __DIR__ is admin_backend/, so ../uploads/ goes up to USTP-Student-Attendance-System/ and into uploads/
     $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
     // Create directory if it doesn't exist (recursive)
