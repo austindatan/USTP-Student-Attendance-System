@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginStudent = () => {
@@ -7,10 +7,17 @@ const LoginStudent = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const storedUser = localStorage.getItem("student");
+        if (storedUser) {
+            navigate("/student-dashboard", { replace: true });
+        }
+    }, [navigate]);
+
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch("http://localhost/ustp-student-attendance/api/auth/login-student.php", {
+        const response = await fetch("http://localhost/USTP-Student-Attendance-System/api/auth/login-student.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -21,7 +28,6 @@ const LoginStudent = () => {
         const data = await response.json();
 
         if (data.success) {
-
             localStorage.setItem('userRole', 'student');
             localStorage.setItem('student', JSON.stringify(data.user));
             navigate("/student-dashboard");

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginAdmin = () => {
@@ -8,6 +8,13 @@ const LoginAdmin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("admin");
+    if (storedAdmin) {
+      navigate("/admin-dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -15,7 +22,7 @@ const LoginAdmin = () => {
 
     try {
       const response = await fetch(
-        "http://localhost/ustp-student-attendance/api/auth/login-admin.php",
+        "http://localhost/USTP-Student-Attendance-System/api/auth/login-admin.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -53,7 +60,6 @@ const LoginAdmin = () => {
         )}
 
         <form onSubmit={handleLogin}>
-
           <div className="flex items-center mb-6">
             <img
               src="assets/ustp_logo.png"
