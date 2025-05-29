@@ -10,23 +10,41 @@ $data = json_decode(file_get_contents("php://input"));
 
 $section_id = $data->section_id ?? null;
 $section_name = $data->section_name ?? '';
-$course_id = $data->course_id ?? '';
-$schedule_day = $data->schedule_day ?? '';
-$start_time = $data->start_time ?? '';
-$end_time = $data->end_time ?? '';
+$year_level_id = $data->year_level_id ?? null;
+$semester_id = $data->semester_id ?? null;
 
 if (!$section_id) {
     echo json_encode(["success" => false, "message" => "Section ID is missing."]);
     exit;
 }
 
-$sql = "UPDATE section SET section_name = ?, course_id = ?, schedule_day = ?, start_time = ?, end_time = ? WHERE section_id = ?";
+// Update only section_name, year_level_id, semester_id in the 'section' table
+$sql = "UPDATE section SET section_name = ?, year_level_id = ?, semester_id = ? WHERE section_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sisssi", $section_name, $course_id, $schedule_day, $start_time, $end_time, $section_id);
+
+// Check if statement preparation was successful
+if ($stmt === false) {
+    error_log("Failed to prepare statement in update_section.php: " . $conn->error);
+    echo json_encode(["success" => false, "message" => "Database error: Could not prepare statement."]);
+    exit;
+}
+
+// 'siii' for string (section_name), integer (year_level_id), integer (semester_id), integer (section_id)
+$stmt->bind_param("siii", $section_name, $year_level_id, $semester_id, $section_id);
 
 if ($stmt->execute()) {
-    echo json_encode(["success" => true, "message" => "Section updated successfully."]);
+    // Check if any rows were affected (means update actually happened)
+    if ($stmt->affected_rows > 0) {
+        echo json_encode(["success" => true, "message" => "Section updated successfully."]);
+    } else {
+        // No rows affected might mean the data was the same, or ID not found
+        echo json_encode(["success" => true, "message" => "Section details are already up to date or section not found."]);
+    }
 } else {
+    error_log("Error executing statement in update_section.php: " . $stmt->error);
     echo json_encode(["success" => false, "message" => "Update failed."]);
 }
+
+$stmt->close();
+$conn->close();
 ?>

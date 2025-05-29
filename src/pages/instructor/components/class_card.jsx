@@ -92,7 +92,7 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
                 ) : (
                     <div className="font-poppins h-24 text-shadow-sm">
                         <p className="text-white text-sm font-semibold">{code}</p>
-                        <h2 className="text-white text-lg font-bold max-w-[140px] leading-tight">
+                        <h2 className="text-white text-lg font-bold max-w-[160px] leading-tight">
                             {title}
                         </h2>
                         <p className="text-white text-sm mt-1">{room}</p>

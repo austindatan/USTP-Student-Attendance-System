@@ -29,13 +29,14 @@ if (!$instructor_id || !$section_id) {
     exit;
 }
 
-$sql = "SELECT student_details.student_details_id, 
-               CONCAT(student.firstname, ' ', student.middlename, ' ', student.lastname) AS student_name 
-        FROM student_details
-        INNER JOIN student ON student.student_id = student_details.student_id
-        WHERE student_details.instructor_id = ?
-          AND student_details.section_id = ?
-          AND student_details.student_details_id NOT IN (
+$sql = "SELECT sd.student_details_id, 
+               CONCAT(s.firstname, ' ', s.middlename, ' ', s.lastname) AS student_name 
+        FROM student_details sd
+        INNER JOIN student s ON sd.student_id = s.student_id
+        INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id -- Added join to section_courses
+        WHERE sd.instructor_id = ?
+          AND sc.section_id = ? -- Changed to sc.section_id
+          AND sd.student_details_id NOT IN (
               SELECT student_details_id 
               FROM drop_request 
               WHERE status = 'Dropped'

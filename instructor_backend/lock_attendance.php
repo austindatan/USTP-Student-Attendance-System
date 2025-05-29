@@ -26,12 +26,12 @@ if (!$section_id || !$date || $lock_status === null) {
 }
 
 // Update all attendance records for students in this section and date
-// This query joins with student_details to filter by section_id
-// And sets the is_locked column to the received lock_status
+// This query now correctly joins with section_courses to filter by section_id
 $updateLockStatusQuery = "UPDATE attendance a
                           JOIN student_details sd ON a.student_details_id = sd.student_details_id
+                          JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
                           SET a.is_locked = ?
-                          WHERE sd.section_id = ? AND a.date = ?";
+                          WHERE sc.section_id = ? AND a.date = ?";
 
 $stmt = $conn->prepare($updateLockStatusQuery);
 if ($stmt === false) {

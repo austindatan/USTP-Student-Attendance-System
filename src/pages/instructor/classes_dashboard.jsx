@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
-import ClassCard from './components/class_card';
+import ClassCard from './components/class_card'; // Assuming this component exists
 import { format } from 'date-fns';
 
 export default function Classes_Dashboard({ selectedDate }) {
@@ -47,17 +47,21 @@ export default function Classes_Dashboard({ selectedDate }) {
   }, [instructor?.instructor_id]);
 
   const filteredSections = sections.filter(section =>
+    // Added year_level_name and semester_name to search filter
     section.section_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    section.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) 
+    section.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    section.year_level_name?.toLowerCase().includes(searchTerm.toLowerCase()) || // New filter
+    section.semester_name?.toLowerCase().includes(searchTerm.toLowerCase())     // New filter
   );
 
 
-  const handleSectionClick = (section) => { 
-    if (!section?.section_id) return; 
+  const handleSectionClick = (section) => {
+    if (!section?.section_id) return;
 
-    const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null; 
+    const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null;
     const url = `/section-dashboard/${section.section_id}`;
 
+    // Pass all section information including year_level_name and semester_name
     navigate(url, { state: { sectionInfo: section, selectedDate: dateParam } });
   };
 
@@ -97,12 +101,15 @@ return (
               ? `${section.schedule_day} ${section.start_time} – ${section.end_time}`
               : ''
           }
+          // Pass new props for year level and semester
+          yearLevel={!isLoading ? section.year_level_name : ''}
+          semester={!isLoading ? section.semester_name : ''}
           onClick={() => {
             if (!isLoading && section?.section_id) {
-              navigate(`/section-dashboard/${section.section_id}`);
+              handleSectionClick(section); // Call handleSectionClick to pass full section object
             }
           }}
-          bgImage={`${process.env.PUBLIC_URL}/${section?.image}`}
+          bgImage={`${process.env.PUBLIC_URL}/assets/${section?.image}`}
           bgColor={section?.hexcode || "#0097b2"}
         />
       ))}

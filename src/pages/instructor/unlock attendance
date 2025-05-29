@@ -410,7 +410,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         className="rounded-lg p-6 text-white font-poppins mb-6 relative"
                         style={{
                             backgroundColor: sectionInfo?.hexcode || '#0097b2',
-                            backgroundImage: `url(${process.env.PUBLIC_URL}/assets/${sectionInfo?.image})`,
+                            backgroundImage: `url(${process.env.PUBLIC_URL}/${sectionInfo?.image})`,
                             backgroundRepeat: "no-repeat",
                             backgroundPosition: "right 20px center",
                             backgroundSize: "contain",

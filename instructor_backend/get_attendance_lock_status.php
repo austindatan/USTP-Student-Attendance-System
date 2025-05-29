@@ -25,10 +25,13 @@ if (!$section_id || !$date) {
 }
 
 // Check if ANY attendance record for this section and date is locked
-// This query joins with student_details to filter by section_id
-$checkLockQuery = "SELECT a.is_locked FROM attendance a
+// This query now joins with student_details and section_courses to filter by section_id
+$checkLockQuery = "SELECT a.is_locked
+                   FROM attendance a
                    JOIN student_details sd ON a.student_details_id = sd.student_details_id
-                   WHERE sd.section_id = ? AND a.date = ? AND a.is_locked = 1 LIMIT 1"; // Only need one to determine locked status
+                   JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
+                   WHERE sc.section_id = ? AND a.date = ? AND a.is_locked = 1
+                   LIMIT 1"; // Only need one to determine locked status
 
 $stmt = $conn->prepare($checkLockQuery);
 if ($stmt === false) {

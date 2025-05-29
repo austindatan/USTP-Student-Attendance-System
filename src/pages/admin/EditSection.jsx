@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; // Import ConfirmationModal
+import ConfirmationModal from '../../components/confirmationmodal';
 
 const EditSection = () => {
   const { id } = useParams();
@@ -10,16 +10,23 @@ const EditSection = () => {
   const [formData, setFormData] = useState({
     section_id: '',
     section_name: '',
-    course_id: '',
-    schedule_day: '',
-    start_time: '',
-    end_time: '',
+    year_level_id: '',
+    semester_id: '',
   });
 
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isEditSectionModalOpen, setIsEditSectionModalOpen] = useState(false); // State for modal
-  const [isSaving, setIsSaving] = useState(false); // State for saving/loading in modal
+  const [yearLevels, setYearLevels] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+
+  const [loadingSection, setLoadingSection] = useState(true);
+  const [loadingYearLevels, setLoadingYearLevels] = useState(true);
+  const [loadingSemesters, setLoadingSemesters] = useState(true);
+
+  const [errorSection, setErrorSection] = useState('');
+  const [errorYearLevels, setErrorYearLevels] = useState('');
+  const [errorSemesters, setErrorSemesters] = useState('');
+
+  const [isEditSectionModalOpen, setIsEditSectionModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     // Fetch single section data
@@ -27,31 +34,62 @@ const EditSection = () => {
       .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         if (res.data.success && res.data.section) {
-          setFormData({ ...res.data.section, section_id: id });
+          setFormData({
+            section_id: id,
+            section_name: res.data.section.section_name || '',
+            year_level_id: res.data.section.year_level_id || '',
+            semester_id: res.data.section.semester_id || '',
+          });
+          setErrorSection(null);
         } else {
+          setErrorSection(res.data.message || 'Failed to load section data.');
           alert(res.data.message || 'Failed to load section data.');
           navigate('/admin-sections');
         }
-        setLoading(false);
-      })
-      .catch(() => {
-        alert('Error fetching section data.');
-        navigate('/admin-sections');
-        setLoading(false);
-      });
-
-    // Fetch courses data
-    axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_courses.php')
-      .then((res) => {
-        if (res.data.success) {
-          setCourses(res.data.courses);
-        } else {
-          console.warn("Failed to load courses:", res.data.message);
-        }
+        setLoadingSection(false);
       })
       .catch((err) => {
-        console.error("Error fetching courses:", err);
+        console.error('Axios error fetching section data:', err);
+        setErrorSection('Error fetching section data: ' + (err.message || 'Network error'));
+        alert('Error fetching section data. Please try again.');
+        navigate('/admin-sections');
+        setLoadingSection(false);
+      });
+
+    // Fetch Year Levels
+    axios
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php')
+      .then((res) => {
+        if (res.data.success) {
+          setYearLevels(res.data.year_levels);
+          setErrorYearLevels(null);
+        } else {
+          setErrorYearLevels('Failed to fetch year levels: ' + (res.data.message || 'Unknown error'));
+        }
+        setLoadingYearLevels(false);
+      })
+      .catch((err) => {
+        console.error('Axios error fetching year levels:', err);
+        setErrorYearLevels('Error loading year levels: ' + (err.message || 'Network error'));
+        setLoadingYearLevels(false);
+      });
+
+    // Fetch Semesters
+    axios
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php')
+      .then((res) => {
+        if (res.data.success) {
+          setSemesters(res.data.semesters);
+          setErrorSemesters(null);
+        } else {
+          setErrorSemesters('Failed to fetch semesters: ' + (res.data.message || 'Unknown error'));
+        }
+        setLoadingSemesters(false);
+      })
+      .catch((err) => {
+        console.error('Axios error fetching semesters:', err);
+        setErrorSemesters('Error loading semesters: ' + (err.message || 'Network error'));
+        setLoadingSemesters(false);
       });
   }, [id, navigate]);
 
@@ -64,9 +102,9 @@ const EditSection = () => {
     e.preventDefault();
 
     // Basic validation before opening modal
-    if (!formData.section_name || !formData.course_id || !formData.schedule_day || !formData.start_time || !formData.end_time) {
-        alert('Please fill in all required fields.');
-        return;
+    if (!formData.section_name.trim() || !formData.year_level_id || !formData.semester_id) {
+      alert('Please fill in all required fields (Section Name, Year Level, and Semester).');
+      return;
     }
 
     setIsEditSectionModalOpen(true); // Open confirmation modal
@@ -75,9 +113,15 @@ const EditSection = () => {
   const handleConfirmUpdate = async () => {
     setIsSaving(true); // Start loading animation in modal
     try {
-      const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData);
+      const res = await axios.post(
+        'http://localhost/ustp-student-attendance/admin_backend/update_section.php',
+        JSON.stringify(formData), // Send formData as JSON
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
       if (res.data.success) {
-        // Removed the alert here
+        alert(res.data.message || 'Section updated successfully!');
         setIsEditSectionModalOpen(false); // Close modal
         navigate('/admin-sections'); // Redirect to sections list
       } else {
@@ -86,7 +130,7 @@ const EditSection = () => {
       }
     } catch (error) {
       console.error("Server error during update:", error);
-      alert('Server error during update.');
+      alert('An error occurred during the update. Please check the server logs.');
       setIsEditSectionModalOpen(false); // Close modal on error
     } finally {
       setIsSaving(false); // Stop loading animation
@@ -97,15 +141,24 @@ const EditSection = () => {
     setIsEditSectionModalOpen(false);
   };
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  const handleCancel = () => {
+    navigate('/admin-sections');
+  };
+
+  const isLoading = loadingSection || loadingYearLevels || loadingSemesters;
+  const hasError = errorSection || errorYearLevels || errorSemesters;
+
+  if (isLoading) return <p className="text-center mt-10">Loading section details...</p>;
+  if (hasError) return <p className="text-center mt-10 text-red-600">Error: {errorSection || errorYearLevels || errorSemesters}</p>;
+
 
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll" style={{ backgroundImage: "url('/assets/section_bg.png')" }}>
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('assets/teacher_vector.png')",
+            backgroundImage: "url('/assets/section_vector.png')", // Changed image path
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -127,88 +180,64 @@ const EditSection = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
+            {/* Year Level Dropdown */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700">Course</label>
-              <select
-                name="course_id"
-                value={formData.course_id}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-              >
-                <option value="">Select a course</option>
-                {courses.map((course) => (
-                  <option key={course.course_id} value={course.course_id}>
-                    {course.course_name}
-                  </option>
-                ))}
-              </select>
+              <label className="block text-sm font-semibold text-gray-700">Year Level</label>
+              {loadingYearLevels ? (
+                <p className="text-gray-500 mt-2">Loading year levels...</p>
+              ) : errorYearLevels ? (
+                <p className="text-red-500 mt-2">{errorYearLevels}</p>
+              ) : (
+                <select
+                  name="year_level_id"
+                  value={formData.year_level_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Year Level</option>
+                  {yearLevels.map((yl) => (
+                    <option key={yl.year_id} value={yl.year_id}>
+                      {yl.year_level_name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
+            {/* Semester Dropdown */}
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Day:</label>
-            <select
-              name="schedule_day"
-              value={formData.schedule_day}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-            >
-              <option value="">Select a day</option>
-              {[
-                'Monday & Tuesday',
-                'Monday & Wednesday',
-                'Monday & Thursday',
-                'Monday & Friday',
-                'Monday & Saturday',
-                'Tuesday & Wednesday',
-                'Tuesday & Thursday',
-                'Tuesday & Friday',
-                'Tuesday & Saturday',
-                'Wednesday & Thursday',
-                'Wednesday & Friday',
-                'Wednesday & Saturday',
-                'Thursday & Friday',
-                'Thursday & Saturday',
-                'Friday & Saturday'
-              ].map((day) => (
-                <option key={day} value={day}>{day}</option>
-              ))}
-            </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">Start Time</label>
-              <input
-                type="time"
-                name="start_time"
-                value={formData.start_time}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">End Time</label>
-              <input
-                type="time"
-                name="end_time"
-                value={formData.end_time}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-              />
+              <label className="block text-sm font-semibold text-gray-700">Semester</label>
+              {loadingSemesters ? (
+                <p className="text-gray-500 mt-2">Loading semesters...</p>
+              ) : errorSemesters ? (
+                <p className="text-red-500 mt-2">{errorSemesters}</p>
+              ) : (
+                <select
+                  name="semester_id"
+                  value={formData.semester_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Semester</option>
+                  {semesters.map((sem) => (
+                    <option key={sem.semester_id} value={sem.semester_id}>
+                      {sem.semester_name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="md:col-span-2 flex justify-end items-center gap-3">
               <button
                 type="button"
-                onClick={() => navigate('/admin-sections')}
+                onClick={handleCancel}
                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
               >
                 Cancel
