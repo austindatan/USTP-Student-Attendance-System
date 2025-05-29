@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; 
 
 export default function EditStudent() {
   const { student_id } = useParams();
@@ -48,7 +47,7 @@ export default function EditStudent() {
       if (semesterId) {
         params.semester_id = semesterId;
       }
-      const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+      const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
       setSections(secRes.data);
 
       // Determine if the current section_id is still valid in the new list of sections
@@ -76,12 +75,12 @@ export default function EditStudent() {
     const fetchData = async () => {
       try {
         const [instRes, progRes, yearRes, semRes, studentRes] = await Promise.all([
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
-          axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
+          axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
           // IMPORTANT: Ensure student_get_api.php returns year_level_id and semester_id
-          axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`),
+          axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`),
         ]);
 
         setInstructors(instRes.data);
@@ -149,19 +148,8 @@ export default function EditStudent() {
     setImageFile(e.target.files[0]);
   };
 
- 
-  const handleOpenEditStudentModal = (e) => {
-    e.preventDefault(); 
-
-    if (!formData.firstname || !formData.lastname || !formData.email || !formData.date_of_birth || !formData.contact_number) {
-        alert('Please fill in all required fields.');
-        return;
-    }
-    setIsEditStudentModalOpen(true);
-  };
-
-  const handleConfirmEditStudent = async () => {
-    setIsLoading(true); 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const submissionData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       submissionData.append(key, value);
@@ -180,7 +168,7 @@ export default function EditStudent() {
 
     try {
       const res = await axios.post(
-        `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
+        `http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`,
         submissionData,
         {
           headers: {
@@ -189,16 +177,11 @@ export default function EditStudent() {
         }
       );
       alert(res.data.message || 'Student updated successfully!');
-      setIsEditStudentModalOpen(false); 
       navigate('/admin-students');
     } catch (error) {
       console.error('Failed to update student:', error.response?.data || error.message);
       alert(`Error updating student: ${error.response?.data?.message || 'Please check the console.'}`);
     }
-  };
-
-  const handleCloseEditStudentModal = () => {
-    setIsEditStudentModalOpen(false);
   };
 
   return (
@@ -208,7 +191,7 @@ export default function EditStudent() {
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('/assets/teacher_vector.png')",
+            backgroundImage: "url('assets/teacher_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',
@@ -219,7 +202,7 @@ export default function EditStudent() {
 
         {/* Form */}
         <form
-          onSubmit={handleOpenEditStudentModal} 
+          onSubmit={handleSubmit}
           className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
           encType="multipart/form-data"
         >
@@ -383,18 +366,6 @@ export default function EditStudent() {
           </div>
         </form>
       </section>
-
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isEditStudentModalOpen}
-        onClose={handleCloseEditStudentModal}
-        onConfirm={handleConfirmEditStudent}
-        title="Confirm Edit Student"
-        message={`Are you sure you want to update the student "${formData.firstname} ${formData.lastname}"?`}
-        confirmText="Update Student"
-        loading={isLoading}
-        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
-      />
     </div>
   );
 }

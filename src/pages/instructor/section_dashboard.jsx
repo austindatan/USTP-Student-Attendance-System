@@ -35,24 +35,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     try {
       const [hours, minutes, seconds] = timeString24hr.split(':');
-    // Fetch section info for header (only if not passed via location state)
-    useEffect(() => {
-        if (!sectionInfo && sectionId) {
-            async function fetchSectionInfo() {
-                try {
-                    const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    const data = await res.json();
-                    setSectionInfo(data);
-                } catch (err) {
-                    console.error("Error fetching section info:", err);
-                }
-            }
-            fetchSectionInfo();
-        }
-    }, [sectionId, sectionInfo]);
 
       if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
         throw new Error("Invalid time components");
