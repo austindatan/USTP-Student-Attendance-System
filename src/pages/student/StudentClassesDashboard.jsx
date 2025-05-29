@@ -1,35 +1,37 @@
 import React, { useEffect, useState } from 'react';
 
-export default function StudentDashboard() {
+export default function StudentClassesDashboard() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch attendance data
   useEffect(() => {
+    const studentId = localStorage.getItem('student_id');
+
     const fetchAttendance = async () => {
       try {
-        const res = await fetch('http://localhost/USTP-Student-Attendance-System/student_backend/get_attendance_summary.php');
+        const res = await fetch('http://localhost/ustp-student-attendance/student_backend/get_attendance_summary.php');
         const data = await res.json();
         setAttendanceData(data);
       } catch (error) {
         console.error('Failed to fetch attendance summary:', error);
         setAttendanceData([]);
       } finally {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1500);
+        setTimeout(() => setIsLoading(false), 1500);
       }
     };
 
-    fetchAttendance();
+    if (studentId) {
+      fetchAttendance();
+    } else {
+      console.warn("No student_id found in localStorage.");
+      setIsLoading(false);
+    }
   }, []);
 
   return (
     <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
-      {/* Attendance Summary Table */}
       <div className="bg-white rounded-lg shadow p-6 w-full lg:w-3/4">
         <h2 className="text-lg font-semibold mb-4 text-gray-700">Attendance Summary</h2>
-
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-gray-600">
             <thead className="text-xs uppercase bg-gray-100 text-gray-500">

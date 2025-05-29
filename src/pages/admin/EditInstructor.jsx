@@ -29,6 +29,7 @@ export default function EditInstructor() {
   useEffect(() => {
     axios
       .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php?instructor_id=${instructor_id}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php?instructor_id=${instructor_id}`)
       .then(res => {
         const instructor = res.data;
         if (instructor && instructor.instructor_id) {

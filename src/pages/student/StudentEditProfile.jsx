@@ -51,7 +51,7 @@ const StudentEditProfile = () => {
 
     // Now, `studentIdToFetch` should definitely have a valid ID
     fetch(
-      `http://localhost/USTP-Student-Attendance-System/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/ustp-student-attendance-system/api/get_student.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
@@ -70,9 +70,7 @@ const StudentEditProfile = () => {
 
           const image = data.student.image;
           const resolvedURL = image
-            ? (image.includes("uploads/")
-                ? `http://localhost/USTP-Student-Attendance-System/api/${image}`
-                : `http://localhost/USTP-Student-Attendance-System/api/uploads/${image}`)
+            ? `http://localhost/ustp-student-attendance-system/uploads/${image.replace("uploads/", "")}`
             : "";
           setPreviewURL(resolvedURL);
         } else {
@@ -115,7 +113,7 @@ const StudentEditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/USTP-Student-Attendance-System/api/edit_student_profile.php",
+        "http://localhost/ustp-student-attendance-system/api/edit_student_profile.php",
         {
           method: "POST",
           body: formPayload,

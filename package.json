@@ -1,5 +1,5 @@
 {
-  "name": "ustp-attendance-system",
+  "name": "ustp-student-attendance",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

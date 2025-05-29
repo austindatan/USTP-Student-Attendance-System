@@ -25,6 +25,7 @@ const EditSection = () => {
     // Fetch single section data
     axios
       .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         if (res.data.success && res.data.section) {
           setFormData({ ...res.data.section, section_id: id });
