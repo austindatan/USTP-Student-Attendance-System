@@ -1,34 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const LeftSidebar = ({ setBgImage }) => {
+const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used here but kept if needed elsewhere
     const navigate = useNavigate();
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    // studentDetailsId is read directly here, which is fine for UI logic
+    // as it doesn't cause a render loop like in App.js trying to pass it as a prop
+    const studentDetailsId = localStorage.getItem('studentDetailsId');
+
+
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 1500);
+        // Corrected console.log to use studentDetailsId
+        console.log("Student ID from localStorage in StudentLeftSidebar:", studentDetailsId);
         return () => clearTimeout(timer);
-    }, []);
+    }, [studentDetailsId]); // Added studentDetailsId to dependency array for clarity, though it's a direct read.
 
     const Classes_Dashboard = () => {
         navigate("/student-classes-dashboard");
     };
 
-    const Teacher_Dashboard = () => {
+    const Student_Dashboard = () => { // Renamed for clarity, though variable name was Teacher_Dashboard
         navigate("/student-dashboard");
     };
 
-    const Excuse_Requests_Page = () => {
-        navigate("/excuse-requests");
+    const Add_Excuse_Request_Page = () => { // Renamed for clarity
+        navigate("/add-excuse-request");
     };
 
-    const dashboard_active = location.pathname === '/teacher-dashboard';
-    const classes_active = ['/classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
-    location.pathname.startsWith(path)
-    );
-    const excuse_requests_active = location.pathname === '/excuse-requests';
+    // --- START OF FIX ---
+    // Corrected path comparisons for student specific routes
+    const dashboard_active = location.pathname === '/student-dashboard'; // Corrected path
+    const classes_active = location.pathname === '/student-classes-dashboard'; // Simpler check for student classes
+    // Note: If you have dynamic student class routes like /student-classes/:id, you'd use startsWith
+    // For now, based on your routes, exact match is sufficient.
+    const excuse_requests_active = location.pathname === '/add-excuse-request'; // Corrected path
+    // --- END OF FIX ---
 
 
     return (
@@ -91,7 +101,7 @@ const LeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Teacher_Dashboard}
+                        onClick={Student_Dashboard} 
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
                             dashboard_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
@@ -151,7 +161,7 @@ const LeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Excuse_Requests_Page}
+                        onClick={Add_Excuse_Request_Page}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
                             excuse_requests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
@@ -245,4 +255,4 @@ const LeftSidebar = ({ setBgImage }) => {
     );
 };
 
-export default LeftSidebar;
+export default StudentLeftSidebar;
