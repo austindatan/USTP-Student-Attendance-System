@@ -5,7 +5,6 @@ header("Content-Type: application/json");
 
 define('LOG_PREFIX', '[ATTENDANCE_API]');
 
-// Adjust this path according to your actual file structure
 require_once("../../src/conn.php");
 
 if ($conn->connect_error) {
@@ -28,7 +27,6 @@ $year = (int) date("Y");
 
 error_log(LOG_PREFIX . " Processing request for student_id: '{$student_id}' for year: {$year}");
 
-// Make sure these column and table names exactly exist in your DB
 $sql = "
     SELECT COUNT(a.attendance_id) AS total_present
     FROM attendance a
@@ -39,7 +37,6 @@ $sql = "
     AND YEAR(a.date) = ?
 ";
 
-// Check if prepare returns false
 if (!$stmt = $conn->prepare($sql)) {
     error_log(LOG_PREFIX . " Failed to prepare statement. MySQL Error: " . $conn->error);
     echo json_encode(["error" => "SQL prepare failed", "mysql_error" => $conn->error]);

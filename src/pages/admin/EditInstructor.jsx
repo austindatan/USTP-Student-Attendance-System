@@ -25,14 +25,14 @@ export default function EditInstructor() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost/ustp-student-attendance/admin_backend/get_instructor_info.php?instructor_id=${instructor_id}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php?instructor_id=${instructor_id}`)
       .then(res => {
         const instructor = res.data;
         if (instructor && instructor.instructor_id) {
           setForm({
             instructor_id: instructor.instructor_id || '',
             email: instructor.email || '',
-            password: '', // leave blank to keep unchanged
+            password: '', 
             firstname: instructor.firstname || '',
             middlename: instructor.middlename || '',
             lastname: instructor.lastname || '',
@@ -81,7 +81,7 @@ export default function EditInstructor() {
     }
 
     axios
-      .post('http://localhost/ustp-student-attendance/admin_backend/edit_profile.php', data, {
+      .post('http://localhost/USTP-Student-Attendance-System/admin_backend/edit_profile.php', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       .then(res => {
@@ -100,7 +100,6 @@ export default function EditInstructor() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
-        {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
@@ -113,10 +112,8 @@ export default function EditInstructor() {
           <h1 className="text-2xl text-blue-700 font-bold">Edit Instructor</h1>
         </div>
 
-        {/* Form Container */}
         <div className="bg-white shadow-md p-8 rounded-lg">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6" encType="multipart/form-data">
-            {/* Hidden input for instructor_id */}
             <input type="hidden" name="instructor_id" value={form.instructor_id} />
 
             {[ 
@@ -147,7 +144,6 @@ export default function EditInstructor() {
               </div>
             ))}
 
-            {/* Image upload */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Image (optional)</label>
               <input
@@ -159,7 +155,6 @@ export default function EditInstructor() {
               />
             </div>
 
-            {/* Submit and Cancel buttons */}
             <div className="md:col-span-2 flex justify-end items-center gap-3">
               <button
                 type="button"

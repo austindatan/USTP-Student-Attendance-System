@@ -19,7 +19,6 @@ const EditSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load section info
     axios
       .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
@@ -37,7 +36,6 @@ const EditSection = () => {
         setLoading(false);
       });
 
-    // Load course options
     axios
       .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
       .then((res) => {
@@ -79,7 +77,6 @@ const EditSection = () => {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
-        {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
@@ -92,13 +89,10 @@ const EditSection = () => {
           <h1 className="text-2xl text-blue-700 font-bold">Edit Section</h1>
         </div>
 
-        {/* Form Container */}
         <div className="bg-white shadow-md p-8 rounded-lg">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Hidden ID */}
             <input type="hidden" name="section_id" value={formData.section_id} />
 
-            {/* Section Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Section Name</label>
               <input
@@ -112,7 +106,6 @@ const EditSection = () => {
               />
             </div>
 
-            {/* Course Dropdown */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Course</label>
               <select
@@ -131,21 +124,38 @@ const EditSection = () => {
               </select>
             </div>
 
-            {/* Schedule Day */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700">Schedule Day</label>
-              <input
-                type="text"
-                name="schedule_day"
-                value={formData.schedule_day}
-                onChange={handleChange}
-                required
-                autoComplete="off"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Day:</label>
+            <select
+              name="schedule_day"
+              value={formData.schedule_day}
+              onChange={handleChange}
+              required
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Select a day</option>
+              {[
+                'Monday & Tuesday',
+                'Monday & Wednesday',
+                'Monday & Thursday',
+                'Monday & Friday',
+                'Monday & Saturday',
+                'Tuesday & Wednesday',
+                'Tuesday & Thursday',
+                'Tuesday & Friday',
+                'Tuesday & Saturday',
+                'Wednesday & Thursday',
+                'Wednesday & Friday',
+                'Wednesday & Saturday',
+                'Thursday & Friday',
+                'Thursday & Saturday',
+                'Friday & Saturday'
+              ].map((day) => (
+                <option key={day} value={day}>{day}</option>
+              ))}
+            </select>
+          </div>
 
-            {/* Start Time */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">Start Time</label>
               <input
@@ -158,7 +168,6 @@ const EditSection = () => {
               />
             </div>
 
-            {/* End Time */}
             <div>
               <label className="block text-sm font-semibold text-gray-700">End Time</label>
               <input
@@ -171,7 +180,6 @@ const EditSection = () => {
               />
             </div>
 
-            {/* Buttons */}
             <div className="md:col-span-2 flex justify-end items-center gap-3">
               <button
                 type="button"

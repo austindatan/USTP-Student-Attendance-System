@@ -12,22 +12,20 @@ export default function Admin_Sections() {
   useEffect(() => {
     axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
       .then(res => {
-        // Log the data to inspect its structure if needed
-        console.log("Fetched sections data:", res.data); 
+        console.log("Fetched sections data:", res.data);
         if (Array.isArray(res.data)) {
           setSections(res.data);
-        } else if (res.data && Array.isArray(res.data.sections)) { // Check if res.data exists before accessing .sections
+        } else if (res.data && Array.isArray(res.data.sections)) {
           setSections(res.data.sections);
         } else {
           setSections([]);
-          // Optionally, set an error if the data format is unexpected but not a network error
           if (res.data !== null && res.data !== undefined && typeof res.data === 'object') {
-              console.warn("Unexpected data format for sections:", res.data);
+            console.warn("Unexpected data format for sections:", res.data);
           }
         }
       })
       .catch((err) => {
-        console.error("Error fetching sections:", err); // Log the actual error
+        console.error("Error fetching sections:", err);
         setError("Failed to fetch sections. Please check your network or server.");
       })
       .finally(() => setLoading(false));
@@ -40,13 +38,12 @@ export default function Admin_Sections() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-        {/* Header */}
+
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
             !loading
               ? {
-                    // Make sure 'assets/teacher_vector.png' is correctly served from your public folder
                   backgroundImage: "url('assets/teacher_vector.png')",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right",
@@ -67,7 +64,7 @@ export default function Admin_Sections() {
           </div>
         </div>
 
-        {/* Controls */}
+
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
@@ -91,22 +88,23 @@ export default function Admin_Sections() {
             </div>
           </div>
 
-          {/* Table */}
           {loading ? (
             <p className="text-center text-gray-500">Loading sections...</p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="overflow-x-auto max-w-full">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2">Section Name</th>
-                    <th className="px-3 py-2">Course Name</th>
-                    <th className="px-3 py-2">Schedule Day</th>
-                    <th className="px-3 py-2">Start Time</th>
-                    <th className="px-3 py-2">End Time</th>
-                    <th className="px-3 py-2">Action</th>
+
+                    <th className="px-3 py-2 w-[4%]"></th>
+                    <th className="px-3 py-2 w-[10%]">Section Name</th>
+                    <th className="px-3 py-2 w-[20%]">Course Name</th>
+                    <th className="px-3 py-2 w-[15%]">Schedule Day</th>
+                    <th className="px-3 py-2 w-[10%]">Start Time</th>
+                    <th className="px-3 py-2 w-[10%]">End Time</th>
+                    <th className="px-3 py-2 w-[10%]">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -119,14 +117,15 @@ export default function Admin_Sections() {
                   ) : (
                     filteredSections.map((section, index) => (
                       <tr
-                        key={index}
+                        key={section.section_id || index}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-3 py-2 truncate max-w-[120px]">{section.section_name}</td>
-                        <td className="px-3 py-2 truncate max-w-[140px]">{section.course_name}</td>
-                        <td className="px-3 py-2 truncate max-w-[110px]">{section.schedule_day}</td>
-                        <td className="px-3 py-2 truncate max-w-[90px]">{section.start_time}</td>
-                        <td className="px-3 py-2 truncate max-w-[90px]">{section.end_time}</td>
+                        <td className="px-3 py-2 truncate min-w-0"></td>
+                        <td className="px-3 py-2 truncate min-w-0">{section.section_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{section.course_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{section.schedule_day}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{section.start_time}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{section.end_time}</td>
                         <td className="px-3 py-2">
                           <button
                             onClick={() => navigate(`/admin-edit-section/${section.section_id}`)}

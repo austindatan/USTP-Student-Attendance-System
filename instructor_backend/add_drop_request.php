@@ -33,7 +33,7 @@ if ($stmt->execute()) {
         "drop_request_id" => $stmt->insert_id
     ]);
 } else {
-    error_log("Drop request error: " . $stmt->error); // Optional for debugging
+    error_log("Drop request error: " . $stmt->error);
     http_response_code(500);
     echo json_encode(["error" => $stmt->error]);
 }

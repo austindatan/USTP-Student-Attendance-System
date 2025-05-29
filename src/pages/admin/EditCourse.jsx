@@ -6,25 +6,32 @@ import ConfirmationModal from '../../components/confirmationmodal';
 export default function EditCourse() {
   const [formData, setFormData] = useState({
     course_id: '',
+    course_code: '', 
     course_name: '',
     description: '',
   });
 
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
   const [isEditCourseModalOpen, setIsEditCourseModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost/ustp-student-attendance/admin_backend/course_get.php?id=${id}`)
+    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
       .then((response) => {
-        setFormData(response.data);
+        if (response.data.success === false) { 
+            alert(response.data.message);
+            navigate('/admin-courses'); 
+            return;
+        }
+        setFormData(response.data); 
       })
       .catch((error) => {
         console.error('Error fetching course:', error);
         alert('Failed to fetch course data.');
+        navigate('/admin-courses'); 
       });
-  }, [id]);
+  }, [id, navigate]); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,8 +40,9 @@ export default function EditCourse() {
 
   const handleOpenEditCourseModal = (e) => {
     e.preventDefault();
-    if (!formData.course_name || !formData.description) {
-      alert('Please fill in both the Course Name and Description.');
+    
+    if (!formData.course_code || !formData.course_name || !formData.description) {
+      alert('Please fill in all fields: Course Code, Course Name, and Description.');
       return;
     }
     setIsEditCourseModalOpen(true);
@@ -43,10 +51,16 @@ export default function EditCourse() {
   const handleConfirmEditCourse = async () => {
     setIsLoading(true);
     try {
-      await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
-      alert('Course updated successfully!');
-      setIsEditCourseModalOpen(false);
-      navigate('/admin-courses');
+ 
+      const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
+      if (response.data.success) {
+          alert('Course updated successfully!');
+          setIsEditCourseModalOpen(false);
+          navigate('/admin-courses');
+      } else {
+
+          alert(`Failed to update course: ${response.data.message}`);
+      }
     } catch (error) {
       console.error('Error updating course:', error);
       alert(`Failed to update course: ${error.response?.data?.message || 'Please check the console.'}`);
@@ -83,6 +97,21 @@ export default function EditCourse() {
 
         <div className="bg-white shadow-md p-8 rounded-lg">
           <form onSubmit={handleOpenEditCourseModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <input type="hidden" name="course_id" value={formData.course_id} />
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700">Course Code</label>
+              <input
+                type="text"
+                name="course_code"
+                value={formData.course_code}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700">Course Name</label>
               <input
@@ -126,13 +155,12 @@ export default function EditCourse() {
         </div>
       </section>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={isEditCourseModalOpen}
         onClose={handleCloseEditCourseModal}
         onConfirm={handleConfirmEditCourse}
         title="Confirm Edit"
-        message={`Are you sure you want to update the course "${formData.course_name}"?`}
+        message={`Are you sure you want to update the course "${formData.course_code}: ${formData.course_name}"?`}
         confirmText="Update Course"
         loading={isLoading}
         confirmButtonClass="bg-blue-700 hover:bg-blue-800"

@@ -43,7 +43,6 @@ if (!$instructor_id) {
     exit;
 }
 
-// image upload
 $imageName = null;
 if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     $imageTmp = $_FILES["image"]["tmp_name"];
@@ -112,7 +111,6 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param($types, ...$params);
 
 if ($stmt->execute()) {
-    // Return updated infoz
     $stmt = $conn->prepare("SELECT * FROM instructor WHERE instructor_id = ?");
     $stmt->bind_param("i", $instructor_id);
     $stmt->execute();

@@ -11,7 +11,7 @@ export default function InstructorAdminPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_instructor_info.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php')
       .then((res) => {
         if (!res.data.error) {
           setInstructors(res.data);
@@ -32,7 +32,6 @@ export default function InstructorAdminPage() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex flex-col overflow-y-auto">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-        {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
@@ -58,7 +57,6 @@ export default function InstructorAdminPage() {
           </div>
         </div>
 
-        {/* Controls & Table */}
         <div className="bg-white shadow-md p-6 rounded-lg">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
@@ -82,7 +80,6 @@ export default function InstructorAdminPage() {
             </div>
           </div>
 
-          {/* Table wrapper with horizontal scroll on mobile */}
           {loading ? (
             <p className="text-center text-gray-500">Loading instructors...</p>
           ) : error ? (

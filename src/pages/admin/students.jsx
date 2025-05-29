@@ -24,7 +24,6 @@ export default function Admin_Students() {
         data = res.data.students;
       }
 
-      // Sort by student_id ascending
       data.sort((a, b) => a.student_id - b.student_id);
       setStudents(data);
     } catch (err) {
@@ -38,7 +37,6 @@ export default function Admin_Students() {
     fetchStudents();
   }, []);
 
-  // Filter students by search term (fullname)
   const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
@@ -47,7 +45,7 @@ export default function Admin_Students() {
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0">
-        {/* Header */}
+
         <div
           className="bg-white rounded-lg p-6 mb-6 relative overflow-hidden"
           style={
@@ -78,7 +76,6 @@ export default function Admin_Students() {
           </div>
         </div>
 
-        {/* Controls */}
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg overflow-x-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
@@ -102,28 +99,28 @@ export default function Admin_Students() {
             </div>
           </div>
 
-          {/* Table */}
           {loading ? (
             <p className="text-center text-gray-500">Loading students...</p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="w-full overflow-x-auto">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2 whitespace-nowrap">Student ID</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Full Name</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Program</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Birthdate</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Contact Number</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Address</th>
-                    <th className="px-3 py-2 whitespace-nowrap">Action</th>
+                    <th className="px-3 py-2 w-[8%]">Stu. ID</th>
+                    <th className="px-3 py-2 w-[22%]">Full Name</th>
+                    <th className="px-3 py-2 w-[15%]">Program</th>
+                    <th className="px-3 py-2 w-[12%]">Birthdate</th>
+                    <th className="px-3 py-2 w-[13%]">Contact Number</th>
+                    <th className="px-3 py-2 w-[20%]">Address</th>
+                    <th className="px-3 py-2 w-[10%]">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.length === 0 ? (
                     <tr>
+
                       <td colSpan={7} className="px-3 py-4 text-center text-gray-500">
                         No students found.
                       </td>
@@ -131,25 +128,27 @@ export default function Admin_Students() {
                   ) : (
                     filteredStudents.map((student) => (
                       <tr
-                        key={student.student_id}
+                        key={student.student_id} 
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-3 py-2 truncate">{student.student_id}</td>
-                        <td className="px-3 py-2 truncate">
+
+                        <td className="px-3 py-2 truncate min-w-0">{student.student_id}</td>
+                        <td className="px-3 py-2 truncate min-w-0">
                           {student.firstname} {student.middlename} {student.lastname}
                         </td>
-                        <td className="px-3 py-2 truncate">{student.program_name}</td>
-                        <td className="px-3 py-2 truncate">{student.date_of_birth}</td>
-                        <td className="px-3 py-2 truncate">{student.contact_number}</td>
-                        <td className="px-3 py-2 truncate">
+                        <td className="px-3 py-2 truncate min-w-0">{student.program_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.date_of_birth}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.contact_number}</td>
+                        <td className="px-3 py-2 truncate min-w-0">
                           {student.street} {student.city} {student.province} {student.zipcode}
                         </td>
-                        <td className="px-3 py-2 truncate">
+                        <td className="px-3 py-2">
+
                           <button
                             onClick={() =>
                               navigate(`/admin-students/edit/${student.student_id}`)
                             }
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm mx-auto block"
                           >
                             Edit
                           </button>

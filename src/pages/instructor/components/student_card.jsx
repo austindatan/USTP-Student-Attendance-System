@@ -4,7 +4,7 @@ export default function StudentCard({ student, isPresent, onToggle }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1200); // 1.2s delay
+        const timer = setTimeout(() => setLoading(false), 1200);
         return () => clearTimeout(timer);
     }, []);
 

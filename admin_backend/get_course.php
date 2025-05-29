@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 include __DIR__ . '/../src/conn.php';
 
-$sql = "SELECT course_id, course_code, course_name FROM course"; 
+$sql = "SELECT course_id, course_code, course_name, description FROM course"; 
 $result = $conn->query($sql);
 
 $course = [];

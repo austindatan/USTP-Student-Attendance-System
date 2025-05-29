@@ -10,9 +10,8 @@ export default function Admin_Courses() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then(res => {
-
         if (Array.isArray(res.data)) {
           setCourses(res.data);
         } else if (Array.isArray(res.data.courses)) {
@@ -38,7 +37,6 @@ export default function Admin_Courses() {
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
       <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
 
-        {/* Header */}
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={
@@ -64,7 +62,6 @@ export default function Admin_Courses() {
           </div>
         </div>
 
-        {/* Controls */}
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
@@ -88,25 +85,26 @@ export default function Admin_Courses() {
             </div>
           </div>
 
-          {/* Table */}
           {loading ? (
             <p className="text-center text-gray-500">Loading courses...</p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="overflow-x-auto max-w-full">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
-                <thead className="bg-blue-100 uppercase text-blue-700">
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full"> {/* KEEP table-fixed and w-full */}
+                <thead className="items-center bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2">Course Code</th>
-                    <th className="px-3 py-2">Course Name</th> 
-                    <th className="px-3 py-2">Action</th>
+                    {/* Assign percentage widths that add up to 100% */}
+                    <th className="px-3 py-2 w-[15%]">Course Code</th> {/* ~15% */}
+                    <th className="px-3 py-2 w-[20%]">Course Name</th> {/* ~35% */}
+                    <th className="px-3 py-2 w-[50%]">Description</th> {/* ~40% */}
+                    <th className="px-3 py-2 w-[10%]">Action</th>    {/* ~10% (adjust based on button size) */}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredCourses.length === 0 ? (
                     <tr>
-                      <td colSpan="3" className="px-4 py-4 text-center text-gray-500">
+                      <td colSpan="4" className="px-4 py-4 text-center text-gray-500">
                         No courses found.
                       </td>
                     </tr>
@@ -116,8 +114,9 @@ export default function Admin_Courses() {
                         key={course.course_id ?? course.course_code}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        <td className="px-3 py-2 max-w-[120px] truncate">{course.course_code}</td>
-                        <td className="px-3 py-2 max-w-[200px] truncate">{course.course_name}</td> {/* CHANGED: From "course.description" to "course.course_name" */}
+                        <td className="px-3 py-2 truncate min-w-0">{course.course_code}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{course.course_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{course.description}</td>
                         <td className="px-3 py-2">
                           <button
                             onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}

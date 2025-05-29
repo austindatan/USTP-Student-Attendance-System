@@ -16,7 +16,6 @@ if (empty($email) || empty($password)) {
     exit;
 }
 
-// Checks admin record
 $stmt = $conn->prepare("SELECT * FROM admin WHERE email = ? LIMIT 1"); 
 $stmt->bind_param("s", $email);
 $stmt->execute();

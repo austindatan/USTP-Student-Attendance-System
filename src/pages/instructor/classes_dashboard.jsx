@@ -10,13 +10,11 @@ export default function Classes_Dashboard({ selectedDate }) {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  // Parse instructor once on mount
   const instructor = useMemo(() => {
     const stored = localStorage.getItem('instructor');
     return stored ? JSON.parse(stored) : null;
   }, []);
 
-  // Fetch sections by instructor ID
   const fetchSections = async () => {
     if (!instructor?.instructor_id) return;
 
@@ -34,7 +32,7 @@ export default function Classes_Dashboard({ selectedDate }) {
       setSections(data);
     } catch (error) {
       console.error('Error fetching sections:', error);
-      setSections([]); // Clear sections on error
+      setSections([]);
     } finally {
       setTimeout(() => {
       setIsLoading(false);
@@ -42,33 +40,29 @@ export default function Classes_Dashboard({ selectedDate }) {
       }
   };
 
-  // Fetch once when instructor_id changes
   useEffect(() => {
     if (instructor?.instructor_id) {
       fetchSections();
     }
   }, [instructor?.instructor_id]);
 
-  // Filter sections by search term
   const filteredSections = sections.filter(section =>
     section.section_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    section.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) // Also search by course name
+    section.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) 
   );
 
-  // Corrected handleSectionClick to pass full section object and use URL param
-  const handleSectionClick = (section) => { // Receive the full section object here
-    if (!section?.section_id) return; // Ensure sectionId exists
 
-    const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null; // Use date-fns format
+  const handleSectionClick = (section) => { 
+    if (!section?.section_id) return; 
+
+    const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null; 
     const url = `/section-dashboard/${section.section_id}`;
 
-    // Pass the entire section object in the state
     navigate(url, { state: { sectionInfo: section, selectedDate: dateParam } });
   };
 
 return (
   <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
-    {/* Search Bar */}
     <div className="relative">
       <div className="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
         <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20">
@@ -90,7 +84,6 @@ return (
       />
     </div>
 
-    {/* Section Cards */}
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
       {(isLoading ? Array.from({ length: 6 }) : filteredSections).map((section, i) => (
         <ClassCard

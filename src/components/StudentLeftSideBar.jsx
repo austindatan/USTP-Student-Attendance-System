@@ -20,7 +20,6 @@ const LeftSidebar = ({ setBgImage }) => {
         navigate("/student-dashboard");
     };
 
-    // New navigation function for Excuse Requests
     const Excuse_Requests_Page = () => {
         navigate("/excuse-requests");
     };
@@ -29,13 +28,11 @@ const LeftSidebar = ({ setBgImage }) => {
     const classes_active = ['/classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
     location.pathname.startsWith(path)
     );
-    // New active state check for Excuse Requests
     const excuse_requests_active = location.pathname === '/excuse-requests';
 
 
     return (
         <>
-            {/* Hamburger Button for Mobile */}
             <button
                 onClick={() => setIsOpen(true)}
                 className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow"
@@ -57,7 +54,6 @@ const LeftSidebar = ({ setBgImage }) => {
                 </svg>
             </button>
 
-            {/* Mobile Overlay */}
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-30 z-40"
@@ -66,12 +62,10 @@ const LeftSidebar = ({ setBgImage }) => {
                 />
             )}
 
-            {/* Sidebar */}
             <aside
                 className={`font-dm-sans fixed md:static top-0 left-0 h-full bg-white shadow-lg transition-transform duration-300 w-[30%] md:w-[9%] z-50 md:z-auto ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
                 aria-label="Main sidebar"
             >
-                {/* Sidebar Header */}
                 <div className="flex justify-center items-center p-4 relative">
                     {loading ? (
                         <div className="w-20 h-20 rounded-full bg-gray-200 animate-pulse" />
@@ -93,10 +87,8 @@ const LeftSidebar = ({ setBgImage }) => {
                     )}
                 </div>
 
-                {/* Navigation */}
                 <nav className="flex flex-col items-center gap-6 mt-5 text-sm text-[#737373]">
 
-                    {/* Teacher Dashboard Button */}
                     <button
                         type="button"
                         onClick={Teacher_Dashboard}
@@ -127,7 +119,6 @@ const LeftSidebar = ({ setBgImage }) => {
                         )}
                     </button>
 
-                    {/* Classes Dashboard Button */}
                     <button
                         type="button"
                         onClick={Classes_Dashboard}
@@ -158,7 +149,6 @@ const LeftSidebar = ({ setBgImage }) => {
                         )}
                     </button>
 
-                    {/* New Excuse Requests Button */}
                     <button
                         type="button"
                         onClick={Excuse_Requests_Page}
@@ -191,7 +181,6 @@ const LeftSidebar = ({ setBgImage }) => {
 
                 </nav>
 
-                {/* Theme Dropdown */}
                 <div className="absolute bottom-4 w-full flex justify-center">
                     <div className="relative group">
                         <button

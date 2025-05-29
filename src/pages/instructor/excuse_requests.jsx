@@ -8,9 +8,8 @@ const ExcuseRequestsPage = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [modal, setModal] = useState({ show: false, id: null, type: '' });
 
-  // Fetch data from the backend
   const fetchRequests = () => {
-    fetch('http://localhost/ustp-student-attendance/instructor_backend/get_excused_req.php')
+    fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -26,12 +25,10 @@ const ExcuseRequestsPage = () => {
     fetchRequests();
   }, []);
 
-  // Handler for the Approve/Reject Confirmation Modal
   const openConfirmationModal = (id, type) => {
     setModal({ show: true, id, type });
   };
 
-  // Handler for the "View Details" Modal
   const handleViewDetails = (request) => {
     setSelectedRequest(request);
     setShowModal(true);
@@ -49,7 +46,7 @@ const ExcuseRequestsPage = () => {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/instructor_backend/update_excuse_req.php",
+          "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -144,7 +141,7 @@ const ExcuseRequestsPage = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-center text-sm font-medium">
-                        {/* Conditional rendering for action buttons based on status */}
+                       
                         {req.status === 'Pending' ? (
                           <div className="flex justify-center space-x-2">
                             <button
@@ -161,7 +158,7 @@ const ExcuseRequestsPage = () => {
                             </button>
                           </div>
                         ) : (
-                          // Display "Already {Status}" if the status is not 'Pending'
+               
                           <span className="text-gray-500">Already {req.status}</span>
                         )}
                       </td>
@@ -173,7 +170,7 @@ const ExcuseRequestsPage = () => {
           )}
         </div>
 
-        {/* --- Details Modal --- */}
+
         {showModal && selectedRequest && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-auto" onClick={(e) => e.stopPropagation()}>
@@ -199,7 +196,7 @@ const ExcuseRequestsPage = () => {
           document.body
         )}
 
-        {/* --- Confirmation Modal --- */}
+
         {modal.show && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto" onClick={(e) => e.stopPropagation()}>

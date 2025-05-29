@@ -30,7 +30,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const email = instructor?.email || "";
 
   const imagePath = instructor?.image
-    ? `http://localhost/ustp-student-attendance/api/uploads/${instructor.image.replace(
+    ? `http://localhost/USTP-Student-Attendance-System/api/uploads/${instructor.image.replace(
         "uploads/",
         ""
       )}`
@@ -56,7 +56,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500); // Simulate loading
+    const timer = setTimeout(() => setIsLoading(false), 1500); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -192,7 +192,6 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
           </button>
         </div>
 
-        {/* Dropdown */}
         <div className="flex items-center justify-between mb-5 relative">
           <div className="relative" ref={dropdownRef}>
             {isLoading ? (
@@ -265,7 +264,6 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
           )}
         </div>
 
-        {/* Calendar */}
         <div className="bg-white">
           {isLoading ? (
             <div className="space-y-2">
