@@ -144,7 +144,8 @@ export default function Admin_Students() {
                     <th className="px-3 py-2 w-[12%]">Birthdate</th>
                     <th className="px-3 py-2 w-[13%]">Contact Number</th>
                     <th className="px-3 py-2 w-[20%]">Address</th>
-                    <th className="px-3 py-2 w-[10%]">Action</th>
+                    {/* Added text-center here */}
+                    <th className="px-3 py-2 w-[10%] text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,21 +174,22 @@ export default function Admin_Students() {
                           {student.street} {student.city} {student.province} {student.zipcode}
                         </td>
                         <td className="px-3 py-2">
-                          {/* Centered button using mx-auto block */}
-                          <button
-                            onClick={() =>
-                              navigate(`/admin-students/edit/${student.student_id}`)
-                            }
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm mx-auto block"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(student)}
-                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex gap-1 justify-center"> {/* Added flex container and gap */}
+                            <button
+                              onClick={() =>
+                                navigate(`/admin-students/edit/${student.student_id}`)
+                              }
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(student)}
+                              className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -211,6 +213,7 @@ export default function Admin_Students() {
               <span className="font-bold">{selectedStudent.firstname} {selectedStudent.lastname} </span>?
             </p>
             <div className="flex justify-end gap-3">
+              {/* Buttons reordered: Cancel (left) and Delete (right) */}
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"

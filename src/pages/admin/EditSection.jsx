@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; // Import ConfirmationModal
 
 const EditSection = () => {
   const { id } = useParams();
@@ -17,10 +18,13 @@ const EditSection = () => {
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isEditSectionModalOpen, setIsEditSectionModalOpen] = useState(false); // State for modal
+  const [isSaving, setIsSaving] = useState(false); // State for saving/loading in modal
 
   useEffect(() => {
+    // Fetch single section data
     axios
-      .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         if (res.data.success && res.data.section) {
           setFormData({ ...res.data.section, section_id: id });
@@ -36,8 +40,9 @@ const EditSection = () => {
         setLoading(false);
       });
 
+    // Fetch courses data
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_courses.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -57,19 +62,39 @@ const EditSection = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData)
-      .then((res) => {
-        if (res.data.success) {
-          alert('Section updated successfully!');
-          navigate('/admin-sections');
-        } else {
-          alert(res.data.message || 'Update failed.');
-        }
-      })
-      .catch(() => {
-        alert('Server error during update.');
-      });
+
+    // Basic validation before opening modal
+    if (!formData.section_name || !formData.course_id || !formData.schedule_day || !formData.start_time || !formData.end_time) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+
+    setIsEditSectionModalOpen(true); // Open confirmation modal
+  };
+
+  const handleConfirmUpdate = async () => {
+    setIsSaving(true); // Start loading animation in modal
+    try {
+      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData);
+      if (res.data.success) {
+        // Removed the alert here
+        setIsEditSectionModalOpen(false); // Close modal
+        navigate('/admin-sections'); // Redirect to sections list
+      } else {
+        alert(res.data.message || 'Update failed.');
+        setIsEditSectionModalOpen(false); // Close modal on failure
+      }
+    } catch (error) {
+      console.error("Server error during update:", error);
+      alert('Server error during update.');
+      setIsEditSectionModalOpen(false); // Close modal on error
+    } finally {
+      setIsSaving(false); // Stop loading animation
+    }
+  };
+
+  const handleCloseEditSectionModal = () => {
+    setIsEditSectionModalOpen(false);
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
@@ -102,7 +127,7 @@ const EditSection = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
               />
             </div>
 
@@ -113,7 +138,7 @@ const EditSection = () => {
                 value={formData.course_id}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
               >
                 <option value="">Select a course</option>
                 {courses.map((course) => (
@@ -131,7 +156,7 @@ const EditSection = () => {
               value={formData.schedule_day}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded-md p-2"
+              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
             >
               <option value="">Select a day</option>
               {[
@@ -154,7 +179,7 @@ const EditSection = () => {
                 <option key={day} value={day}>{day}</option>
               ))}
             </select>
-          </div>
+            </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700">Start Time</label>
@@ -164,7 +189,7 @@ const EditSection = () => {
                 value={formData.start_time}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
               />
             </div>
 
@@ -176,7 +201,7 @@ const EditSection = () => {
                 value={formData.end_time}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
               />
             </div>
 
@@ -198,6 +223,18 @@ const EditSection = () => {
           </form>
         </div>
       </section>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isEditSectionModalOpen}
+        onClose={handleCloseEditSectionModal}
+        onConfirm={handleConfirmUpdate}
+        title="Confirm Edit"
+        message={`Are you sure you want to update the section "${formData.section_name}"?`}
+        confirmText="Update Section"
+        loading={isSaving}
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
+      />
     </div>
   );
 };

@@ -118,43 +118,50 @@ export default function InstructorAdminPage() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="overflow-x-auto max-w-full">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
+              {/* Added table-fixed and w-full for consistent column widths */}
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2">First Name</th>
-                    <th className="px-3 py-2">Middle Name</th>
-                    <th className="px-3 py-2">Last Name</th>
-                    <th className="px-3 py-2">Date of Birth</th>
-                    <th className="px-3 py-2">Action</th>
+                    {/* Adjusted column widths and added text-center to Action */}
+                    <th className="px-3 py-2 w-[22%]">First Name</th>
+                    <th className="px-3 py-2 w-[22%]">Middle Name</th>
+                    <th className="px-3 py-2 w-[22%]">Last Name</th>
+                    <th className="px-3 py-2 w-[14%]">Date of Birth</th>
+                    <th className="px-3 py-2 w-[20%] text-center">Action</th> {/* Added text-center */}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredInstructors.length === 0 ? (
                     <tr>
+                      {/* Updated colSpan to 5 */}
                       <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
                         No instructors found.
                       </td>
                     </tr>
                   ) : (
                     filteredInstructors.map((instructor, index) => (
-                      <tr key={index} className="border-b border-blue-200 hover:bg-blue-50">
-                        <td className="px-3 py-2 truncate max-w-[120px]">{instructor.firstname}</td>
-                        <td className="px-3 py-2 truncate max-w-[120px]">{instructor.middlename}</td>
-                        <td className="px-3 py-2 truncate max-w-[140px]">{instructor.lastname}</td>
-                        <td className="px-3 py-2 truncate max-w-[110px]">{instructor.date_of_birth}</td>
-                        <td className="px-3 py-2 whitespace-nowrap space-x-2">
-                          <button
-                            onClick={() => navigate(`/admin-instructor/edit/${instructor.instructor_id}`)}
-                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(instructor)}
-                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Delete
-                          </button>
+                      <tr key={instructor.instructor_id || index} className="border-b border-blue-200 hover:bg-blue-50">
+                        {/* Added truncate and min-w-0 for content cells */}
+                        <td className="px-3 py-2 truncate min-w-0">{instructor.firstname}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{instructor.middlename}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{instructor.lastname}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{instructor.date_of_birth}</td>
+                        <td className="px-3 py-2">
+                          {/* Wrapped buttons in flex container with gap and center justification */}
+                          <div className="flex gap-1 justify-center">
+                            <button
+                              onClick={() => navigate(`/admin-instructor/edit/${instructor.instructor_id}`)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap" // Adjusted padding and font size
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(instructor)}
+                              className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm" // Adjusted padding and font size
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

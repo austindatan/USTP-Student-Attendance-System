@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; // Assuming this path is correct
 
 export default function EditStudent() {
     const { student_id } = useParams();
@@ -39,6 +40,8 @@ export default function EditStudent() {
     });
 
     const [cachedSections, setCachedSections] = useState({});
+    const [isEditStudentModalOpen, setIsEditStudentModalOpen] = useState(false); // State for modal
+    const [isSaving, setIsSaving] = useState(false); // State for saving/loading in modal
 
     const fetchSections = useCallback(async (yearLevelId, semesterId) => {
         if (!yearLevelId || !semesterId) {
@@ -51,13 +54,13 @@ export default function EditStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prev => ({ ...prev, [cacheKey]: fetchedSections }));
             return fetchedSections;
         } catch (error) {
             console.error(`Error fetching sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
-            alert('Failed to load sections for selected criteria. Please try again.');
+            alert('Failed to load sections for selected criteria. Please try again.'); // Keep alert for fetch error
             return [];
         }
     }, [cachedSections]);
@@ -67,11 +70,11 @@ export default function EditStudent() {
         const fetchData = async () => {
             try {
                 const [instRes, progRes, yearRes, semRes, studentRes] = await Promise.all([
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
-                    axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
+                    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`),
                 ]);
 
                 setInstructors(instRes.data);
@@ -88,7 +91,7 @@ export default function EditStudent() {
                     date_of_birth: studentData.date_of_birth || '',
                     contact_number: studentData.contact_number || '',
                     email: studentData.email || '',
-                    password: '',
+                    password: '', // Password should usually not be pre-filled for security
                     street: studentData.street || '',
                     city: studentData.city || '',
                     province: studentData.province || '',
@@ -96,33 +99,25 @@ export default function EditStudent() {
                     country: studentData.country || '',
                 });
 
-                // --- MODIFICATION START ---
                 const initialEnrollments = await Promise.all(
                     (studentData.enrollments || []).map(async (enrollment) => {
-                        // Crucially, fetch sections for each existing enrollment
-                        // assuming your student_get_api.php provides year_level_id and semester_id
-                        let fetchedSectionsForEnrollment = [];
-                        if (enrollment.year_level_id && enrollment.semester_id) {
-                            fetchedSectionsForEnrollment = await fetchSections(
-                                enrollment.year_level_id,
-                                enrollment.semester_id
-                            );
-                        }
-
-                        // Make sure year_level_id and semester_id are correctly present in the enrollment object
-                        // If your backend doesn't return them directly in student_details,
-                        // you might need to query the section table on the backend to get them
-                        // based on enrollment.section_id. For now, assuming they are available.
                         return {
                             ...enrollment,
                             isNew: false,
-                            year_level_id: enrollment.year_level_id || '', // Ensure it's not undefined/null
-                            semester_id: enrollment.semester_id || '', // Ensure it's not undefined/null
+                            year_level_id: enrollment.year_level_id || '',
+                            semester_id: enrollment.semester_id || '',
                         };
                     })
                 );
                 setEnrollments(initialEnrollments);
-                // --- MODIFICATION END ---
+
+                // Pre-fetch sections for existing enrollments
+                initialEnrollments.forEach(async (enrollment) => {
+                    if (enrollment.year_level_id && enrollment.semester_id) {
+                        await fetchSections(enrollment.year_level_id, enrollment.semester_id);
+                    }
+                });
+
 
             } catch (err) {
                 console.error('Failed to fetch data:', err);
@@ -132,7 +127,7 @@ export default function EditStudent() {
         };
 
         fetchData();
-    }, [student_id, navigate, fetchSections]); // Add fetchSections to dependencies
+    }, [student_id, navigate, fetchSections]);
 
     const handleStudentDataChange = (e) => {
         const { name, value } = e.target;
@@ -153,8 +148,6 @@ export default function EditStudent() {
                 const year = updatedEnrollments[index].year_level_id;
                 const semester = updatedEnrollments[index].semester_id;
 
-                // Do not await inside setState directly. Trigger fetchSections here.
-                // The sections will be updated in cachedSections, and the component will re-render.
                 if (year && semester) {
                     fetchSections(year, semester);
                 }
@@ -172,15 +165,15 @@ export default function EditStudent() {
             const year = field === 'year_level_id' ? value : newEnrollment.year_level_id;
             const semester = field === 'semester_id' ? value : newEnrollment.semester_id;
             if (year && semester) {
-                await fetchSections(year, semester); // Await here if you want sections immediately for the new enrollment form
+                await fetchSections(year, semester);
             }
         }
     }, [newEnrollment.year_level_id, newEnrollment.semester_id, fetchSections]);
 
 
     const addEnrollment = () => {
-        if (!newEnrollment.instructor_id || !newEnrollment.program_details_id || !newEnrollment.section_id) {
-            alert('Please select Instructor, Program, and Section for the new enrollment before adding.');
+        if (!newEnrollment.instructor_id || !newEnrollment.program_details_id || !newEnrollment.section_id || !newEnrollment.year_level_id || !newEnrollment.semester_id) {
+            alert('Please select Year Level, Semester, Instructor, Program, and Section for the new enrollment before adding.');
             return;
         }
 
@@ -210,11 +203,12 @@ export default function EditStudent() {
         setEnrollments(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!formData.firstname || !formData.lastname || !formData.email) {
-            alert('Please fill in all required student personal information fields.');
+        // Perform all validations here before opening the modal
+        if (!formData.firstname || !formData.lastname || !formData.email || !formData.date_of_birth || !formData.contact_number) {
+            alert('Please fill in all required personal information fields: First Name, Last Name, Email, Date of Birth, and Contact Number.');
             return;
         }
 
@@ -223,6 +217,12 @@ export default function EditStudent() {
             return;
         }
 
+        // Open the confirmation modal
+        setIsEditStudentModalOpen(true);
+    };
+
+    const handleConfirmUpdate = async () => {
+        setIsSaving(true); // Start loading animation
         const submissionData = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
             submissionData.append(key, value);
@@ -230,11 +230,13 @@ export default function EditStudent() {
 
         if (imageFile) submissionData.append('image', imageFile);
 
-        submissionData.append('enrollments', JSON.stringify(enrollments));
+        // Filter enrollments to only send necessary data to backend
+        const enrollmentsToSend = enrollments.map(({ isNew, ...rest }) => rest);
+        submissionData.append('enrollments', JSON.stringify(enrollmentsToSend));
 
         try {
             const res = await axios.post(
-                `http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`,
+                `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
                 submissionData,
                 {
                     headers: {
@@ -242,13 +244,27 @@ export default function EditStudent() {
                     }
                 }
             );
-            alert(res.data.message || 'Student updated successfully!');
-            navigate('/admin-students');
+            if (res.data.success) {
+                // No alert here, just close modal and navigate
+                setIsEditStudentModalOpen(false);
+                navigate('/admin-students');
+            } else {
+                alert(res.data.message || 'Update failed.');
+                setIsEditStudentModalOpen(false); // Close modal on failure
+            }
         } catch (error) {
             console.error('Failed to update student:', error.response?.data || error.message);
-            alert(`Error updating student: ${error.response?.data?.message || 'Please check the console.'}`);
+            alert(`Error updating student: ${error.response?.data?.message || 'Please check the console for details.'}`);
+            setIsEditStudentModalOpen(false); // Close modal on error
+        } finally {
+            setIsSaving(false); // Stop loading
         }
     };
+
+    const handleCloseEditStudentModal = () => {
+        setIsEditStudentModalOpen(false);
+    };
+
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
@@ -533,6 +549,18 @@ export default function EditStudent() {
                     </div>
                 </form>
             </section>
+
+            {/* Confirmation Modal for Update */}
+            <ConfirmationModal
+                isOpen={isEditStudentModalOpen}
+                onClose={handleCloseEditStudentModal}
+                onConfirm={handleConfirmUpdate}
+                title="Confirm Edit"
+                message={`Are you sure you want to update the student "${formData.firstname} ${formData.lastname}"?`}
+                confirmText="Update Student"
+                loading={isSaving}
+                confirmButtonClass="bg-blue-700 hover:bg-blue-800"
+            />
         </div>
     );
 }
