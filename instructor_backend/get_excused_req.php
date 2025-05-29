@@ -8,7 +8,17 @@ include __DIR__ . '/../src/conn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-    $stmt = "
+    // Enable error reporting for debugging
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
+    if ($conn->connect_error) {
+        echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
+        exit;
+    }
+
+    $sql = "
         SELECT 
             excused_request.excused_request_id, 
             student_details.student_details_id, 
@@ -23,12 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             ON excused_request.student_details_id = student_details.student_details_id
         INNER JOIN student 
             ON student.student_id = student_details.student_id
-        INNER JOIN section 
-            ON section.section_id = student_details.section_id
+        INNER JOIN section_courses sc -- Join with section_courses to get course_id
+            ON student_details.section_course_id = sc.section_course_id
         INNER JOIN course 
-            ON course.course_id = section.course_id;
+            ON course.course_id = sc.course_id; -- Use course_id from section_courses
     ";
-    $result = $conn->query($stmt);
+    
+    // Using query() for simple SELECT without parameters
+    $result = $conn->query($sql);
+
+    if ($result === false) {
+        echo json_encode(['error' => 'SQL query failed: ' . $conn->error]);
+        exit;
+    }
 
     $req = [];
     if ($result->num_rows > 0) {
@@ -37,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     }
     echo json_encode($req);
+
+    $conn->close();
+
 } else {
     echo json_encode(["error" => "Invalid request method for GET endpoint"]);
 }
+?>

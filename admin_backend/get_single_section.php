@@ -14,7 +14,9 @@ if (!$section_id) {
     exit;
 }
 
-$sql = "SELECT section_id, section_name, course_id, schedule_day, start_time, end_time FROM section WHERE section_id = ?"; // Assuming 'section' table
+// Fetch section details from the 'section' table
+// Note: course_id, schedule_day, start_time, end_time are no longer in 'section' table
+$sql = "SELECT section_id, section_name, year_level_id, semester_id FROM section WHERE section_id = ?";
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {

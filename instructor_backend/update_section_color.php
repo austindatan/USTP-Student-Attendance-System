@@ -18,8 +18,9 @@ if (!$section_id || !$hexcode) {
     exit;
 }
 
-$stmt = $conn->prepare("UPDATE section SET hexcode = ? WHERE section_id = ?");
-$stmt->bind_param("ss", $hexcode, $section_id);
+// Corrected query: Update hexcode in section_courses table
+$stmt = $conn->prepare("UPDATE section_courses SET hexcode = ? WHERE section_id = ?");
+$stmt->bind_param("si", $hexcode, $section_id); // 's' for hexcode (string), 'i' for section_id (integer)
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true]);
@@ -27,4 +28,6 @@ if ($stmt->execute()) {
     echo json_encode(['success' => false, 'error' => $stmt->error]);
 }
 
+$stmt->close();
+$conn->close();
 ?>

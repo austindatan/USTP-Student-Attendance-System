@@ -21,21 +21,25 @@ $semester_id = isset($_GET['semester_id']) ? intval($_GET['semester_id']) : null
 
 $sql = "
     SELECT
-        s.section_id,
+        sc.section_course_id,
         s.section_name,
         c.course_code,
         c.course_name
     FROM
-        section s
+        section_courses sc
     JOIN
-        course c ON s.course_id = c.course_id
+        section s ON sc.section_id = s.section_id
+    JOIN
+        course c ON sc.course_id = c.course_id
     WHERE 1=1
 ";
 
 if ($year_level_id !== null && $year_level_id > 0) {
+    // Apply year_level_id condition to the 'section' table
     $sql .= " AND s.year_level_id = " . $year_level_id;
 }
 if ($semester_id !== null && $semester_id > 0) {
+    // Apply semester_id condition to the 'section' table
     $sql .= " AND s.semester_id = " . $semester_id;
 }
 

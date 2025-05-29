@@ -12,7 +12,7 @@ export default function Admin_Sections() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
+    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_section.php')
       .then(res => {
         console.log("Fetched sections data:", res.data);
         if (Array.isArray(res.data)) {
@@ -39,7 +39,7 @@ export default function Admin_Sections() {
   };
 
   const confirmDelete = () => {
-    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_section.php', {
+    axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_section.php', {
       _method: 'DELETE',
       section_id: selectedSection.section_id,
     })
@@ -131,13 +131,14 @@ export default function Admin_Sections() {
                     <th className="px-3 py-2 w-[15%]">Schedule Day</th>
                     <th className="px-3 py-2 w-[10%]">Start Time</th>
                     <th className="px-3 py-2 w-[10%]">End Time</th>
-                    <th className="px-3 py-2 w-[10%]">Action</th>
+                    {/* Added text-center here */}
+                    <th className="px-3 py-2 w-[10%] text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSections.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="px-4 py-4 text-center text-gray-500">
+                      <td colSpan="7" className="px-4 py-4 text-center text-gray-500">
                         No sections found.
                       </td>
                     </tr>
@@ -154,18 +155,20 @@ export default function Admin_Sections() {
                         <td className="px-3 py-2 truncate min-w-0">{section.start_time}</td>
                         <td className="px-3 py-2 truncate min-w-0">{section.end_time}</td>
                         <td className="px-3 py-2">
-                          <button
-                            onClick={() => navigate(`/admin-edit-section/${section.section_id}`)}
-                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(section)}
-                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex gap-1 justify-center">
+                            <button
+                              onClick={() => navigate(`/admin-edit-section/${section.section_id}`)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(section)}
+                              className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

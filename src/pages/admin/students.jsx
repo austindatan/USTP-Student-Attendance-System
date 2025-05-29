@@ -16,7 +16,7 @@ export default function Admin_Students() {
     setError(null);
     try {
       const res = await axios.get(
-        "http://localhost/USTP-Student-Attendance-System/admin_backend/student_api.php"
+        "http://localhost/ustp-student-attendance/admin_backend/student_api.php"
       );
 
       let data = [];
@@ -45,16 +45,16 @@ export default function Admin_Students() {
   };
 
   const confirmDelete = () => {
-    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_student.php', {
+    axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_student.php', {
       _method: 'DELETE',
       student_id: selectedStudent.student_id,
     })
     .then((res) => {
       if (res.data.success) {
-        // Refresh or filter out the deleted instructor
+        // Refresh or filter out the deleted student
         setStudents(students.filter(s => s.student_id !== selectedStudent.student_id));
       } else {
-        alert(res.data.message || "Failed to delete instructor.");
+        alert(res.data.message || "Failed to delete student.");
       }
     })
     .catch(() => alert("An error occurred while deleting."))
@@ -65,8 +65,10 @@ export default function Admin_Students() {
   };
 
   const filteredStudents = students.filter((student) => {
+    // Include enrolled_classes in the search if needed
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
-    return fullName.includes(searchTerm.toLowerCase());
+    const enrolledClasses = (student.enrolled_classes || '').toLowerCase(); // Added for search
+    return fullName.includes(searchTerm.toLowerCase()) || enrolledClasses.includes(searchTerm.toLowerCase());
   });
 
   return (
@@ -132,40 +134,40 @@ export default function Admin_Students() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="w-full overflow-x-auto">
-              {/* Added table-fixed and w-full */}
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    {/* Define proportional widths for each column and center headers */}
-                    {/* Sum of widths should be 100% */}
                     <th className="px-3 py-2 w-[8%]">Stu. ID</th>
                     <th className="px-3 py-2 w-[22%]">Full Name</th>
+                    {/* Changed from 'Section' to 'Enrolled Classes' */}
+                    <th className="px-3 py-2 w-[20%]">Enrolled Classes</th> 
                     <th className="px-3 py-2 w-[15%]">Program</th>
                     <th className="px-3 py-2 w-[12%]">Birthdate</th>
                     <th className="px-3 py-2 w-[13%]">Contact Number</th>
                     <th className="px-3 py-2 w-[20%]">Address</th>
-                    <th className="px-3 py-2 w-[10%]">Action</th>
+                    <th className="px-3 py-2 w-[10%] text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.length === 0 ? (
                     <tr>
-                      {/* Updated colSpan to 7 for all columns */}
-                      <td colSpan={7} className="px-3 py-4 text-center text-gray-500">
+                      {/* Updated colSpan to 8 (added 1 for Enrolled Classes, adjusted others) */}
+                      <td colSpan={8} className="px-3 py-4 text-center text-gray-500">
                         No students found.
                       </td>
                     </tr>
                   ) : (
                     filteredStudents.map((student) => (
                       <tr
-                        key={student.student_id} // Assuming student_id is unique
+                        key={student.student_id}
                         className="border-b border-blue-200 hover:bg-blue-50"
                       >
-                        {/* Data cells: Added truncate and min-w-0 */}
                         <td className="px-3 py-2 truncate min-w-0">{student.student_id}</td>
                         <td className="px-3 py-2 truncate min-w-0">
                           {student.firstname} {student.middlename} {student.lastname}
                         </td>
+                        {/* Display the new enrolled_classes field */}
+                        <td className="px-3 py-2 truncate min-w-0">{student.enrolled_classes}</td>
                         <td className="px-3 py-2 truncate min-w-0">{student.program_name}</td>
                         <td className="px-3 py-2 truncate min-w-0">{student.date_of_birth}</td>
                         <td className="px-3 py-2 truncate min-w-0">{student.contact_number}</td>
@@ -173,21 +175,22 @@ export default function Admin_Students() {
                           {student.street} {student.city} {student.province} {student.zipcode}
                         </td>
                         <td className="px-3 py-2">
-                          {/* Centered button using mx-auto block */}
-                          <button
-                            onClick={() =>
-                              navigate(`/admin-students/edit/${student.student_id}`)
-                            }
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm mx-auto block"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(student)}
-                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex gap-1 justify-center">
+                            <button
+                              onClick={() =>
+                                navigate(`/admin-students/edit/${student.student_id}`)
+                              }
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(student)}
+                              className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

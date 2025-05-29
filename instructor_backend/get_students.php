@@ -27,14 +27,19 @@ FROM student_details sd
 INNER JOIN student s ON sd.student_id = s.student_id
 LEFT JOIN attendance a ON sd.student_details_id = a.student_details_id AND a.date = ?
 LEFT JOIN drop_request dr ON sd.student_details_id = dr.student_details_id
+INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
 WHERE sd.instructor_id = ?
-AND sd.section_id = ?  -- Filter by section_id
-AND (dr.status IS NULL OR dr.status != 'Dropped')  -- Ensure dropped students are excluded
+AND sc.section_id = ?
+AND (dr.status IS NULL OR dr.status != 'Dropped')
 ORDER BY s.lastname, s.firstname
 ";
 
 
 $stmt = $conn->prepare($query);
+if ($stmt === false) {
+    echo json_encode(['success' => false, 'message' => 'Failed to prepare statement: ' . $conn->error]);
+    exit;
+}
 $stmt->bind_param("sii", $date, $instructor_id, $section_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -48,4 +53,5 @@ while ($row = $result->fetch_assoc()) {
 echo json_encode($students);
 
 $stmt->close(); 
-$conn->close(); 
+$conn->close();
+?>

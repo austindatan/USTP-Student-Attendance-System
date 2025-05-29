@@ -84,24 +84,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Invalid or empty enrollment data.");
         }
 
-        $insert_details_stmt = $conn->prepare("INSERT INTO student_details (student_id, instructor_id, section_id, program_details_id) VALUES (?, ?, ?, ?)");
+        // Changed 'section_id' to 'section_course_id' in the SQL INSERT statement
+        $insert_details_stmt = $conn->prepare("INSERT INTO student_details (student_id, instructor_id, section_course_id, program_details_id) VALUES (?, ?, ?, ?)");
 
         foreach ($enrollments as $enrollment) {
             $instructor_id = isset($enrollment['instructor_id']) ? $conn->real_escape_string($enrollment['instructor_id']) : '';
-            $section_id = isset($enrollment['section_id']) ? $conn->real_escape_string($enrollment['section_id']) : '';
+            // Changed to read 'section_course_id' from the enrollment array
+            $section_course_id = isset($enrollment['section_course_id']) ? $conn->real_escape_string($enrollment['section_course_id']) : '';
             $program_details_id = isset($enrollment['program_details_id']) ? $conn->real_escape_string($enrollment['program_details_id']) : '';
 
-            if (empty($instructor_id) || empty($section_id) || empty($program_details_id)) {
-                throw new Exception("Missing instructor/section/program ID in one of the enrollments.");
+            // Changed validation to use $section_course_id
+            if (empty($instructor_id) || empty($section_course_id) || empty($program_details_id)) {
+                throw new Exception("Missing instructor/section course/program ID in one of the enrollments.");
             }
 
-            // Optional: Check for duplicate enrollments *for this student* before inserting each
-            // This check is already done on the frontend, but a backend check adds robustness.
-            // For now, we'll rely on frontend to simplify, but in a real app,
-            // you'd typically have a unique constraint or check here.
-            // For example, if (student_id, section_id) is unique.
-
-            $insert_details_stmt->bind_param("iiii", $student_id, $instructor_id, $section_id, $program_details_id);
+            // Bind parameters, ensuring correct order and variable names
+            $insert_details_stmt->bind_param("iiii", $student_id, $instructor_id, $section_course_id, $program_details_id);
             if (!$insert_details_stmt->execute()) {
                 throw new Exception("Failed to insert student enrollment details: " . $insert_details_stmt->error);
             }
