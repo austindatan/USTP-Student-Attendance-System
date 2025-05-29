@@ -118,14 +118,14 @@ export default function Admin_Courses() {
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <div className="overflow-x-auto max-w-full">
-              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full"> {/* KEEP table-fixed and w-full */}
+              <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
                 <thead className="items-center bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    {/* Assign percentage widths that add up to 100% */}
-                    <th className="px-3 py-2 w-[15%]">Course Code</th> {/* ~15% */}
-                    <th className="px-3 py-2 w-[20%]">Course Name</th> {/* ~35% */}
-                    <th className="px-3 py-2 w-[50%]">Description</th> {/* ~40% */}
-                    <th className="px-3 py-2 w-[10%]">Action</th>    {/* ~10% (adjust based on button size) */}
+                    <th className="px-3 py-2 w-[15%]">Course Code</th>
+                    <th className="px-3 py-2 w-[20%]">Course Name</th>
+                    <th className="px-3 py-2 w-[50%]">Description</th>
+                    {/* Added text-center here */}
+                    <th className="px-3 py-2 w-[10%] text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -145,18 +145,21 @@ export default function Admin_Courses() {
                         <td className="px-3 py-2 truncate min-w-0">{course.course_name}</td>
                         <td className="px-3 py-2 truncate min-w-0">{course.description}</td>
                         <td className="px-3 py-2">
-                          <button
-                            onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
-                            className="bg-blue-700 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm whitespace-nowrap"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(course)}
-                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                          >
-                            Delete
-                          </button>
+                          {/* Wrapped buttons in flex container */}
+                          <div className="flex gap-1 justify-center">
+                            <button
+                              onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap" // Adjusted padding and font size
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(course)}
+                              className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm" // Adjusted padding and font size
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

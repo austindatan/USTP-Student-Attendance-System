@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import ConfirmationModal from '../../components/confirmationmodal'; // Import ConfirmationModal
 
 export default function EditInstructor() {
   const [form, setForm] = useState({
@@ -22,17 +23,19 @@ export default function EditInstructor() {
 
   const { instructor_id } = useParams();
   const navigate = useNavigate();
+  const [isEditInstructorModalOpen, setIsEditInstructorModalOpen] = useState(false); // State for modal
+  const [isLoading, setIsLoading] = useState(false); // State for loading
 
   useEffect(() => {
     axios
-      .get(`http://localhost/ustp-student-attendance/admin_backend/get_instructor_info.php?instructor_id=${instructor_id}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php?instructor_id=${instructor_id}`)
       .then(res => {
         const instructor = res.data;
         if (instructor && instructor.instructor_id) {
           setForm({
             instructor_id: instructor.instructor_id || '',
             email: instructor.email || '',
-            password: '', 
+            password: '', // Password should usually not be pre-filled for security
             firstname: instructor.firstname || '',
             middlename: instructor.middlename || '',
             lastname: instructor.lastname || '',
@@ -73,6 +76,18 @@ export default function EditInstructor() {
       return;
     }
 
+    // Basic validation before opening modal
+    if (!form.email || !form.firstname || !form.lastname || !form.date_of_birth || !form.contact_number) {
+        alert('Please fill in all required fields: Email, First Name, Last Name, Date of Birth, and Contact Number.');
+        return;
+    }
+
+    setIsEditInstructorModalOpen(true); // Open confirmation modal
+  };
+
+  const handleConfirmEditInstructor = async () => {
+    setIsLoading(true);
+
     const data = new FormData();
     for (const key in form) {
       if (form[key] !== null && form[key] !== '') {
@@ -80,21 +95,34 @@ export default function EditInstructor() {
       }
     }
 
-    axios
-      .post('http://localhost/ustp-student-attendance/admin_backend/edit_profile.php', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then(res => {
-        if (res.data.success) {
-          alert('Instructor updated successfully!');
-          navigate('/admin-instructor');
-        } else {
-          alert('Update failed: ' + (res.data.message || 'Unknown error'));
+    try {
+      const res = await axios.post(
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/edit_profile.php',
+        data,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
         }
-      })
-      .catch(() => {
-        alert('Update failed due to a network or server error.');
-      });
+      );
+
+      if (res.data.success) {
+        // Removed alert here
+        setIsEditInstructorModalOpen(false);
+        navigate('/admin-instructor');
+      } else {
+        alert('Update failed: ' + (res.data.message || 'Unknown error'));
+        setIsEditInstructorModalOpen(false); // Close modal on failure
+      }
+    } catch (error) {
+      console.error("Update failed due to network or server error:", error);
+      alert('Update failed due to a network or server error.');
+      setIsEditInstructorModalOpen(false); // Close modal on error
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseEditInstructorModal = () => {
+    setIsEditInstructorModalOpen(false);
   };
 
   return (
@@ -116,7 +144,7 @@ export default function EditInstructor() {
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6" encType="multipart/form-data">
             <input type="hidden" name="instructor_id" value={form.instructor_id} />
 
-            {[ 
+            {[
               ['email', 'Email', 'email', true],
               ['password', 'Password (leave blank to keep current)', 'password', false],
               ['firstname', 'First Name', 'text', true],
@@ -139,7 +167,7 @@ export default function EditInstructor() {
                   onChange={handleChange}
                   required={required}
                   autoComplete="off"
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#E55182]"
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color to blue-500 for consistency
                 />
               </div>
             ))}
@@ -174,6 +202,18 @@ export default function EditInstructor() {
           </form>
         </div>
       </section>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isEditInstructorModalOpen}
+        onClose={handleCloseEditInstructorModal}
+        onConfirm={handleConfirmEditInstructor}
+        title="Confirm Edit"
+        message={`Are you sure you want to update the instructor "${form.firstname} ${form.lastname}"?`}
+        confirmText="Update Instructor"
+        loading={isLoading}
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
+      />
     </div>
   );
 }
