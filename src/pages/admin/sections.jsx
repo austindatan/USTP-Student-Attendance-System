@@ -7,10 +7,12 @@ export default function Admin_Sections() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSection, setSelectedSection] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_section.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
       .then(res => {
         console.log("Fetched sections data:", res.data);
         if (Array.isArray(res.data)) {
@@ -30,6 +32,31 @@ export default function Admin_Sections() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDeleteClick = (section) => {
+    setSelectedSection(section);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_section.php', {
+      _method: 'DELETE',
+      section_id: selectedSection.section_id,
+    })
+    .then((res) => {
+      if (res.data.success) {
+        // Refresh or filter out the deleted section
+        setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
+      } else {
+        alert(res.data.message || "Failed to delete section.");
+      }
+    })
+    .catch(() => alert("An error occurred while deleting."))
+    .finally(() => {
+      setIsModalOpen(false);
+      setSelectedSection(null);
+    });
+  };
 
   const filteredSections = sections.filter(section =>
     section.section_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -133,6 +160,12 @@ export default function Admin_Sections() {
                           >
                             Edit
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick(section)}
+                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -143,6 +176,35 @@ export default function Admin_Sections() {
           )}
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {isModalOpen && selectedSection && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Confirm Delete
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-bold">{selectedSection.section_name}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

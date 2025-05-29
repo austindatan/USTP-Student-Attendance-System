@@ -7,10 +7,12 @@ export default function Admin_Courses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then(res => {
         if (Array.isArray(res.data)) {
           setCourses(res.data);
@@ -27,6 +29,31 @@ export default function Admin_Courses() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDeleteClick = (course) => {
+    setSelectedCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_course.php', {
+      _method: 'DELETE',
+      course_id: selectedCourse.course_id,
+    })
+    .then((res) => {
+      if (res.data.success) {
+        // Refresh or filter out the deleted instructor
+        setCourses(courses.filter(c => c.course_id !== selectedCourse.course_id));
+      } else {
+        alert(res.data.message || "Failed to delete instructor.");
+      }
+    })
+    .catch(() => alert("An error occurred while deleting."))
+    .finally(() => {
+      setIsModalOpen(false);
+      setSelectedCourse(null);
+    });
+  };
 
   const filteredCourses = courses.filter(course =>
     (course.course_code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
@@ -124,6 +151,12 @@ export default function Admin_Courses() {
                           >
                             Edit
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick(course)}
+                            className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -134,6 +167,35 @@ export default function Admin_Courses() {
           )}
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {isModalOpen && selectedCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Confirm Delete
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-bold">{selectedCourse.course_code} {selectedCourse.course_name}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
