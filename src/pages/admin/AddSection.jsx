@@ -12,38 +12,91 @@ export default function AddSection() {
     schedule_day: '',
     start_time: '',
     end_time: '',
+    year_level_id: '', // Changed to store ID
+    semester_id: '',   // Changed to store ID
   });
 
   const [courses, setCourses] = useState([]);
+  const [yearLevels, setYearLevels] = useState([]); // New state for year levels
+  const [semesters, setSemesters] = useState([]);   // New state for semesters
+
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [errorCourses, setErrorCourses] = useState('');
+
+  const [loadingYearLevels, setLoadingYearLevels] = useState(true); // New loading state
+  const [errorYearLevels, setErrorYearLevels] = useState('');     // New error state
+
+  const [loadingSemesters, setLoadingSemesters] = useState(true);   // New loading state
+  const [errorSemesters, setErrorSemesters] = useState('');       // New error state
 
   const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch Courses
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
           setErrorCourses(null);
         } else {
-          setErrorCourses('Failed to fetch courses');
+          setErrorCourses('Failed to fetch courses: ' + (res.data.message || 'Unknown error'));
         }
         setLoadingCourses(false);
       })
       .catch((err) => {
-        console.error('Axios error:', err);
-        setErrorCourses('Error loading courses');
+        console.error('Axios error fetching courses:', err);
+        setErrorCourses('Error loading courses: ' + (err.message || 'Network error'));
         setLoadingCourses(false);
       });
   }, []);
 
+  // Fetch Year Levels
+  useEffect(() => {
+    axios
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php')
+      .then((res) => {
+        if (res.data.success) {
+          setYearLevels(res.data.year_levels);
+          setErrorYearLevels(null);
+        } else {
+          setErrorYearLevels('Failed to fetch year levels: ' + (res.data.message || 'Unknown error'));
+        }
+        setLoadingYearLevels(false);
+      })
+      .catch((err) => {
+        console.error('Axios error fetching year levels:', err);
+        setErrorYearLevels('Error loading year levels: ' + (err.message || 'Network error'));
+        setLoadingYearLevels(false);
+      });
+  }, []);
+
+  // Fetch Semesters
+  useEffect(() => {
+    axios
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php')
+      .then((res) => {
+        if (res.data.success) {
+          setSemesters(res.data.semesters);
+          setErrorSemesters(null);
+        } else {
+          setErrorSemesters('Failed to fetch semesters: ' + (res.data.message || 'Unknown error'));
+        }
+        setLoadingSemesters(false);
+      })
+      .catch((err) => {
+        console.error('Axios error fetching semesters:', err);
+        setErrorSemesters('Error loading semesters: ' + (err.message || 'Network error'));
+        setLoadingSemesters(false);
+      });
+  }, []);
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -55,22 +108,30 @@ export default function AddSection() {
       !formData.course_id ||
       !formData.schedule_day ||
       !formData.start_time ||
-      !formData.end_time
+      !formData.end_time ||
+      !formData.year_level_id || // Validate the ID
+      !formData.semester_id      // Validate the ID
     ) {
-      alert('Please fill in all required fields (Section Name, Course, Schedule Day, Start Time, End Time).');
+      alert('Please fill in all required fields (Section Name, Course, Schedule Day, Start Time, End Time, Year Level, Semester).');
       return;
     }
     setIsAddSectionModalOpen(true);
   };
 
-  const handleConfirmAddSection = async () => { // Function is async
+  const handleConfirmAddSection = async () => {
     setIsLoading(true);
 
-    const submitData = { ...formData, course_id: parseInt(formData.course_id, 10) };
+    // Convert IDs to integers for database
+    const submitData = {
+      ...formData,
+      course_id: parseInt(formData.course_id, 10),
+      year_level_id: parseInt(formData.year_level_id, 10),
+      semester_id: parseInt(formData.semester_id, 10),
+    };
 
-    try { // <-- Start of the try block
-      const res = await axios.post( // <-- Await the axios call and assign response to 'res'
-        'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
+    try {
+      const res = await axios.post(
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
           headers: { 'Content-Type': 'application/json' },
@@ -87,16 +148,18 @@ export default function AddSection() {
           schedule_day: '',
           start_time: '',
           end_time: '',
+          year_level_id: '',
+          semester_id: '',
         });
         navigate('/admin-sections');
       } else {
         alert(res.data.message || 'Failed to add section.');
       }
-    } catch (err) { // <-- Correctly placed catch block
+    } catch (err) {
       console.error('An error occurred:', err);
       alert('An error occurred while adding the section.');
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
@@ -211,6 +274,56 @@ export default function AddSection() {
               />
             </div>
 
+            {/* Year Level Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Year Level</label>
+              {loadingYearLevels ? (
+                <p className="text-gray-500 mt-2">Loading year levels...</p>
+              ) : errorYearLevels ? (
+                <p className="text-red-500 mt-2">{errorYearLevels}</p>
+              ) : (
+                <select
+                  name="year_level_id" // Use the ID here
+                  value={formData.year_level_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Year Level</option>
+                  {yearLevels.map((yl) => (
+                    <option key={yl.year_id} value={yl.year_id}>
+                      {yl.year_level_name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            {/* Semester Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700">Semester</label>
+              {loadingSemesters ? (
+                <p className="text-gray-500 mt-2">Loading semesters...</p>
+              ) : errorSemesters ? (
+                <p className="text-red-500 mt-2">{errorSemesters}</p>
+              ) : (
+                <select
+                  name="semester_id" // Use the ID here
+                  value={formData.semester_id}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Semester</option>
+                  {semesters.map((sem) => (
+                    <option key={sem.semester_id} value={sem.semester_id}>
+                      {sem.semester_name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
             {/* Buttons - full width below */}
             <div className="md:col-span-2 flex justify-end gap-3 mt-4">
               <button
@@ -242,7 +355,7 @@ export default function AddSection() {
         message={`Are you sure you want to add section "${formData.section_name}" for the selected course and schedule?`}
         confirmText="Add Section"
         loading={isLoading}
-        confirmButtonClass="bg-blue-700 hover:bg-blue-800" //
+        confirmButtonClass="bg-blue-700 hover:bg-blue-800"
       />
     </div>
   );

@@ -27,20 +27,27 @@ export default function AddStudent() {
   const [sections, setSections] = useState([]);
   const [programDetails, setProgramDetails] = useState([]);
 
-  // New states for Year Level and Semester
   const [yearLevels, setYearLevels] = useState([]);
   const [semesters, setSemesters] = useState([]);
-  const [selectedYearLevel, setSelectedYearLevel] = useState('');
-  const [selectedSemester, setSelectedSemester] = useState('');
 
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
+  const [selectedYearLevel, setSelectedYearLevel] = useState('');
+  const [selectedSemester, setSelectedSemester] = useState('');  
 
   const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [loadingDropdowns, setLoadingDropdowns] = useState(true);
+  const [errorDropdowns, setErrorDropdowns] = useState(null);
+  const [loadingSections, setLoadingSections] = useState(false);
+  const [errorSections, setErrorSections] = useState(null);
+
+
   // fetch sections based on filters
   const fetchSections = useCallback(async (yearLevelId, semesterId) => {
+    setLoadingSections(true);
+    setErrorSections(null);
     try {
       const params = {};
       if (yearLevelId) {
@@ -49,21 +56,27 @@ export default function AddStudent() {
       if (semesterId) {
         params.semester_id = semesterId;
       }
-      const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
-      setSections(secRes.data);
+      const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+      
+      setSections(secRes.data); 
 
-      if (formData.section_id && !secRes.data.some(sec => sec.section_id === formData.section_id)) {
-          setFormData(prev => ({ ...prev, section_id: '' }));
+      if (formData.section_id && !secRes.data.some(sec => String(sec.section_id) === String(formData.section_id))) {
+        setFormData(prev => ({ ...prev, section_id: '' }));
       }
     } catch (error) {
       console.error('Error fetching filtered sections:', error);
-      alert('Failed to load sections. Please try again.');
+      setErrorSections('Failed to load sections.');
+      setSections([]); 
+    } finally {
+      setLoadingSections(false);
     }
-  }, [formData.section_id]);
+  }, [formData.section_id]); 
 
-  // Initial data fetching for all dropdowns
+
   useEffect(() => {
     const fetchData = async () => {
+      setLoadingDropdowns(true);
+      setErrorDropdowns(null);
       try {
         const [instRes, progRes, yearRes, semRes] = await Promise.all([
           axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
@@ -71,23 +84,41 @@ export default function AddStudent() {
           axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
           axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
         ]);
+        
         setInstructors(instRes.data);
         setProgramDetails(progRes.data);
-        setYearLevels(yearRes.data);
-        setSemesters(semRes.data);
 
-        fetchSections('', '');
+        if (yearRes.data.success) {
+          setYearLevels(yearRes.data.year_levels); 
+        } else {
+          console.warn("Failed to load year levels:", yearRes.data.message);
+          setErrorDropdowns(prev => prev ? prev + ' Year levels failed.' : 'Year levels failed.');
+        }
+
+        if (semRes.data.success) {
+          setSemesters(semRes.data.semesters);  
+        } else {
+          console.warn("Failed to load semesters:", semRes.data.message);
+          setErrorDropdowns(prev => prev ? prev + ' Semesters failed.' : 'Semesters failed.');
+        }
+
+        fetchSections('', ''); 
 
       } catch (error) {
         console.error('Error fetching initial dropdown data:', error);
-        alert('Failed to load necessary data for dropdowns. Please try again.');
+        setErrorDropdowns('Failed to load necessary data for dropdowns. Please check console.');
+      } finally {
+        setLoadingDropdowns(false);
       }
     };
     fetchData();
-  }, [fetchSections]);
+  }, [fetchSections]); 
 
   useEffect(() => {
-    fetchSections(selectedYearLevel, selectedSemester);
+
+    if (selectedYearLevel !== '' || selectedSemester !== '') {
+        fetchSections(selectedYearLevel, selectedSemester);
+    }
   }, [selectedYearLevel, selectedSemester, fetchSections]);
 
 
@@ -119,16 +150,14 @@ export default function AddStudent() {
     setImageFile(null);
     setSelectedInstructor('');
     setSelectedProgram('');
-    setSelectedYearLevel('');
-    setSelectedSemester('');
+    setSelectedYearLevel(''); 
+    setSelectedSemester('');   
   };
-
 
   const handleCancel = () => {
     handleResetForm();
     navigate('/admin-students');
   };
-
 
   const handleOpenAddStudentModal = (e) => {
     e.preventDefault();
@@ -143,7 +172,7 @@ export default function AddStudent() {
       !selectedInstructor ||
       !selectedProgram ||
       !selectedYearLevel || 
-      !selectedSemester || 
+      !selectedSemester ||   
       !formData.section_id
     ) {
       alert('Please fill in all required fields (First Name, Last Name, Date of Birth, Contact, Email, Password, Instructor, Program, Year Level, Semester, Section).');
@@ -155,11 +184,17 @@ export default function AddStudent() {
   const handleConfirmAddStudent = async () => {
     setIsLoading(true);
     const submissionData = new FormData();
+    // Append all formData fields
     Object.entries(formData).forEach(([key, value]) => {
       submissionData.append(key, value);
     });
+    // Append selected IDs for relationships
     submissionData.append('instructor_id', selectedInstructor);
     submissionData.append('program_details_id', selectedProgram);
+    
+    submissionData.append('year_level_id', selectedYearLevel);
+    submissionData.append('semester_id', selectedSemester);
+
     if (imageFile) submissionData.append('image', imageFile);
 
     try {
@@ -182,6 +217,21 @@ export default function AddStudent() {
   const handleCloseAddStudentModal = () => {
     setIsAddStudentModalOpen(false);
   };
+
+  if (loadingDropdowns) {
+    return <div className="text-center mt-10">Loading form data...</div>;
+  }
+
+  if (errorDropdowns) {
+    return (
+      <div className="text-red-500 text-center mt-10 p-4 bg-red-100 rounded">
+        <p>Error loading dropdown data: {errorDropdowns}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-blue-700 text-white rounded">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -290,15 +340,15 @@ export default function AddStudent() {
               value={selectedYearLevel}
               onChange={(e) => {
                 setSelectedYearLevel(e.target.value);
-                setFormData(prev => ({ ...prev, section_id: '' })); // Reset section when year level changes
+                setFormData(prev => ({ ...prev, section_id: '' })); 
               }}
               required
               className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">Select Year Level</option>
               {yearLevels.map((yl) => (
-                <option key={yl.year_id} value={yl.year_id}> {/* Changed from yl.id to yl.year_id */}
-                  {yl.year_level_name} {/* Changed from yl.year_level to yl.year_level_name */}
+                <option key={yl.year_id} value={yl.year_id}>
+                  {yl.year_level_name}
                 </option>
               ))}
             </select>
@@ -311,14 +361,14 @@ export default function AddStudent() {
               value={selectedSemester}
               onChange={(e) => {
                 setSelectedSemester(e.target.value);
-                setFormData(prev => ({ ...prev, section_id: '' })); // Reset section when semester changes
+                setFormData(prev => ({ ...prev, section_id: '' })); 
               }}
               required
               className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">Select Semester</option>
               {semesters.map((sem) => (
-                <option key={sem.semester_id} value={sem.semester_id}> {/* Changed from sem.id to sem.semester_id */}
+                <option key={sem.semester_id} value={sem.semester_id}>
                   {sem.semester_name}
                 </option>
               ))}
@@ -328,26 +378,32 @@ export default function AddStudent() {
           {/* Section Dropdown */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-blue-700">Section</label>
-            <select
-              name="section_id"
-              value={formData.section_id}
-              onChange={handleChange}
-              required
-              className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
-            >
-              <option value="">Select Section</option>
-              {sections.length > 0 ? (
-                sections.map((sec) => (
-                  <option key={sec.section_id} value={sec.section_id}>
-                    {sec.section_name} - {sec.course_code} ({sec.course_name})
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>
-                  {selectedYearLevel && selectedSemester ? "No sections found for selected Year Level and Semester" : "Please select Year Level and Semester first"}
-                </option>
-              )}
-            </select>
+            {loadingSections ? (
+                <p className="text-gray-500 mt-2">Loading sections...</p>
+            ) : errorSections ? (
+                <p className="text-red-500 mt-2">{errorSections}</p>
+            ) : (
+                <select
+                name="section_id"
+                value={formData.section_id}
+                onChange={handleChange}
+                required
+                className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+                >
+                <option value="">Select Section</option>
+                {sections.length > 0 ? (
+                    sections.map((sec) => (
+                    <option key={sec.section_id} value={sec.section_id}>
+                        {sec.section_name} - {sec.course_code} ({sec.course_name})
+                    </option>
+                    ))
+                ) : (
+                    <option value="" disabled>
+                    {selectedYearLevel && selectedSemester ? "No sections found for selected Year Level and Semester" : "Please select Year Level and Semester first"}
+                    </option>
+                )}
+                </select>
+            )}
           </div>
 
           {/* Buttons at bottom right */}
