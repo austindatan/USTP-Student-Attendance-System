@@ -24,7 +24,7 @@ const EditSection = () => {
   useEffect(() => {
     // Fetch single section data
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
+      .get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`)
       .then((res) => {
         if (res.data.success && res.data.section) {
           setFormData({ ...res.data.section, section_id: id });
@@ -42,7 +42,7 @@ const EditSection = () => {
 
     // Fetch courses data
     axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
+      .get('http://localhost/ustp-student-attendance/admin_backend/get_courses.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -75,7 +75,7 @@ const EditSection = () => {
   const handleConfirmUpdate = async () => {
     setIsSaving(true); // Start loading animation in modal
     try {
-      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData);
+      const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData);
       if (res.data.success) {
         // Removed the alert here
         setIsEditSectionModalOpen(false); // Close modal

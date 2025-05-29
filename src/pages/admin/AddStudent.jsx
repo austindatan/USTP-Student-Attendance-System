@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/confirmationmodal'; // Ensure this path is correct
 
 export default function AddStudent() {
     const navigate = useNavigate();
@@ -38,14 +38,14 @@ export default function AddStudent() {
         program_details_id: '',
         year_level_id: '',
         semester_id: '',
-        section_id: '',
+        section_course_id: '', // Changed from section_id to section_course_id
     });
 
     // Cache for sections, indexed by yearLevelId-semesterId
     const [cachedSections, setCachedSections] = useState({});
 
     const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // State for loading during student addition
 
     const [loadingDropdowns, setLoadingDropdowns] = useState(true);
     const [errorDropdowns, setErrorDropdowns] = useState(null);
@@ -62,7 +62,7 @@ export default function AddStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
@@ -79,10 +79,10 @@ export default function AddStudent() {
             setErrorDropdowns(null);
             try {
                 const [instRes, progRes, yearRes, semRes] = await Promise.all([
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/instructor_dropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
                 ]);
 
                 setInstructors(instRes.data);
@@ -129,9 +129,9 @@ export default function AddStudent() {
         setNewEnrollment(prevNew => { // Corrected: prevNew is the parameter here
             const updatedNewEnrollment = { ...prevNew, [field]: value }; // Use prevNew here
 
-            // When year or semester changes, reset section and trigger fetch
+            // When year or semester changes, reset section_course_id and trigger fetch
             if (field === 'year_level_id' || field === 'semester_id') {
-                updatedNewEnrollment.section_id = ''; // Reset section in the updated object
+                updatedNewEnrollment.section_course_id = ''; // Reset section_course_id in the updated object
                 const year = field === 'year_level_id' ? value : prevNew.year_level_id; // Use prevNew for existing value
                 const semester = field === 'semester_id' ? value : prevNew.semester_id; // Use prevNew for existing value
                 if (year && semester) {
@@ -150,15 +150,15 @@ export default function AddStudent() {
             !newEnrollment.program_details_id ||
             !newEnrollment.year_level_id ||
             !newEnrollment.semester_id ||
-            !newEnrollment.section_id
+            !newEnrollment.section_course_id // Changed to section_course_id
         ) {
             alert('Please select Instructor, Program, Year Level, Semester, and Section for the new enrollment before adding.');
             return;
         }
 
-        // Check for duplicate enrollments (same section, instructor, program)
+        // Check for duplicate enrollments (same section_course_id, instructor, program)
         const isDuplicate = enrollments.some(existing =>
-            String(existing.section_id) === String(newEnrollment.section_id) &&
+            String(existing.section_course_id) === String(newEnrollment.section_course_id) && // Changed to section_course_id
             String(existing.instructor_id) === String(newEnrollment.instructor_id) &&
             String(existing.program_details_id) === String(newEnrollment.program_details_id)
         );
@@ -175,7 +175,7 @@ export default function AddStudent() {
             program_details_id: '',
             year_level_id: '',
             semester_id: '',
-            section_id: '',
+            section_course_id: '', // Changed to section_course_id
         });
     };
 
@@ -206,7 +206,7 @@ export default function AddStudent() {
             program_details_id: '',
             year_level_id: '',
             semester_id: '',
-            section_id: '',
+            section_course_id: '', // Changed to section_course_id
         });
         setCachedSections({}); // Clear section cache
     };
@@ -242,7 +242,7 @@ export default function AddStudent() {
     };
 
     const handleConfirmAddStudent = async () => {
-        setIsLoading(true);
+        setIsLoading(true); // Set loading to true when confirmation starts
         const submissionData = new FormData();
 
         // Append all formData fields
@@ -258,7 +258,7 @@ export default function AddStudent() {
 
         try {
             const res = await axios.post(
-                'http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php',
+                'http://localhost/ustp-student-attendance/admin_backend/student_add_api.php',
                 submissionData,
                 {
                     headers: {
@@ -274,7 +274,7 @@ export default function AddStudent() {
             console.error('Failed to add student:', error.response?.data || error.message);
             alert(`Error adding student: ${error.response?.data?.message || 'Please check the console for details.'}`);
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Set loading to false when request finishes (success or error)
         }
     };
 
@@ -411,7 +411,7 @@ export default function AddStudent() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700">Section</label>
                                     <select
-                                        value={enrollment.section_id}
+                                        value={enrollment.section_course_id} // Changed to section_course_id
                                         required
                                         className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         disabled
@@ -420,7 +420,7 @@ export default function AddStudent() {
                                         {enrollment.year_level_id && enrollment.semester_id && cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`] &&
                                             cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`].length > 0 ? (
                                             cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`].map((sec) => (
-                                                <option key={sec.section_id} value={sec.section_id}>
+                                                <option key={sec.section_course_id} value={sec.section_course_id}> {/* Changed to section_course_id */}
                                                     {sec.section_name} - {sec.course_code} ({sec.course_name})
                                                 </option>
                                             ))
@@ -513,15 +513,15 @@ export default function AddStudent() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700">Section</label>
                                 <select
-                                    value={newEnrollment.section_id}
-                                    onChange={(e) => handleNewEnrollmentChange('section_id', e.target.value)}
+                                    value={newEnrollment.section_course_id} // Changed to section_course_id
+                                    onChange={(e) => handleNewEnrollmentChange('section_course_id', e.target.value)} // Changed to section_course_id
                                     className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="">Select Section</option>
                                     {newEnrollment.year_level_id && newEnrollment.semester_id && cachedSections[`${newEnrollment.year_level_id}-${newEnrollment.semester_id}`] &&
                                         cachedSections[`${newEnrollment.year_level_id}-${newEnrollment.semester_id}`].length > 0 ? (
                                         cachedSections[`${newEnrollment.year_level_id}-${newEnrollment.semester_id}`].map((sec) => (
-                                            <option key={sec.section_id} value={sec.section_id}>
+                                            <option key={sec.section_course_id} value={sec.section_course_id}> {/* Changed to section_course_id */}
                                                 {sec.section_name} - {sec.course_code} ({sec.course_name})
                                             </option>
                                         ))
@@ -599,10 +599,10 @@ export default function AddStudent() {
                 onClose={handleCloseAddStudentModal}
                 onConfirm={handleConfirmAddStudent}
                 title="Confirm Student Addition"
-                message={`Are you sure you want to add ${formData.firstname} ${formData.lastname} as a new student with ${enrollments.length} class(es)?`}
-                confirmText="Add Student"
-                loading={isLoading}
-                confirmButtonClass="bg-blue-700 hover:bg-blue-800"
+                message="Are you sure you want to add this student with the specified enrollments?"
+                confirmText="Yes, Add Student"
+                cancelText="No, Cancel"
+                loading={isLoading} // Pass the isLoading state to the modal
             />
         </div>
     );

@@ -9,7 +9,7 @@ export default function StudentClassesDashboard() {
 
     const fetchAttendance = async () => {
       try {
-        const res = await fetch('http://localhost/USTP-Student-Attendance-System/student_backend/get_attendance_summary.php');
+        const res = await fetch('http://localhost/ustp-student-attendance/student_backend/get_attendance_summary.php');
         const data = await res.json();
         setAttendanceData(data);
       } catch (error) {

@@ -25,48 +25,64 @@ if ($data === null) {
     exit();
 }
 
-// Extract all fields, including the new ones (now IDs)
+// Extract all fields
 $section_name = $data['section_name'] ?? null;
 $course_id = $data['course_id'] ?? null;
 $schedule_day = $data['schedule_day'] ?? null;
 $start_time = $data['start_time'] ?? null;
 $end_time = $data['end_time'] ?? null;
-$year_level_id = $data['year_level_id'] ?? null; // Expecting an ID (integer)
-$semester_id = $data['semester_id'] ?? null;   // Expecting an ID (integer)
-
+$year_level_id = $data['year_level_id'] ?? null;
+$semester_id = $data['semester_id'] ?? null;
 
 // Validate incoming data (basic check for null values)
 if (is_null($section_name) || is_null($course_id) || is_null($schedule_day) ||
     is_null($start_time) || is_null($end_time) || is_null($year_level_id) ||
     is_null($semester_id)) {
     error_log("Missing required data in section_add.php. Received: " . print_r($data, true));
-    echo json_encode(["success" => false, "message" => "Missing required data for section creation."]);
+    echo json_encode(["success" => false, "message" => "Missing required data for section creation or course/schedule linkage."]);
     exit();
 }
 
-// Prepare an insert statement with the new columns for IDs
-$stmt = $conn->prepare("INSERT INTO section (section_name, course_id, schedule_day, start_time, end_time, year_level_id, semester_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+// Start a transaction
+$conn->begin_transaction();
 
-// Bind parameters, including the new ones (now integers)
-// "siissss" -> section_name (s), course_id (i), schedule_day (s), start_time (s), end_time (s), year_level_id (i), semester_id (i)
-// Wait, course_id is integer. So year_level_id and semester_id should also be 'i' if they are INT in DB.
-// "s i s s s i i"
-if ($stmt) {
-    $stmt->bind_param("sisssii", $section_name, $course_id, $schedule_day, $start_time, $end_time, $year_level_id, $semester_id);
-
-    if ($stmt->execute()) {
-        echo json_encode(["success" => true, "message" => "Section added successfully!"]);
-    } else {
-        error_log("Error adding section: " . $stmt->error);
-        echo json_encode(["success" => false, "message" => "Failed to add section. Please try again."]);
+try {
+    // 1. Insert into the 'section' table
+    $stmt_section = $conn->prepare("INSERT INTO section (section_name, year_level_id, semester_id) VALUES (?, ?, ?)");
+    if ($stmt_section === false) {
+        throw new Exception("Failed to prepare section insert statement: " . $conn->error);
     }
+    $stmt_section->bind_param("sii", $section_name, $year_level_id, $semester_id);
+    if (!$stmt_section->execute()) {
+        throw new Exception("Failed to add section: " . $stmt_section->error);
+    }
+    $new_section_id = $conn->insert_id; // Get the ID of the newly inserted section
+    $stmt_section->close();
 
-    $stmt->close();
-} else {
-    error_log("Failed to prepare statement: " . $conn->error);
-    echo json_encode(["success" => false, "message" => "Database error: Could not prepare statement."]);
+    // 2. Insert into the 'section_courses' table
+    $stmt_section_courses = $conn->prepare("INSERT INTO section_courses (section_id, course_id, schedule_day, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
+    if ($stmt_section_courses === false) {
+        throw new Exception("Failed to prepare section_courses insert statement: " . $conn->error);
+    }
+    $stmt_section_courses->bind_param("iisss", $new_section_id, $course_id, $schedule_day, $start_time, $end_time);
+    if (!$stmt_section_courses->execute()) {
+        throw new Exception("Failed to link section with course and schedule: " . $stmt_section_courses->error);
+    }
+    $stmt_section_courses->close();
+
+    // Commit the transaction if all operations were successful
+    $conn->commit();
+    echo json_encode(["success" => true, "message" => "Section and its course/schedule added successfully!", "section_id" => $new_section_id]);
+
+} catch (Exception $e) {
+    // Rollback the transaction on error
+    $conn->rollback();
+    error_log("Transaction failed in section_add.php: " . $e->getMessage());
+    echo json_encode(["success" => false, "message" => "Error adding section: " . $e->getMessage()]);
+} finally {
+    if ($conn) {
+        $conn->close();
+    }
 }
-
-$conn->close();
 
 ?>

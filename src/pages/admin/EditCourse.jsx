@@ -17,8 +17,8 @@ export default function EditCourse() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
-    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/course_get.php?id=${id}`)
+    axios.get(`http://localhost/ustp-student-attendance/admin_backend/course_get.php?id=${id}`)
+    axios.get(`http://localhost/ustp-student-attendance/admin_backend/course_get.php?id=${id}`)
       .then((response) => {
         if (response.data.success === false) {
             alert(response.data.message);
@@ -52,7 +52,7 @@ export default function EditCourse() {
     setIsLoading(true);
     try {
       // formData now correctly includes course_code
-      const response = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/course_edit.php', formData);
+      const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/course_edit.php', formData);
       if (response.data.success) {
           // Removed the alert here
           setIsEditCourseModalOpen(false);
@@ -79,7 +79,6 @@ export default function EditCourse() {
   return (
     <div
       className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll"
-      style={{ backgroundImage: "url('/assets/ustp_theme.png')" }}
     >
       <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-5xl mx-auto">
         <div
