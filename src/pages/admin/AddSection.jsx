@@ -55,7 +55,7 @@ export default function AddSection() {
   // Fetch Year Levels
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php')
       .then((res) => {
         if (res.data.success) {
           setYearLevels(res.data.year_levels);
@@ -75,7 +75,7 @@ export default function AddSection() {
   // Fetch Semesters
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php')
       .then((res) => {
         if (res.data.success) {
           setSemesters(res.data.semesters);
@@ -131,7 +131,7 @@ export default function AddSection() {
 
     try {
       const res = await axios.post(
-        'http://localhost/ustp-student-attendance/admin_backend/section_add.php',
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php',
         JSON.stringify(submitData),
         {
           headers: { 'Content-Type': 'application/json' },
