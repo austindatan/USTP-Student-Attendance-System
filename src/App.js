@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
@@ -23,6 +23,7 @@ import StudentRightSidebar from './components/student_rightsidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
 import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
 import StudentSectionDashboard from "./pages/student/StudentSectionDashboard";
+import AddExcuseRequest from './pages/student/AddExcuseRequest';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
@@ -90,6 +91,39 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
+  
+
+  const [studentDetailsId, setStudentDetailsId] = useState(null); 
+
+  useEffect(() => {
+    const idFromLocalStorage = localStorage.getItem('studentDetailsId');
+    console.log("App.js (useEffect): Loaded studentDetailsId from localStorage:", idFromLocalStorage);
+
+    if (idFromLocalStorage && idFromLocalStorage !== "null" && idFromLocalStorage !== "undefined" && idFromLocalStorage !== "") {
+      setStudentDetailsId(idFromLocalStorage);
+    } else {
+      setStudentDetailsId(null);
+    }
+
+    const handleStorageChange = (event) => {
+      if (event.key === 'studentDetailsId') {
+        const updatedId = event.newValue;
+        console.log("App.js (storage event): studentDetailsId updated:", updatedId);
+        if (updatedId && updatedId !== "null" && updatedId !== "undefined" && updatedId !== "") {
+          setStudentDetailsId(updatedId);
+        } else {
+          setStudentDetailsId(null);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []); 
+
   return (
     <BrowserRouter>
       <Routes>
@@ -143,6 +177,17 @@ function App() {
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <StudentLayout>
                 <StudentEditProfile />
+              </StudentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/add-excuse-request"
+          element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+              <StudentLayout>
+                <AddExcuseRequest studentDetailsId={studentDetailsId} />
               </StudentLayout>
             </ProtectedRoute>
           }
