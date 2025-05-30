@@ -23,8 +23,134 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
   useEffect(() => {
     if (studentId && course_code) {
-      // Fetch course info and attendance counts (your fetch logic here)
-      // ...
+      // --- Fetch Course Name ---
+      const fetchCourseNameUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
+
+      fetch(fetchCourseNameUrl)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.error) {
+            setCourseInfo({ course_name: "Error loading course" });
+          } else if (data && data.course_name) {
+            setCourseInfo(data);
+          } else {
+            setCourseInfo({ course_name: "Course Not Found" });
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching course name info from API:", err);
+          setCourseInfo({ course_name: "Failed to Load Course" });
+        });
+
+      // --- Fetch Total Present Count ---
+      const fetchPresentUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_present.php?student_id=${studentId}&course_code=${course_code}`;
+
+      fetch(fetchPresentUrl)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.error) {
+            console.error("API returned an error for present count:", data.error);
+            setTotalPresent(0);
+          } else if (data && typeof data.total_present !== 'undefined') {
+            setTotalPresent(data.total_present);
+          } else {
+            console.warn("API response for present count missing 'total_present' or unexpected format:", data);
+            setTotalPresent(0);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching present count from API:", err);
+          setTotalPresent(0);
+        });
+
+      // --- Fetch Total Absent Count ---
+      const fetchAbsentUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_absent.php?student_id=${studentId}&course_code=${course_code}`;
+
+      fetch(fetchAbsentUrl)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.error) {
+            console.error("API returned an error for absent count:", data.error);
+            setTotalAbsent(0);
+          } else if (data && typeof data.total_absent !== 'undefined') {
+            setTotalAbsent(data.total_absent);
+          } else {
+            console.warn("API response for absent count missing 'total_absent' or unexpected format:", data);
+            setTotalAbsent(0);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching absent count from API:", err);
+          setTotalAbsent(0);
+        });
+
+      // --- NEW: Fetch Total Late Count ---
+      const fetchLateUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_late.php?student_id=${studentId}&course_code=${course_code}`;
+
+      fetch(fetchLateUrl)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.error) {
+            console.error("API returned an error for late count:", data.error);
+            setTotalLate(0);
+          } else if (data && typeof data.total_late !== 'undefined') {
+            setTotalLate(data.total_late);
+          } else {
+            console.warn("API response for late count missing 'total_late' or unexpected format:", data);
+            setTotalLate(0);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching late count from API:", err);
+          setTotalLate(0);
+        });
+
+      // --- NEW: Fetch Total Excused Count ---
+      const fetchExcusedUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_excused.php?student_id=${studentId}&course_code=${course_code}`;
+
+      fetch(fetchExcusedUrl)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (data && data.error) {
+            console.error("API returned an error for excused count:", data.error);
+            setTotalExcused(0);
+          } else if (data && typeof data.total_excused !== 'undefined') {
+            setTotalExcused(data.total_excused);
+          } else {
+            console.warn("API response for excused count missing 'total_excused' or unexpected format:", data);
+            setTotalExcused(0);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching excused count from API:", err);
+          setTotalExcused(0);
+        });
+
     } else {
       setCourseInfo(null);
       setTotalPresent(0);

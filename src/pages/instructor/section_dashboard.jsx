@@ -298,12 +298,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
     useEffect(() => {
         const fetchDropdownStudents = async () => {
             try {
-                // Ensure instructor and sectionId are available
-                if (!instructor?.instructor_id || !sectionId) {
+                // Ensure instructor, sectionId, and course_id are available
+                if (!instructor?.instructor_id || !sectionId || !sectionInfo?.course_id) { // Added sectionInfo?.course_id
                     console.log("DEBUG (fetchDropdownStudents): Prerequisites not met.");
                     return;
                 }
-                const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+                const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 setDropdownStudents(data);
@@ -313,7 +313,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         fetchDropdownStudents();
-    }, [instructor?.instructor_id, sectionId]);
+    }, [instructor?.instructor_id, sectionId, sectionInfo?.course_id]);
 
     const markAsLate = async (student) => {
         if (isAttendanceLocked) {
@@ -436,6 +436,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
     };
 
+    const [showNoClassContent, setShowNoClassContent] = useState(false);
+
+    useEffect(() => {
+    const timer = setTimeout(() => setShowNoClassContent(true), 1500); // 1 second delay
+    return () => clearTimeout(timer);
+    }, []);
+
+
 
     console.log("DEBUG (Render): filteredStudents:", filteredStudents); // New debug log for every render
 
@@ -478,12 +486,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 {showColorModal && (
                                     <div ref={colorModalRef} className="absolute right-0 mt-2 w-60 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200">
 
-                                        <h2 className="text-sectionInfo?.hexcode font-bold text-lg mb-4" style={{ color: sectionInfo?.hexcode }}>Change Section Color</h2>
+                                        <h2 className="text-sectionInfo?.hexcode font-bold text-sm mb-2" style={{ color: sectionInfo?.hexcode }}>Change Section Color</h2>
                                         <input
                                             type="color"
                                             value={selectedColor}
                                             onChange={(e) => setSelectedColor(e.target.value)}
-                                            className="w-24 h-12 border rounded mb-4"
+                                            className="w-24 h-12 mb-2"
                                         />
                                         <div className="flex justify-center gap-4">
                                             <button
@@ -511,13 +519,13 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                         alert('Error updating color.');
                                                     }
                                                 }}
-                                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                                className="bg-blue-500 text-white text-xs px-4 py-2 rounded hover:bg-blue-600"
                                             >
                                                 Save
                                             </button>
                                             <button
                                                 onClick={() => setShowColorModal(false)}
-                                                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+                                                className="bg-gray-300 px-4 py-2 text-xs rounded hover:bg-gray-400"
                                             >
                                                 Cancel
                                             </button>
@@ -585,7 +593,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 onClick={async () => {
                                     if (window.confirm("Are you sure you want to lock attendance for this section and date? This cannot be undone.")) {
                                         try {
-                                            const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/lock_attendance.php', {
+                                            const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/lock_attendance.php', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({
@@ -622,6 +630,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         )}
                     </div>
                 )}
+
+                
 
 
                 {/* Student Cards */}
@@ -706,8 +716,26 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             })}
                     </div>
                 ) : (
-                    <div className="text-center text-gray-500 mt-12 text-lg font-poppins">
-                        No class scheduled for today.
+                    <div className="flex flex-col items-center justify-center w-full min-h-[400px]">
+                        {!showNoClassContent ? (
+                            <div className="w-full h-[400px] rounded-lg bg-gradient-to-r from-white via-gray-200 to-white animate-pulse" />
+                        ) : (
+                            <>
+                            <div className="w-48 h-48 mb-6 animate-fade-in">
+                                <img
+                                src={`${process.env.PUBLIC_URL}/assets/no_schedule_illustration.png`}
+                                alt="No Class"
+                                className="w-full h-full object-contain opacity-80"
+                                />
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-600 font-poppins animate-fade-in">
+                                No class schedule today
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-1 font-[Barlow] animate-fade-in">
+                                Please check your schedule or contact our administrator.
+                            </p>
+                            </>
+                        )}
                     </div>
                 )}
             </section>
@@ -722,7 +750,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md mx-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h2 className="text-xl font-bold text-[#0097b2] mb-4">Add Request</h2>
+                        <h2 className="text-xl font-bold mb-4" style={{ color: sectionInfo?.hexcode }}>Add Request</h2>
 
                         {/* Student Dropdown */}
                         <div className="mb-4">
@@ -769,7 +797,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </button>
                             <button
                                 onClick={handleAddDropRequest}
-                                className="px-4 py-2 bg-[#0097b2] text-white rounded-md hover:bg-[#007b8e]"
+                                // *** FIX IS HERE: style prop moved outside className ***
+                                className="px-4 py-2 text-white rounded-md hover:bg-[#007b8e]"
+                                style={{ backgroundColor: sectionInfo?.hexcode }}
                             >
                                 Submit Request
                             </button>
