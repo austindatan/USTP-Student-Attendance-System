@@ -25,13 +25,11 @@ export default function EditStudent() {
     const [enrollments, setEnrollments] = useState([]);
     const [imageFile, setImageFile] = useState(null);
 
-    const [instructors, setInstructors] = useState([]);
     const [programDetails, setProgramDetails] = useState([]);
     const [yearLevels, setYearLevels] = useState([]);
     const [semesters, setSemesters] = useState([]);
 
     const [newEnrollment, setNewEnrollment] = useState({
-        instructor_id: '',
         program_details_id: '',
         year_level_id: '',
         semester_id: '',
@@ -55,7 +53,7 @@ export default function EditStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prev => ({ ...prev, [cacheKey]: fetchedSections }));
             return fetchedSections;
@@ -70,15 +68,13 @@ export default function EditStudent() {
         const fetchData = async () => {
             setIsLoadingInitialData(true);
             try {
-                const [instRes, progRes, yearRes, semRes, studentRes] = await Promise.all([
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
-                    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`),
+                const [progRes, yearRes, semRes, studentRes] = await Promise.all([
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
+                    axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`),
                 ]);
 
-                setInstructors(instRes.data);
                 setProgramDetails(progRes.data);
                 setYearLevels(yearRes.data.year_levels || []);
                 setSemesters(semRes.data.semesters || []);
@@ -100,7 +96,6 @@ export default function EditStudent() {
                     country: studentData.country || '',
                 });
 
-                // --- START FIX FOR ENROLLMENT DROPDOWNS ---
                 const tempCachedSections = {};
                 const sectionFetchPromises = [];
 
@@ -109,7 +104,7 @@ export default function EditStudent() {
                         const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
                         if (!tempCachedSections[cacheKey]) {
                             sectionFetchPromises.push(
-                                axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', {
+                                axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', {
                                     params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
                                 }).then(res => {
                                     tempCachedSections[cacheKey] = res.data;
@@ -131,8 +126,6 @@ export default function EditStudent() {
 
                 await Promise.all(sectionFetchPromises);
                 setCachedSections(tempCachedSections);
-                // --- END FIX FOR ENROLLMENT DROPDOWNS ---
-
                 setEnrollments(initialEnrollments);
 
             } catch (err) {
@@ -160,30 +153,39 @@ export default function EditStudent() {
     const handleEnrollmentChange = useCallback(async (index, field, value) => {
         setEnrollments(prevEnrollments => {
             const updatedEnrollments = [...prevEnrollments];
-            updatedEnrollments[index] = { ...updatedEnrollments[index], [field]: value };
+            const currentEnrollment = { ...updatedEnrollments[index] }; // Create a mutable copy
+
+            currentEnrollment[field] = value; // Update the field
+
+            // If a key field of an *existing* enrollment is changed,
+            // mark it as 'new' and remove its old ID.
+            // This enables the "delete and re-insert" strategy on the backend.
+            if (
+                currentEnrollment.student_details_id && // It's an existing enrollment loaded from DB
+                (field === 'program_details_id' || field === 'year_level_id' || field === 'semester_id' || field === 'section_course_id')
+            ) {
+                currentEnrollment.isNew = true;
+                delete currentEnrollment.student_details_id;
+            }
+
 
             if (field === 'year_level_id' || field === 'semester_id') {
-                updatedEnrollments[index].section_course_id = '';
-                const year = field === 'year_level_id' ? value : updatedEnrollments[index].year_level_id;
-                const semester = field === 'semester_id' ? value : updatedEnrollments[index].semester_id;
+                currentEnrollment.section_course_id = ''; // Clear section if year/semester changes
+                const year = field === 'year_level_id' ? value : currentEnrollment.year_level_id;
+                const semester = field === 'semester_id' ? value : currentEnrollment.semester_id;
 
                 if (year && semester) {
-                    fetchSections(year, semester);
+                    fetchSections(year, semester); // Re-fetch sections for this enrollment
+                } else {
+                    // Clear sections for this index if year/semester is incomplete
+                    setCachedSections(prev => ({ ...prev, [`${year}-${semester}`]: [] }));
                 }
             }
+            updatedEnrollments[index] = currentEnrollment; // Assign the updated enrollment back
             return updatedEnrollments;
         });
-        // Also fetch and cache sections for the changed enrollment
-        if (field === 'year_level_id' || field === 'semester_id') {
-            const enrollmentsCopy = [...enrollments];
-            const changedEnrollment = { ...enrollmentsCopy[index], [field]: value };
-            const year = field === 'year_level_id' ? value : changedEnrollment.year_level_id;
-            const semester = field === 'semester_id' ? value : changedEnrollment.semester_id;
-            if (year && semester) {
-                await fetchSections(year, semester);
-            }
-        }
-    }, [fetchSections, enrollments]);
+    }, [fetchSections]);
+
 
     // Handles changes for the 'newEnrollment' state
     const handleNewEnrollmentChange = useCallback(async (field, value) => {
@@ -200,14 +202,13 @@ export default function EditStudent() {
     }, [fetchSections, newEnrollment.year_level_id, newEnrollment.semester_id]);
 
     const addEnrollment = () => {
-        if (!newEnrollment.instructor_id || !newEnrollment.program_details_id || !newEnrollment.section_course_id || !newEnrollment.year_level_id || !newEnrollment.semester_id) {
-            alert('Please select Year Level, Semester, Instructor, Program, and Section for the new enrollment before adding.');
+        if (!newEnrollment.program_details_id || !newEnrollment.section_course_id || !newEnrollment.year_level_id || !newEnrollment.semester_id) {
+            alert('Please select Year Level, Semester, Program, and Section for the new enrollment before adding.');
             return;
         }
 
         const isDuplicate = enrollments.some(existing =>
             String(existing.section_course_id) === String(newEnrollment.section_course_id) &&
-            String(existing.instructor_id) === String(newEnrollment.instructor_id) &&
             String(existing.program_details_id) === String(newEnrollment.program_details_id)
         );
 
@@ -218,7 +219,6 @@ export default function EditStudent() {
 
         setEnrollments(prev => [...prev, { ...newEnrollment, isNew: true }]);
         setNewEnrollment({
-            instructor_id: '',
             program_details_id: '',
             year_level_id: '',
             semester_id: '',
@@ -244,34 +244,52 @@ export default function EditStudent() {
             return;
         }
 
+        // Validate all existing enrollments before opening modal
+        const hasInvalidEnrollment = enrollments.some(enrollment => {
+            return !enrollment.program_details_id || !enrollment.year_level_id ||
+                   !enrollment.semester_id || !enrollment.section_course_id;
+        });
+
+        if (hasInvalidEnrollment) {
+            alert('Please ensure all existing enrollment fields (Program, Year Level, Semester, Section/Course) are selected for every enrollment.');
+            return;
+        }
+
+
         setIsEditStudentModalOpen(true);
     };
 
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
-        const submissionData = new FormData(); // Initialize submissionData first
+        const submissionData = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
-            submissionData.append(key, value);
+            if (value !== null) { // Ensure null values are not appended, empty strings are fine
+                submissionData.append(key, value);
+            }
         });
-        if (imageFile) submissionData.append('image', imageFile);
 
-        const enrollmentsToSend = enrollments.map(enrollment => ({ // Define enrollmentsToSend first
+        if (imageFile) {
+            if (imageFile instanceof File) {
+                submissionData.append('image', imageFile);
+            }
+        } else {
+            // If imageFile is null, it means the user cleared the image.
+            // Send a flag to explicitly tell PHP to clear the image.
+            submissionData.append('clear_image', 'true');
+        }
+
+        const enrollmentsToSend = enrollments.map(enrollment => ({
             student_details_id: enrollment.student_details_id,
-            instructor_id: enrollment.instructor_id,
             program_details_id: enrollment.program_details_id,
             section_course_id: enrollment.section_course_id,
             isNew: enrollment.isNew,
         }));
         submissionData.append('enrollments', JSON.stringify(enrollmentsToSend));
 
-        // Now you can safely log these variables
-        console.log("Submitting data:", Object.fromEntries(submissionData.entries()));
-        console.log("Enrollments to send:", enrollmentsToSend);
-        console.log("Student ID:", student_id);
 
         try {
             const res = await axios.post(
-                `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
+                `http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`,
                 submissionData,
                 {
                     headers: {
@@ -561,11 +579,11 @@ export default function EditStudent() {
             <ConfirmationModal
                 isOpen={isEditStudentModalOpen}
                 onClose={handleCloseEditStudentModal}
-                onConfirm={handleConfirmUpdate} // Don't forget to pass this if it's not already
-                title="Confirm Update" // Pass the title here
-                message="Are you sure you want to update this student's details and enrollments?" // Pass the message here
-                confirmText={isSaving ? 'Updating...' : 'Confirm Update'} // This was already set up correctly
-                loading={isSaving} // This was already set up correctly
+                onConfirm={handleConfirmUpdate}
+                title="Confirm Update"
+                message="Are you sure you want to update this student's details and enrollments?"
+                confirmText={isSaving ? 'Updating...' : 'Confirm Update'}
+                loading={isSaving}
             />
         </div>
     );

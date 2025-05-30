@@ -24,7 +24,6 @@ export default function AddStudent() {
     const [imageFile, setImageFile] = useState(null);
 
     // Dropdown options states
-    const [instructors, setInstructors] = useState([]);
     const [programDetails, setProgramDetails] = useState([]);
     const [yearLevels, setYearLevels] = useState([]);
     const [semesters, setSemesters] = useState([]);
@@ -34,7 +33,6 @@ export default function AddStudent() {
 
     // State for a *new* enrollment being added (before it's pushed to 'enrollments' array)
     const [newEnrollment, setNewEnrollment] = useState({
-        instructor_id: '',
         program_details_id: '',
         year_level_id: '',
         semester_id: '',
@@ -62,7 +60,7 @@ export default function AddStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
@@ -78,14 +76,12 @@ export default function AddStudent() {
             setLoadingDropdowns(true);
             setErrorDropdowns(null);
             try {
-                const [instRes, progRes, yearRes, semRes] = await Promise.all([
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/instructor_dropdown.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
+                const [progRes, yearRes, semRes] = await Promise.all([
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
+                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
                 ]);
 
-                setInstructors(instRes.data);
                 setProgramDetails(progRes.data);
 
                 if (yearRes.data.success) {
@@ -146,32 +142,29 @@ export default function AddStudent() {
     const addEnrollment = () => {
         // Basic validation for the new enrollment fields
         if (
-            !newEnrollment.instructor_id ||
             !newEnrollment.program_details_id ||
             !newEnrollment.year_level_id ||
             !newEnrollment.semester_id ||
             !newEnrollment.section_course_id // Changed to section_course_id
         ) {
-            alert('Please select Instructor, Program, Year Level, Semester, and Section for the new enrollment before adding.');
+            alert('Please select Program, Year Level, Semester, and Section for the new enrollment before adding.');
             return;
         }
 
-        // Check for duplicate enrollments (same section_course_id, instructor, program)
+        // Check for duplicate enrollments (same section_course_id, program)
         const isDuplicate = enrollments.some(existing =>
             String(existing.section_course_id) === String(newEnrollment.section_course_id) && // Changed to section_course_id
-            String(existing.instructor_id) === String(newEnrollment.instructor_id) &&
             String(existing.program_details_id) === String(newEnrollment.program_details_id)
         );
 
         if (isDuplicate) {
-            alert('This class (combination of section, instructor, and program) has already been added.');
+            alert('This class (combination of section, and program) has already been added.');
             return;
         }
 
         setEnrollments(prevEnrollments => [...prevEnrollments, { ...newEnrollment }]);
         // Reset the new enrollment form after adding
         setNewEnrollment({
-            instructor_id: '',
             program_details_id: '',
             year_level_id: '',
             semester_id: '',
@@ -202,7 +195,6 @@ export default function AddStudent() {
         setImageFile(null);
         setEnrollments([]); // Clear all added enrollments
         setNewEnrollment({ // Reset the 'add new' enrollment form
-            instructor_id: '',
             program_details_id: '',
             year_level_id: '',
             semester_id: '',
@@ -258,7 +250,7 @@ export default function AddStudent() {
 
         try {
             const res = await axios.post(
-                'http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php',
+                'http://localhost/ustp-student-attendance/admin_backend/student_add_api.php',
                 submissionData,
                 {
                     headers: {
@@ -431,23 +423,6 @@ export default function AddStudent() {
                                         )}
                                     </select>
                                 </div>
-                                {/* Instructor */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700">Instructor</label>
-                                    <select
-                                        value={enrollment.instructor_id}
-                                        required
-                                        className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        disabled
-                                    >
-                                        <option value="">Select Instructor</option>
-                                        {instructors.map((inst) => (
-                                            <option key={inst.instructor_id} value={inst.instructor_id}>
-                                                {inst.firstname} {inst.lastname}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
                                 {/* Program */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700">Program</label>
@@ -532,21 +507,7 @@ export default function AddStudent() {
                                     )}
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700">Instructor</label>
-                                <select
-                                    value={newEnrollment.instructor_id}
-                                    onChange={(e) => handleNewEnrollmentChange('instructor_id', e.target.value)}
-                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Select Instructor</option>
-                                    {instructors.map((inst) => (
-                                        <option key={inst.instructor_id} value={inst.instructor_id}>
-                                            {inst.firstname} {inst.lastname}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700">Program</label>
                                 <select

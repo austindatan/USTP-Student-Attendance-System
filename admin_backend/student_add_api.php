@@ -85,21 +85,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Changed 'section_id' to 'section_course_id' in the SQL INSERT statement
-        $insert_details_stmt = $conn->prepare("INSERT INTO student_details (student_id, instructor_id, section_course_id, program_details_id) VALUES (?, ?, ?, ?)");
+        $insert_details_stmt = $conn->prepare("INSERT INTO student_details (student_id, section_course_id, program_details_id) VALUES (?, ?, ?)");
 
         foreach ($enrollments as $enrollment) {
-            $instructor_id = isset($enrollment['instructor_id']) ? $conn->real_escape_string($enrollment['instructor_id']) : '';
             // Changed to read 'section_course_id' from the enrollment array
             $section_course_id = isset($enrollment['section_course_id']) ? $conn->real_escape_string($enrollment['section_course_id']) : '';
             $program_details_id = isset($enrollment['program_details_id']) ? $conn->real_escape_string($enrollment['program_details_id']) : '';
 
             // Changed validation to use $section_course_id
-            if (empty($instructor_id) || empty($section_course_id) || empty($program_details_id)) {
-                throw new Exception("Missing instructor/section course/program ID in one of the enrollments.");
+            if (empty($section_course_id) || empty($program_details_id)) {
+                throw new Exception("Missing section/course/program ID in one of the enrollments.");
             }
 
             // Bind parameters, ensuring correct order and variable names
-            $insert_details_stmt->bind_param("iiii", $student_id, $instructor_id, $section_course_id, $program_details_id);
+            $insert_details_stmt->bind_param("iii", $student_id, $section_course_id, $program_details_id);
             if (!$insert_details_stmt->execute()) {
                 throw new Exception("Failed to insert student enrollment details: " . $insert_details_stmt->error);
             }

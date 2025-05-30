@@ -1,41 +1,68 @@
 <?php
+// get_single_section.php
+
 header("Content-Type: application/json");
-header('Access-Control-Allow-Origin: *'); 
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 include __DIR__ . '/../src/conn.php';
 
-$section_id = $_GET['section_id'] ?? null;
-
-if (!$section_id) {
-    error_log("Error in get_single_section.php: Section ID not provided in GET request.");
-    echo json_encode(["success" => false, "message" => "Section ID is required."]);
-    exit;
+if ($conn->connect_error) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $conn->connect_error]);
+    exit();
 }
 
-// Fetch section details from the 'section' table
-// Note: course_id, schedule_day, start_time, end_time are no longer in 'section' table
-$sql = "SELECT section_id, section_name, year_level_id, semester_id FROM section WHERE section_id = ?";
-$stmt = $conn->prepare($sql);
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $section_id = $_GET['section_id'] ?? null;
 
-if ($stmt === false) {
-    error_log("Error preparing statement in get_single_section.php: " . $conn->error);
-    echo json_encode(["success" => false, "message" => "Database prepare failed."]);
-    exit;
-}
+    if (!$section_id) {
+        echo json_encode(["success" => false, "message" => "Section ID is missing."]);
+        exit;
+    }
 
-$stmt->bind_param("i", $section_id);
-$stmt->execute();
-$result = $stmt->get_result();
+    // SQL query to fetch section details including year_level and semester information
+    $sql = "SELECT
+                s.section_id,
+                s.section_name,
+                s.year_level_id,
+                yl.year_level_name,
+                s.semester_id,
+                sm.semester_name
+            FROM
+                section s
+            LEFT JOIN
+                year_level yl ON s.year_level_id = yl.year_id
+            LEFT JOIN
+                semester sm ON s.semester_id = sm.semester_id
+            WHERE
+                s.section_id = ?";
 
-if ($row = $result->fetch_assoc()) {
-    echo json_encode(["success" => true, "section" => $row]);
+    $stmt = $conn->prepare($sql);
+
+    if ($stmt === false) {
+        error_log("Failed to prepare statement in get_single_section.php: " . $conn->error);
+        echo json_encode(["success" => false, "message" => "Database error: Could not prepare statement."]);
+        exit;
+    }
+
+    $stmt->bind_param("i", $section_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $section = $result->fetch_assoc();
+        echo json_encode(["success" => true, "section" => $section]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Section not found."]);
+    }
+
+    $stmt->close();
 } else {
-    error_log("Error in get_single_section.php: Section not found for ID " . $section_id);
-    echo json_encode(["success" => false, "message" => "Section not found."]);
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method Not Allowed"]);
 }
 
-$stmt->close();
 $conn->close();
 ?>

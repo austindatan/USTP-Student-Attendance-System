@@ -1,11 +1,10 @@
-// Refactored EditSectionCourse.jsx to match EditSection.jsx frontend
+// Refactored AddSectionCourse.jsx to match EditSection UI structure
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ConfirmationModal from '../../components/confirmationmodal';
 
-function EditSectionCourse() {
-    const { sectionId, sectionCourseId } = useParams();
+function AddSectionCourse() {
+    const { sectionId } = useParams();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         course_id: '',
@@ -14,13 +13,11 @@ function EditSectionCourse() {
         end_time: '',
         instructor_id: ''
     });
-    const [currentCourseName, setCurrentCourseName] = useState('');
     const [allCourses, setAllCourses] = useState([]);
     const [allInstructors, setAllInstructors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,73 +28,72 @@ function EditSectionCourse() {
                 const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
-                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
-                if (sectionCourseRes.data.success) {
-                    const { course_id, schedule_day, start_time, end_time, course_name, instructor_id } = sectionCourseRes.data.sectionCourse;
-                    setFormData({ course_id, schedule_day, start_time, end_time, instructor_id: instructor_id || '' });
-                    setCurrentCourseName(course_name);
-                } else {
-                    setError(sectionCourseRes.data.message || 'Failed to load section course data.');
-                }
             } catch (err) {
-                console.error("Error:", err);
+                console.error("Fetch error:", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchData();
-    }, [sectionCourseId]);
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsModalOpen(true);
-    };
-
-    const handleConfirmUpdate = async () => {
-        setIsSaving(true);
+        setError(null);
+        setMessage('');
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/edit_section_course.php', {
+            const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/add_sectioncourse.php', {
                 ...formData,
-                section_course_id: sectionCourseId
+                section_id: sectionId
             });
             if (res.data.success) {
-                navigate(`/sections/${sectionId}/courses`);
+                setMessage(res.data.message);
+                setTimeout(() => navigate(`/sections/${sectionId}/courses`), 2000);
             } else {
-                setError(res.data.message || 'Failed to update section course.');
+                setError(res.data.message || 'Failed to add course.');
             }
         } catch (err) {
             console.error("Submit error:", err);
             setError(err.message);
-        } finally {
-            setIsSaving(false);
-            setIsModalOpen(false);
         }
     };
 
     if (loading) return <p className="text-center mt-10">Loading...</p>;
-    if (error) return <p className="text-center mt-10 text-red-500">Error: {error}</p>;
+    if (error) return <p className="text-center text-red-500 mt-10">Error: {error}</p>;
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
-                <div className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+                <div
+                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={{
                         backgroundImage: "url('assets/teacher_vector.png')",
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'right',
                         backgroundSize: 'contain'
-                    }}>
-                    <h1 className="text-2xl text-blue-700 font-bold">Edit Section Course</h1>
+                    }}
+                >
+                    <h1 className="text-2xl text-blue-700 font-bold">Add New Section Course</h1>
                 </div>
 
                 <div className="bg-white shadow-md p-8 rounded-lg">
+                    {message && (
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+                            {message}
+                        </div>
+                    )}
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+                            {error}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700">Course Name</label>
@@ -121,6 +117,7 @@ function EditSectionCourse() {
                                 name="instructor_id"
                                 value={formData.instructor_id}
                                 onChange={handleChange}
+                                required
                                 className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="">Select Instructor</option>
@@ -182,27 +179,16 @@ function EditSectionCourse() {
                             </button>
                             <button
                                 type="submit"
-                                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                             >
-                                Save Changes
+                                Add Course
                             </button>
                         </div>
                     </form>
                 </div>
             </section>
-
-            <ConfirmationModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onConfirm={handleConfirmUpdate}
-                title="Confirm Update"
-                message="Are you sure you want to update this section course?"
-                confirmText="Update Course"
-                loading={isSaving}
-                confirmButtonClass="bg-blue-700 hover:bg-blue-800"
-            />
         </div>
     );
 }
 
-export default EditSectionCourse;
+export default AddSectionCourse;

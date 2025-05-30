@@ -166,7 +166,7 @@ try {
         $foundInSubmitted = false;
         foreach ($submittedEnrollments as $subEnrollment) {
             // Check if this existing enrollment is still present in the submitted list
-            // We use section_course_id for comparison
+            // We use student_details_id for comparison
             if (isset($subEnrollment['student_details_id']) && $subEnrollment['student_details_id'] == $dbId) {
                 $foundInSubmitted = true;
                 // If found, check if any critical fields have changed (though frontend disables editing existing)
@@ -183,7 +183,7 @@ try {
     // Identify new enrollments to insert
     foreach ($submittedEnrollments as $subEnrollment) {
         // If it's a new enrollment (no student_details_id or isNew flag is true)
-        if (!isset($subEnrollment['student_details_id']) || $subEnrollment['isNew'] === true) {
+        if (!isset($subEnrollment['student_details_id']) || ($subEnrollment['isNew'] ?? false) === true) { // Added ?? false for robustness
             $enrollmentsToInsert[] = $subEnrollment;
         }
     }
@@ -205,18 +205,21 @@ try {
 
     // Perform insertions
     if (!empty($enrollmentsToInsert)) {
-        $stmt_insert_enrollment = $conn->prepare("INSERT INTO student_details (student_id, section_course_id, program_details_id) VALUES (?, ?, ?, ?)");
+        // --- CORRECTED LINE BELOW ---
+        $stmt_insert_enrollment = $conn->prepare("INSERT INTO student_details (student_id, section_course_id, program_details_id) VALUES (?, ?, ?)");
         if ($stmt_insert_enrollment === false) {
             throw new Exception("Failed to prepare insert enrollment statement: " . $conn->error);
         }
         foreach ($enrollmentsToInsert as $enrollment) {
-            $section_course_id = $enrollment['section_course_id'] ?? null; // Changed to section_course_id
+            $section_course_id = $enrollment['section_course_id'] ?? null;
             $program_details_id = $enrollment['program_details_id'] ?? null;
 
             if (empty($section_course_id) || empty($program_details_id)) {
-                throw new Exception("Missing data for new enrollment (section_course_id, or program_details_id).");
+                // It's crucial that these IDs are valid and present for new enrollments
+                throw new Exception("Missing data for new enrollment (section_course_id, or program_details_id). Submitted enrollment: " . json_encode($enrollment));
             }
-            $stmt_insert_enrollment->bind_param("iiii", $student_id, $section_course_id, $program_details_id);
+            // --- CORRECTED LINE BELOW ---
+            $stmt_insert_enrollment->bind_param("iii", $student_id, $section_course_id, $program_details_id);
             if (!$stmt_insert_enrollment->execute()) {
                 throw new Exception("Failed to insert new enrollment: " . $stmt_insert_enrollment->error);
             }

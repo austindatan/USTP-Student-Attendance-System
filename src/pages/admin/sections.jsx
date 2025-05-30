@@ -13,7 +13,7 @@ export default function Admin_Sections() {
 
     useEffect(() => {
         // Updated API endpoint to fetch sections with year level and semester details
-        axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/sections_with_details.php')
+        axios.get('http://localhost/ustp-student-attendance/admin_backend/section_with_details.php')
             .then(res => {
                 console.log("Fetched sections data:", res.data);
                 if (res.data.success && Array.isArray(res.data.sections)) {
@@ -37,28 +37,28 @@ export default function Admin_Sections() {
     };
 
     const confirmDelete = () => {
-        axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_section.php', {
+        axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_section.php', {
             _method: 'DELETE',
             section_id: selectedSection.section_id,
         })
-        .then((res) => {
-            if (res.data.success) {
-                // Refresh or filter out the deleted section
-                setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
-            } else {
-                // Using console.error for demonstration. In a real app, implement a custom modal/toast for messages.
-                console.error(res.data.message || "Failed to delete section.");
-            }
-        })
-        .catch((err) => {
-            console.error("An error occurred while deleting:", err);
-            // Using console.error for demonstration.
-            console.error("An error occurred while deleting.");
-        })
-        .finally(() => {
-            setIsModalOpen(false);
-            setSelectedSection(null);
-        });
+            .then((res) => {
+                if (res.data.success) {
+                    // Refresh or filter out the deleted section
+                    setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
+                } else {
+                    // Using console.error for demonstration. In a real app, implement a custom modal/toast for messages.
+                    console.error(res.data.message || "Failed to delete section.");
+                }
+            })
+            .catch((err) => {
+                console.error("An error occurred while deleting:", err);
+                // Using console.error for demonstration.
+                console.error("An error occurred while deleting.");
+            })
+            .finally(() => {
+                setIsModalOpen(false);
+                setSelectedSection(null);
+            });
     };
 
     const handleViewCourses = (sectionId) => {
@@ -72,17 +72,16 @@ export default function Admin_Sections() {
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
             <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-
                 <div
-                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflowhidden"
                     style={
                         !loading
                             ? {
-                                  backgroundImage: "url('assets/teacher_vector.png')",
-                                  backgroundRepeat: "no-repeat",
-                                  backgroundPosition: "right",
-                                  backgroundSize: "contain"
-                              }
+                                    backgroundImage: "url('assets/teacher_vector.png')",
+                                    backgroundRepeat: "no-repeat",
+                                    backgroundPosition: "right",
+                                    backgroundSize: "contain"
+                                }
                             : {}
                     }
                 >
@@ -97,30 +96,27 @@ export default function Admin_Sections() {
                         )}
                     </div>
                 </div>
-
                 <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <p className="text-blue-700 font-semibold whitespace-nowrap">
                             Total Sections: {filteredSections.length}
                         </p>
-
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input
                                 type="text"
                                 placeholder="Search sections..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
+                                className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring2 focus:ring-blue-500 w-full sm:w-[250px]"
                             />
                             <button
                                 onClick={() => navigate("/admin-sections/add")}
-                                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
+                                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:wauto"
                             >
                                 + Add Section
                             </button>
                         </div>
                     </div>
-
                     {loading ? (
                         <p className="text-center text-gray-500">Loading sections...</p>
                     ) : error ? (
@@ -134,7 +130,7 @@ export default function Admin_Sections() {
                                         <th className="px-3 py-2 w-[20%]">Section Name</th>
                                         <th className="px-3 py-2 w-[20%]">Year Level</th>
                                         <th className="px-3 py-2 w-[20%]">Semester</th>
-                                        <th className="px-3 py-2 w-[40%] text-center">Action</th> {/* Increased width for action buttons */}
+                                        <th className="px-3 py-2 w-[40%] text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -154,10 +150,10 @@ export default function Admin_Sections() {
                                                 <td className="px-3 py-2 truncate min-w-0">{section.year_level_name || 'N/A'}</td>
                                                 <td className="px-3 py-2 truncate min-w-0">{section.semester_name || 'N/A'}</td>
                                                 <td className="px-3 py-2">
-                                                    <div className="flex gap-1 justify-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
+                                                    <div className="flex gap-1 justify-center flex-wrap">
                                                         <button
                                                             onClick={() => handleViewCourses(section.section_id)}
-                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap mb-1" // Added margin-bottom
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap mb-1"
                                                         >
                                                             View Courses
                                                         </button>
@@ -184,7 +180,6 @@ export default function Admin_Sections() {
                     )}
                 </div>
             </section>
-
             {/* Delete Confirmation Modal */}
             {isModalOpen && selectedSection && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
