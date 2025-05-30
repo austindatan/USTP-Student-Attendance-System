@@ -39,6 +39,8 @@ import AddCourse from './pages/admin/AddCourse';
 import AddSection from './pages/admin/AddSection';
 import EditSection from './pages/admin/EditSection';
 import EditCourse from './pages/admin/EditCourse';
+import SectionCourses from './pages/admin/SectionCourses';
+import EditSectionCourse from './pages/admin/EditSectionCourse';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -420,6 +422,28 @@ function App() {
               </AdminLayout>
             </ProtectedRoute>
           }
+        />
+
+        <Route
+            path="/sections/:sectionId/courses"
+            element={
+                <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <AdminLayout>
+                        <SectionCourses />
+                    </AdminLayout>
+                </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/sections/:sectionId/courses/:sectionCourseId/edit"
+            element={
+                <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <AdminLayout>
+                        <EditSectionCourse />
+                    </AdminLayout>
+                </ProtectedRoute>
+            }
         />
 
         <Route path="*" element={<NotFound />} />
