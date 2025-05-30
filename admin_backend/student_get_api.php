@@ -54,7 +54,6 @@ $stmt_student->close();
 $query_enrollments = "
 SELECT 
 	sd.student_details_id,
-	sd.instructor_id,
 	sd.section_course_id,
 	sd.program_details_id,
 	sec.year_level_id,
@@ -63,6 +62,7 @@ SELECT
 	inst.firstname AS instructor_firstname,
 	inst.lastname AS instructor_lastname,
 	p.program_name,
+	sc.instructor_id,
 	sc.schedule_day,
 	sc.start_time,
 	sc.end_time,
@@ -80,7 +80,7 @@ LEFT JOIN
 LEFT JOIN 
 	course c ON sc.course_id = c.course_id
 JOIN 
-	instructor inst ON sd.instructor_id = inst.instructor_id
+	instructor inst ON sc.instructor_id = inst.instructor_id
 JOIN 
 	program_details pd ON sd.program_details_id = pd.program_details_id
 JOIN

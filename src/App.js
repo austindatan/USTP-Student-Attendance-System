@@ -39,10 +39,16 @@ import AddCourse from './pages/admin/AddCourse';
 import AddSection from './pages/admin/AddSection';
 import EditSection from './pages/admin/EditSection';
 import EditCourse from './pages/admin/EditCourse';
+import SectionCourses from './pages/admin/SectionCourses';
+import EditSectionCourse from './pages/admin/EditSectionCourse';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import NotFound from "./components/NotFound";
+
+
+import AttendanceSummary from './pages/student/AttendanceSummary'; // Assuming you have this component
+<Route path="/Attendance-Summary/:classCode" element={<AttendanceSummary/>} />
 
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
   const location = useLocation();
@@ -73,11 +79,11 @@ function AdminLayout({ children }) {
   );
 }
 
-function StudentLayout({ children }) {
+function StudentLayout({ children, bgImage, setBgImage }) { // Correctly accepts bgImage and setBgImage
   return (
     <div className="flex h-screen w-full">
-      <StudentLeftSideBar />
-      <div className="flex-1 overflow-y-auto">
+      <StudentLeftSideBar setBgImage={setBgImage} /> {/* StudentLeftSideBar is always rendered here */}
+      <div className="flex-1 overflow-y-auto" style={{ backgroundImage: bgImage }}> {/* Background applied here */}
         {children}
       </div>
       <StudentRightSidebar />
@@ -139,28 +145,37 @@ useEffect(() => {
         <Route path="/login-instructor" element={<LoginInstructor />} />
         <Route path="/register-instructor" element={<RegisterInstructor />} />
 
-        <Route
+             <Route
           path="/student-dashboard"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <StudentLayout
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                bgImage={bgImage}
-                setBgImage={setBgImage}
+                bgImage={bgImage} // Pass the current background image
+                setBgImage={setBgImage} // Pass the function to change it
               >
                 <StudentDashboard />
               </StudentLayout>
             </ProtectedRoute>
           }
         />
+         {/* Your new route for Attendance Summary */}
+        <Route path="/Attendance-Summary/:classCode" element={
+            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
+                <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
+                    <AttendanceSummary />
+                </StudentLayout>
+            </ProtectedRoute>
+        } />
 
         <Route
           path="/student-classes-dashboard"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <StudentLayout>
-                <StudentClassesDashboard />
+              <StudentLayout
+                bgImage={bgImage} // Pass the current background image
+                setBgImage={setBgImage} // Pass the function to change it
+              >
+                <StudentClassesDashboard /> {/* This is where DemoCards is likely rendered */}
               </StudentLayout>
             </ProtectedRoute>
           }
@@ -181,7 +196,10 @@ useEffect(() => {
           path="/student-edit-profile"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <StudentLayout>
+              <StudentLayout
+                bgImage={bgImage} // Pass the current background image
+                setBgImage={setBgImage} // Pass the function to change it
+              >
                 <StudentEditProfile />
               </StudentLayout>
             </ProtectedRoute>
@@ -192,7 +210,10 @@ useEffect(() => {
           path="/add-excuse-request"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <StudentLayout>
+              <StudentLayout
+                bgImage={bgImage} // <-- This correctly passes the current background image
+                setBgImage={setBgImage} // <-- This correctly passes the setter function
+              >
                 <AddExcuseRequest studentDetailsId={studentDetailsId} />
               </StudentLayout>
             </ProtectedRoute>
@@ -408,6 +429,28 @@ useEffect(() => {
               </AdminLayout>
             </ProtectedRoute>
           }
+        />
+
+        <Route
+            path="/sections/:sectionId/courses"
+            element={
+                <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <AdminLayout>
+                        <SectionCourses />
+                    </AdminLayout>
+                </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/sections/:sectionId/courses/:sectionCourseId/edit"
+            element={
+                <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <AdminLayout>
+                        <EditSectionCourse />
+                    </AdminLayout>
+                </ProtectedRoute>
+            }
         />
 
         <Route path="*" element={<NotFound />} />

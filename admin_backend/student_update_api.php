@@ -146,7 +146,7 @@ try {
 
     // Fetch current enrollments for this student from the database
     $currentEnrollments = [];
-    $stmt_fetch_enrollments = $conn->prepare("SELECT student_details_id, instructor_id, section_course_id, program_details_id FROM student_details WHERE student_id = ?");
+    $stmt_fetch_enrollments = $conn->prepare("SELECT student_details_id, section_course_id, program_details_id FROM student_details WHERE student_id = ?");
     if ($stmt_fetch_enrollments === false) {
         throw new Exception("Failed to prepare fetch enrollments statement: " . $conn->error);
     }
@@ -205,19 +205,18 @@ try {
 
     // Perform insertions
     if (!empty($enrollmentsToInsert)) {
-        $stmt_insert_enrollment = $conn->prepare("INSERT INTO student_details (student_id, instructor_id, section_course_id, program_details_id) VALUES (?, ?, ?, ?)");
+        $stmt_insert_enrollment = $conn->prepare("INSERT INTO student_details (student_id, section_course_id, program_details_id) VALUES (?, ?, ?, ?)");
         if ($stmt_insert_enrollment === false) {
             throw new Exception("Failed to prepare insert enrollment statement: " . $conn->error);
         }
         foreach ($enrollmentsToInsert as $enrollment) {
-            $instructor_id = $enrollment['instructor_id'] ?? null;
             $section_course_id = $enrollment['section_course_id'] ?? null; // Changed to section_course_id
             $program_details_id = $enrollment['program_details_id'] ?? null;
 
-            if (empty($instructor_id) || empty($section_course_id) || empty($program_details_id)) {
-                throw new Exception("Missing data for new enrollment (instructor_id, section_course_id, or program_details_id).");
+            if (empty($section_course_id) || empty($program_details_id)) {
+                throw new Exception("Missing data for new enrollment (section_course_id, or program_details_id).");
             }
-            $stmt_insert_enrollment->bind_param("iiii", $student_id, $instructor_id, $section_course_id, $program_details_id);
+            $stmt_insert_enrollment->bind_param("iiii", $student_id, $section_course_id, $program_details_id);
             if (!$stmt_insert_enrollment->execute()) {
                 throw new Exception("Failed to insert new enrollment: " . $stmt_insert_enrollment->error);
             }

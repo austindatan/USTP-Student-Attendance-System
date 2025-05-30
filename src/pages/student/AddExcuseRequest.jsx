@@ -130,8 +130,11 @@ const handleSubmit = async (e) => {
 
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
-      <h2 className="text-2xl font-semibold text-center mb-6">Excuse Request Form</h2>
+    <form 
+      onSubmit={handleSubmit}
+      className="font-dm-sans px-4 sm:px-10 py-6 sm:py-10 text-left w-full max-w-[85%] sm:max-w-2xl ml-4 sm:ml-[200px] text-sm sm:text-base mt-10 mb-10 bg-white rounded-lg shadow-lg transition-all duration-300 space-y-6"
+    >
+      <h2 className="text-2xl font-semibold text-center mb-4">Excuse Request Form</h2>
 
       {message && (
         <div className={`p-3 rounded border text-center ${success ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}`}>
@@ -139,14 +142,14 @@ const handleSubmit = async (e) => {
         </div>
       )}
 
-      <div className="flex flex-col">
-        <label htmlFor="course" className="mb-2 font-medium">Course</label>
+      <div>
+        <label htmlFor="course" className="block mb-2 font-medium">Course</label>
         <select
           id="course"
           value={courseId}
           onChange={handleCourseChange}
           required
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">Select a course</option>
           {courses.map(course => (
@@ -155,49 +158,49 @@ const handleSubmit = async (e) => {
         </select>
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="instructor" className="mb-2 font-medium">Instructor</label>
+      <div>
+        <label htmlFor="instructor" className="block mb-2 font-medium">Instructor</label>
         <input
           id="instructor"
           type="text"
           value={instructor ? `${instructor.firstname} ${instructor.lastname}` : ''}
           readOnly
-          className="border bg-gray-100 rounded px-3 py-2"
+          className="w-full border bg-gray-100 rounded px-3 py-2"
         />
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="reason" className="mb-2 font-medium">Reason</label>
+      <div>
+        <label htmlFor="reason" className="block mb-2 font-medium">Reason</label>
         <textarea
           id="reason"
           value={reason}
           onChange={e => setReason(e.target.value)}
           required
           rows={4}
-          className="border rounded px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="file" className="mb-2 font-medium">Upload File (Optional)</label>
+      <div>
+        <label htmlFor="file" className="block mb-2 font-medium">Upload File (Optional)</label>
         <input
           id="file"
           type="file"
           onChange={e => setFile(e.target.files[0])}
-          className="focus:outline-none"
+          className="w-full focus:outline-none"
           ref={fileInputRef}
         />
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="dateOfAbsence" className="mb-2 font-medium">Date of Absence</label>
+      <div>
+        <label htmlFor="dateOfAbsence" className="block mb-2 font-medium">Date of Absence</label>
         <input
           id="dateOfAbsence"
           type="date"
           value={dateOfAbsence}
           onChange={e => setDateOfAbsence(e.target.value)}
           required
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 

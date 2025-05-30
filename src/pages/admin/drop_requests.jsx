@@ -10,7 +10,7 @@ export default function DropRequests() {
 
   const fetchRequests = () => {
     setLoading(true);
-    fetch("http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php")
+    fetch("http://localhost/USTP-Student-Attendance-System/admin_backend/get_drop_req.php")
       .then((res) => res.json())
       .then((data) => {
         setRequests(data);
@@ -40,7 +40,7 @@ export default function DropRequests() {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/admin_backend/update_drop_req.php",
+          "http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
