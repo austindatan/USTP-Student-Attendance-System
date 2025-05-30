@@ -1,42 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used here but kept if needed elsewhere
+const StudentLeftSidebar = ({ setBgImage }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [showThemes, setShowThemes] = useState(false); // Add this state
 
-    // studentDetailsId is read directly here, which is fine for UI logic
-    // as it doesn't cause a render loop like in App.js trying to pass it as a prop
     const studentDetailsId = localStorage.getItem('studentDetailsId');
 
 
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 1500);
-        // Corrected console.log to use studentDetailsId
+
         console.log("Student ID from localStorage in StudentLeftSidebar:", studentDetailsId);
         return () => clearTimeout(timer);
-    }, [studentDetailsId]); // Added studentDetailsId to dependency array for clarity, though it's a direct read.
+    }, [studentDetailsId]); 
 
     const Classes_Dashboard = () => {
         navigate("/student-classes-dashboard");
     };
 
-    const Student_Dashboard = () => { // Renamed for clarity, though variable name was Teacher_Dashboard
+    const Student_Dashboard = () => { 
         navigate("/student-dashboard");
     };
 
-    const Add_Excuse_Request_Page = () => { // Renamed for clarity
+    const Add_Excuse_Request_Page = () => { 
         navigate("/add-excuse-request");
     };
 
-    const dashboard_active = location.pathname === '/student-dashboard'; // Adjusted for student dashboard
-    const classes_active = ['/student-classes-dashboard', '/section-dashboard/:sectionId'].some(path => // Adjusted for student classes
+    const dashboard_active = location.pathname === '/student-dashboard'; 
+    const classes_active = ['/student-classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
         location.pathname.startsWith(path)
     );
-    const excuse_requests_active = location.pathname === '/excuse-requests';
+    const excuse_requests_active = location.pathname === '/add-excuse-request'; 
 
     return (
         <>

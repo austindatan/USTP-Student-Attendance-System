@@ -2,80 +2,132 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
 const AddExcuseRequest = ({ studentDetailsId }) => {
+  console.log("AddExcuseRequest (render): received studentDetailsId prop =", studentDetailsId); 
+
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState('');
-  const [instructor, setInstructor] = useState('');
+  const [instructor, setInstructor] = useState(null);
   const [instructorId, setInstructorId] = useState('');
   const [reason, setReason] = useState('');
   const [file, setFile] = useState(null);
   const [dateOfAbsence, setDateOfAbsence] = useState('');
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    axios
-      .get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`)
-      .then(res => {
-        if (res.data.success) {
-          setCourses(res.data.courses);
-          setMessage('');
-          setSuccess(null);
-        }
-      });
+
+useEffect(() => {
+  console.log("AddExcuseRequest (useEffect): studentDetailsId in dependency array =", studentDetailsId);
+
+  const fetchCourses = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost/USTP-student-attendance-system/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`
+      );
+
+      console.log("API response:", res.data);
+
+      if (res.data?.success && res.data.courses.length > 0) {
+        setCourses(res.data.courses);
+        setError('');
+      } else if (res.data?.success && res.data.courses.length === 0) {
+        setCourses([]);
+        setError('No courses found for this student.');
+      } else {
+        setError('Failed to load courses.');
+      }
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+      setMessage("Error loading courses.");
+      setSuccess(false);
+    }
+  };
+
+  if (studentDetailsId) {
+    console.log("AddExcuseRequest (useEffect): studentDetailsId is truthy, fetching courses...");
+    fetchCourses();
+    } else {
+      console.log("AddExcuseRequest (useEffect): studentDetailsId is falsy, NOT fetching courses."); // Added this
+    }
   }, [studentDetailsId]);
 
+
   useEffect(() => {
-    if (!courseId) {
-      setInstructor('');
-      setInstructorId('');
-      return;
-    }
-    axios
-      .get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`)
-      .then(res => {
-        if (res.data.success) {
-          setInstructor(res.data.instructor_name || '');
-          setInstructorId(res.data.instructor_id || '');
+    const fetchInstructorByCourse = async () => {
+      if (!courseId) return;
+
+    try {
+        const res = await axios.get(`http://localhost/USTP-student-attendance-system/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`);
+        console.log("Instructor API response:", res.data); 
+        if (res.data.success && res.data.instructor) {
+            setInstructor(res.data.instructor);
+            setInstructorId(res.data.instructor.instructor_id);
+            console.log("Instructor ID set to:", res.data.instructor.instructor_id);
         } else {
-          setInstructor('');
-          setInstructorId('');
+            console.log("Instructor not found or API failed, instructorId reset.");
         }
-      });
+    } catch (err) {
+        console.error("Error fetching instructor:", err); 
+      }
+    };
+
+    fetchInstructorByCourse();
   }, [courseId, studentDetailsId]);
 
-  const handleSubmit = async (e) => {
+  const handleCourseChange = (e) => {
+    const selectedId = e.target.value;
+    setCourseId(selectedId);
+    setInstructor(null);
+    setInstructorId('');
+    setMessage('');
+    setSuccess(null);
+  };
+
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
     formData.append('student_details_id', studentDetailsId);
     formData.append('instructor_id', instructorId);
     formData.append('reason', reason);
-    formData.append('file', file);
+    formData.append('file', file); 
     formData.append('date_of_absence', dateOfAbsence);
 
-    try {
-      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/api/student_backend/submit_excuse_request.php', formData);
-      if (res.data.message) {
-        setMessage(res.data.message);
-        setSuccess(res.data.success === true || res.data.success === "true");
-      }
-
-      if (res.data.success === true || res.data.success === "true") {
-        setCourseId('');
-        setInstructor('');
-        setInstructorId('');
-        setReason('');
-        setFile(null);
-        setDateOfAbsence('');
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      }
-
-    } catch (err) {
-      setMessage("Something went wrong.");
-      setSuccess(false);
+    console.log("Preparing to submit form with FormData:");
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
     }
-  };
+
+    setLoading(true);
+    setMessage('');
+    setSuccess(null);
+
+    try {
+        const res = await axios.post('http://localhost/USTP-student-attendance-system/api/student_backend/submit_excuse_request.php', formData);
+        setMessage(res.data.message);
+        const isSuccess = res.data.success === true || res.data.success === "true";
+        setSuccess(isSuccess);
+
+        if (isSuccess) {
+            setCourseId('');
+            setInstructor(null);
+            setInstructorId('');
+            setReason('');
+            setFile(null);
+            setDateOfAbsence('');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    } catch (err) {
+        console.error("Axios submission error:", err);
+        setMessage("Something went wrong. Check console for details.");
+        setSuccess(false);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
   return (
     <form 
@@ -85,11 +137,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
       <h2 className="text-2xl font-semibold text-center mb-4">Excuse Request Form</h2>
 
       {message && (
-        <div
-          className={`p-3 rounded border text-center ${
-            success ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"
-          }`}
-        >
+        <div className={`p-3 rounded border text-center ${success ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}`}>
           {message}
         </div>
       )}
@@ -99,7 +147,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
         <select
           id="course"
           value={courseId}
-          onChange={e => setCourseId(e.target.value)}
+          onChange={handleCourseChange}
           required
           className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
@@ -115,7 +163,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
         <input
           id="instructor"
           type="text"
-          value={instructor}
+          value={instructor ? `${instructor.firstname} ${instructor.lastname}` : ''}
           readOnly
           className="w-full border bg-gray-100 rounded px-3 py-2"
         />
@@ -158,9 +206,12 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
 
       <button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition"
+        disabled={loading}
+        className={`w-full text-white font-semibold py-3 rounded transition ${
+          loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+        }`}
       >
-        Submit
+        {loading ? "Submitting..." : "Submit"}
       </button>
     </form>
   );
