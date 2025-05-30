@@ -5,7 +5,7 @@ import ClassCard from "./Classcard";
 
 function DashboardCard({ icon, label, count }) {
   return (
-    <div className="font-dm-sans bg-white backdrop-blur-md p-5 rounded-2xl shadow-lg flex items-center gap-4 hover:scale-[1.02] transition-transform min-w-[130px]">
+    <div className="font-dm-sans bg-white backdrop-blur-md p-5 rounded-2xl shadow-lg flex items-center gap-4 hover:scale-[1.02] transition-transform w-full">
       <div className="text-indigo-600">{icon}</div>
       <div>
         <p className="text-sm text-gray-500">{label}</p>
@@ -16,7 +16,7 @@ function DashboardCard({ icon, label, count }) {
 }
 
 function SkeletonCard() {
-  return <div className="bg-gray-200 rounded-2xl h-20 animate-pulse"></div>;
+  return <div className="bg-gray-200 rounded-2xl h-20 animate-pulse w-full"></div>;
 }
 
 function StudentDashboard() {
@@ -56,22 +56,22 @@ function StudentDashboard() {
 
     const endpoints = [
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_absent_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_excused_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
         setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_late_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
         setter: setMissed,
         key: "total_late",
       },
@@ -165,13 +165,17 @@ function StudentDashboard() {
   };
 
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12">
-        {/* Header + Attendance Cards in Flex Row */}
-        <div className="flex flex-col lg:flex-row gap-6 items-start mb-8">
-          {/* Welcome Header */}
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen overflow-y-auto">
+      <section className="w-full py-8 **px-4** pr-0
+                          sm:px-6 md:px-6
+                          md:w-full md:mr-auto md:pr-[200px]
+                          lg:max-w-screen-xl lg:mr-auto lg:pr-[200px]
+                          xl:max-w-[calc(100%-200px)]">
+        {/* Header + Attendance Cards */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start mb-10 w-full">
+          {/* Welcome Card */}
           <div
-            className="bg-[#7685fc] rounded-lg px-6 py-8 text-white font-poppins relative overflow-hidden w-full lg:w-1/3 aspect-square lg:aspect-auto"
+            className="bg-[#7685fc] rounded-lg px-6 py-8 text-white font-poppins relative overflow-hidden w-full lg:w-3/5"
             style={
               !loading
                 ? {
@@ -185,7 +189,7 @@ function StudentDashboard() {
           >
             <div className="leading-none">
               {loading ? (
-                <div className="animate-pulse space-y-3">
+                <div className="animate-pulse space-y-3 ">
                   <div className="w-1/3 h-4 bg-white/50 rounded"></div>
                   <div className="w-1/2 h-8 bg-white/60 rounded"></div>
                   <div className="w-1/4 h-4 mt-10 bg-white/40 rounded"></div>
@@ -200,12 +204,12 @@ function StudentDashboard() {
             </div>
           </div>
 
-          {/* Attendance Cards beside welcome */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 w-full lg:w-1/3">
+          {/* Dashboard Cards */}
+          <div className="grid grid-cols-2 gap-4 w-full lg:w-2/5">
             {loading ? (
               [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
             ) : error ? (
-              <p className="text-red-600 font-medium col-span-4 text-center">{error}</p>
+              <p className="text-red-600 font-medium col-span-2 text-center">{error}</p>
             ) : (
               <>
                 <DashboardCard icon={<FiCheckCircle size={28} />} label="Present" count={present} />
@@ -217,21 +221,21 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Upcoming Classes Container with only header */}
-        <div className="bg-[#7685fc] p-3 rounded-lg shadow-lg mb-6 mt-4 w-[900px]">
-          <h2 className="text-2xl font-bold text-white font-poppins mb-3 ml-2 mt-1">
-            Upcoming Classes
-          </h2>
+        {/* Upcoming Classes Header */}
+        <div className="bg-[#7685fc] p-4 rounded-lg shadow-lg mb-6 w-full">
+          <h2 className="text-2xl font-bold text-white font-poppins">Upcoming Classes</h2>
         </div>
 
-        {/* Class cards BELOW the container */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-6 lg:pr-[400px] mt-6 ml-[-20px]">
+        {/* Class Cards */}
+        {/* Reverted to w-full. The padding from the parent section will handle the mobile spacing. */}
+<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+
           {loading ? (
             [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
           ) : error ? (
-            <p className="text-red-600 font-medium w-full text-center">{error}</p>
+            <p className="text-red-600 font-medium col-span-full text-center">{error}</p>
           ) : classes.length === 0 ? (
-            <p className="text-gray-600 w-full text-center">No upcoming classes found.</p>
+            <p className="text-gray-600 col-span-full text-center">No upcoming classes found.</p>
           ) : (
             classes.map((cls) => (
               <ClassCard

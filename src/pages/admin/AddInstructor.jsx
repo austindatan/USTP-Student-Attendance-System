@@ -81,7 +81,7 @@ export default function AddInstructor() {
 
     try {
       await axios.post(
-        'http://localhost/ustp-student-attendance/admin_backend/add_instructor.php',
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/add_instructor.php',
         data,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
