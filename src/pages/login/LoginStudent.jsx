@@ -9,7 +9,8 @@ const LoginStudent = () => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem("student");
-        if (storedUser) {
+        const storedStudentDetailsId = localStorage.getItem("studentDetailsId"); 
+        if (storedUser && storedStudentDetailsId) {
             navigate("/student-dashboard", { replace: true });
         }
     }, [navigate]);
@@ -30,6 +31,15 @@ const LoginStudent = () => {
         if (data.success) {
             localStorage.setItem('userRole', 'student');
             localStorage.setItem('student', JSON.stringify(data.user));
+            
+            if (data.user && data.user.id) { 
+                localStorage.setItem('studentDetailsId', data.user.id);
+                console.log("LoginStudent: Successfully set studentDetailsId to localStorage as:", data.user.id); // For debugging
+            } else {
+                console.error("Login response missing 'id' in data.user:", data);
+                setError("Login successful, but student ID not found in response. Please contact support.");
+            }
+            
             navigate("/student-dashboard");
         } else {
             setError(data.message);

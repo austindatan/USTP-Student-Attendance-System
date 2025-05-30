@@ -1,44 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used here but kept if needed elsewhere
+const StudentLeftSidebar = ({ setBgImage }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // studentDetailsId is read directly here, which is fine for UI logic
-    // as it doesn't cause a render loop like in App.js trying to pass it as a prop
     const studentDetailsId = localStorage.getItem('studentDetailsId');
 
 
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 1500);
-        // Corrected console.log to use studentDetailsId
+
         console.log("Student ID from localStorage in StudentLeftSidebar:", studentDetailsId);
         return () => clearTimeout(timer);
-    }, [studentDetailsId]); // Added studentDetailsId to dependency array for clarity, though it's a direct read.
+    }, [studentDetailsId]); 
 
     const Classes_Dashboard = () => {
         navigate("/student-classes-dashboard");
     };
 
-    const Student_Dashboard = () => { // Renamed for clarity, though variable name was Teacher_Dashboard
+    const Student_Dashboard = () => { 
         navigate("/student-dashboard");
     };
 
-    const Add_Excuse_Request_Page = () => { // Renamed for clarity
+    const Add_Excuse_Request_Page = () => { 
         navigate("/add-excuse-request");
     };
 
-    // --- START OF FIX ---
-    // Corrected path comparisons for student specific routes
-    const dashboard_active = location.pathname === '/student-dashboard'; // Corrected path
-    const classes_active = location.pathname === '/student-classes-dashboard'; // Simpler check for student classes
-    // Note: If you have dynamic student class routes like /student-classes/:id, you'd use startsWith
-    // For now, based on your routes, exact match is sufficient.
-    const excuse_requests_active = location.pathname === '/add-excuse-request'; // Corrected path
-    // --- END OF FIX ---
+    const dashboard_active = location.pathname === '/student-dashboard';
+    const classes_active = location.pathname === '/student-classes-dashboard'; 
+    const excuse_requests_active = location.pathname === '/add-excuse-request'; 
 
 
     return (
