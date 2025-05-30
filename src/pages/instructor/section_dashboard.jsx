@@ -124,19 +124,21 @@ export default function Teacher_Dashboard({ selectedDate }) {
     // Fetch attendance lock status
     useEffect(() => {
         console.log("DEBUG (fetchLockStatus useEffect): Running. sectionInfo:", sectionInfo, "selectedDate:", selectedDate);
-        const fetchLockStatus = async () => {
-            if (!sectionInfo || !sectionInfo.section_id || !selectedDate) {
-                console.log("DEBUG (fetchLockStatus): Prerequisites not met. isAttendanceLocked set to false.");
-                setIsAttendanceLocked(false);
-                return;
-            }
+        // Ensure sectionInfo, section_id, course_id, and selectedDate are available
+        if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) { // ADD sectionInfo.course_id check here
+            console.log("DEBUG (fetchLockStatus): Prerequisites not met. isAttendanceLocked set to false. sectionInfo:", sectionInfo);
+            setIsAttendanceLocked(false);
+            return;
+        }
 
+        const fetchLockStatus = async () => {
             try {
                 const response = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/get_attendance_lock_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         section_id: sectionInfo.section_id,
+                        course_id: sectionInfo.course_id, // ADD THIS LINE
                         date: format(selectedDate, 'yyyy-MM-dd'),
                     }),
                 });
@@ -215,6 +217,13 @@ export default function Teacher_Dashboard({ selectedDate }) {
             return;
         }
 
+        // Ensure sectionInfo is fully loaded before proceeding
+        if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) {
+            console.error("DEBUG (toggleAttendance): Missing section info or date. sectionInfo:", sectionInfo, "selectedDate:", selectedDate);
+            alert("Error: Missing section or date information. Cannot save attendance.");
+            return;
+        }
+
         const isPresent = presentStudents.includes(student.student_details_id);
         const isLate = lateStudents.includes(student.student_details_id);
 
@@ -241,12 +250,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
         const attendanceData = {
             student_details_id: student.student_details_id,
             section_id: sectionInfo.section_id,
+            course_id: sectionInfo.course_id, // ADDED: Send course_id
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
             status: newStatus,
         };
 
         console.log("DEBUG (toggleAttendance): sectionInfo object:", sectionInfo);
         console.log("DEBUG (toggleAttendance): sectionInfo.section_id value:", sectionInfo?.section_id);
+        console.log("DEBUG (toggleAttendance): sectionInfo.course_id value:", sectionInfo?.course_id); // Log course_id
         console.log("DEBUG (toggleAttendance): Final attendanceData payload:", attendanceData);
 
         try {
@@ -281,6 +292,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
     useEffect(() => {
         const fetchDropdownStudents = async () => {
             try {
+                // Ensure instructor and sectionId are available
+                if (!instructor?.instructor_id || !sectionId) {
+                    console.log("DEBUG (fetchDropdownStudents): Prerequisites not met.");
+                    return;
+                }
                 const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
@@ -299,15 +315,24 @@ export default function Teacher_Dashboard({ selectedDate }) {
             return;
         }
 
+        // Ensure sectionInfo is fully loaded before proceeding
+        if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) {
+            console.error("DEBUG (markAsLate): Missing section info or date. sectionInfo:", sectionInfo, "selectedDate:", selectedDate);
+            alert("Error: Missing section or date information. Cannot save attendance.");
+            return;
+        }
+
         const attendanceData = {
             student_details_id: student.student_details_id,
             section_id: sectionInfo.section_id,
+            course_id: sectionInfo.course_id, // ADDED: Send course_id
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
             status: 'Late',
         };
 
         console.log("DEBUG (markAsLate): sectionInfo object:", sectionInfo);
         console.log("DEBUG (markAsLate): sectionInfo.section_id value:", sectionInfo?.section_id);
+        console.log("DEBUG (markAsLate): sectionInfo.course_id value:", sectionInfo?.course_id); // Log course_id
         console.log("DEBUG (markAsLate): Final attendanceData payload (Late):", attendanceData);
 
         try {
@@ -370,6 +395,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             alert("An error occurred while submitting the drop request.");
         }
     };
+    
 
     // Function to handle unlocking attendance
     const handleUnlockAttendance = async () => {
@@ -384,6 +410,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     section_id: sectionInfo.section_id,
+                    course_id: sectionInfo.course_id,
                     date: format(selectedDate, 'yyyy-MM-dd'),
                     passcode: unlockPasscode,
                 }),
@@ -557,6 +584,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({
                                                     section_id: sectionInfo.section_id,
+                                                    course_id: sectionInfo.course_id,
                                                     date: format(selectedDate, 'yyyy-MM-dd'),
                                                     lock_status: 1,
                                                 }),
