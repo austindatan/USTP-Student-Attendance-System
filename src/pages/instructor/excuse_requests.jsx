@@ -1,29 +1,71 @@
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom'; 
+import { createPortal } from 'react-dom';
 
 const ExcuseRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [modal, setModal] = useState({ show: false, id: null, type: '' });
+  const [instructorId, setInstructorId] = useState(null);
 
-  const fetchRequests = () => {
-    fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php')
-      .then(res => res.json())
+  useEffect(() => {
+    const storedInstructor = localStorage.getItem("instructor");
+    if (storedInstructor) {
+      try {
+        const instructorData = JSON.parse(storedInstructor); 
+        if (instructorData && instructorData.instructor_id) {
+          setInstructorId(instructorData.instructor_id);
+        } else {
+          setError("Instructor data in localStorage is incomplete or missing ID. Please log in again.");
+        }
+      } catch (e) {
+        setError("Failed to parse instructor data from localStorage. Please log in again.");
+        console.error("Error parsing instructor data from localStorage:", e);
+      }
+    } else {
+      setError("Instructor not logged in. Please log in to view requests.");
+    }
+  }, []);
+
+  const fetchRequests = (currentInstructorId) => {
+    setError(null);
+    if (!currentInstructorId) {
+      console.log("No instructor ID provided, skipping fetch.");
+      setError("Cannot fetch requests: Instructor ID is missing.");
+      setRequests([]);
+      return;
+    }
+
+    fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
         if (Array.isArray(data)) {
           setRequests(data);
+        } else if (data.success === false) {
+          setError(data.message || 'No requests found or unexpected error from backend.');
+          setRequests([]);
         } else {
-          throw new Error(data.error || 'Unexpected response format.');
+          throw new Error('Unexpected response format from backend.');
         }
       })
-      .catch(err => setError(err.message));
+      .catch(err => {
+        console.error("Error fetching requests:", err);
+        setError(`Failed to load requests: ${err.message}`);
+        setRequests([]);
+      });
   };
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    if (instructorId) { 
+      fetchRequests(instructorId);
+    }
+  }, [instructorId]); 
 
   const openConfirmationModal = (id, type) => {
     setModal({ show: true, id, type });
@@ -58,13 +100,13 @@ const ExcuseRequestsPage = () => {
         if (result.error) {
           alert("Failed to update status.");
         } else {
-          fetchRequests(); 
+          fetchRequests(instructorId); 
         }
       } catch (error) {
         alert("An error occurred while updating the request.");
         console.error(error);
       } finally {
-        closeModal(); 
+        closeModal();
       }
     }
   };
@@ -141,7 +183,7 @@ const ExcuseRequestsPage = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-center text-sm font-medium">
-                       
+
                         {req.status === 'Pending' ? (
                           <div className="flex justify-center space-x-2">
                             <button
@@ -158,7 +200,7 @@ const ExcuseRequestsPage = () => {
                             </button>
                           </div>
                         ) : (
-               
+
                           <span className="text-gray-500">Already {req.status}</span>
                         )}
                       </td>
@@ -174,7 +216,7 @@ const ExcuseRequestsPage = () => {
         {showModal && selectedRequest && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-auto" onClick={(e) => e.stopPropagation()}>
-            
+
               <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
                 <h3 className="text-2xl font-bold text-indigo-600">Excuse Request Details</h3>
               </div>
@@ -200,12 +242,12 @@ const ExcuseRequestsPage = () => {
         {modal.show && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto" onClick={(e) => e.stopPropagation()}>
-              
+
               <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-indigo-600 text-center">Confirm Action</h2>
               </div>
               <p className="text-gray-700 mb-6 text-center">
-                Are you sure you want to <strong>{modal.type}</strong> this excuse request? 
+                Are you sure you want to <strong>{modal.type}</strong> this excuse request?
               </p>
               <div className="flex justify-end space-x-3">
                 <button

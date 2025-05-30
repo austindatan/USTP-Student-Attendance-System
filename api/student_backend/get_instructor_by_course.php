@@ -24,7 +24,6 @@ if (!isset($_GET['student_id']) || !isset($_GET['course_id'])) {
 $studentId = $_GET['student_id'];
 $courseId = $_GET['course_id'];
 
-// SQL query to find the instructor for a specific student's enrollment in a given course
 $sql = "SELECT i.instructor_id, i.firstname, i.lastname
         FROM student_details sd
         JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
@@ -36,8 +35,7 @@ $stmt->bind_param("ii", $studentId, $courseId);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// --- ADD THIS PART ---
-$instructor = $result->fetch_assoc(); // Fetch the single instructor row
+$instructor = $result->fetch_assoc();
 
 if ($instructor) {
     echo json_encode([
@@ -45,7 +43,6 @@ if ($instructor) {
         "instructor" => $instructor
     ]);
 } else {
-    // If no instructor is found for the given student_id and course_id
     echo json_encode([
         "success" => false,
         "message" => "Instructor not found for this student and course combination."
