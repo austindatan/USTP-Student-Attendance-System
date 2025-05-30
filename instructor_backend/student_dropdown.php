@@ -21,11 +21,12 @@ if ($conn->connect_error) {
 }
 
 $instructor_id = $_GET['instructor_id'] ?? null;
-$section_course_id = $_GET['section_course_id'] ?? null;
+$section_id = $_GET['section_id'] ?? null;
+$course_id = $_GET['course_id'] ?? null; // ADDED: Retrieve course_id from GET
 
-if (!$instructor_id || !$section_course_id) {
+if (!$instructor_id || !$section_id || !$course_id) { // MODIFIED: Added course_id to validation
     http_response_code(400);
-    echo json_encode(['error' => 'Missing instructor_id or section_id']);
+    echo json_encode(['error' => 'Missing instructor_id, section_id, or course_id']);
     exit;
 }
 
@@ -33,9 +34,10 @@ $sql = "SELECT sd.student_details_id,
                CONCAT(s.firstname, ' ', s.middlename, ' ', s.lastname) AS student_name 
         FROM student_details sd
         INNER JOIN student s ON sd.student_id = s.student_id
-        INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id -- Added join to section_courses
+        INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
         WHERE sc.instructor_id = ?
-          AND sc.section_id = ? -- Changed to sc.section_id
+          AND sc.section_id = ?
+          AND sc.course_id = ? -- ADDED: Filter by course_id
           AND sd.student_details_id NOT IN (
               SELECT student_details_id 
               FROM drop_request 
@@ -49,7 +51,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("ii", $instructor_id, $section_course_id);
+$stmt->bind_param("iii", $instructor_id, $section_id, $course_id); // MODIFIED: Added 'i' and $course_id
 $stmt->execute();
 $result = $stmt->get_result();
 
