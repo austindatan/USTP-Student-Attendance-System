@@ -10,17 +10,18 @@ header("Access-Control-Allow-Headers: *");
 include __DIR__ . '/../src/conn.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
-$section_id = $data['section_id'] ?? null;
+$section_course_id = $data['section_course_id'] ?? null; // Changed to section_course_id
 $hexcode = $data['hexcode'] ?? null;
 
-if (!$section_id || !$hexcode) {
-    echo json_encode(['success' => false, 'error' => 'Missing parameters']);
+// Ensure section_course_id is present
+if (!$section_course_id || !$hexcode) {
+    echo json_encode(['success' => false, 'error' => 'Missing parameters (section_course_id or hexcode)']);
     exit;
 }
 
-// Corrected query: Update hexcode in section_courses table
-$stmt = $conn->prepare("UPDATE section_courses SET hexcode = ? WHERE section_id = ?");
-$stmt->bind_param("si", $hexcode, $section_id); // 's' for hexcode (string), 'i' for section_id (integer)
+// Corrected query: Update hexcode for a specific section_course_id
+$stmt = $conn->prepare("UPDATE section_courses SET hexcode = ? WHERE section_course_id = ?");
+$stmt->bind_param("si", $hexcode, $section_course_id); // 's' for hexcode, 'i' for section_course_id
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true]);
