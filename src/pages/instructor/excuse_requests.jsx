@@ -10,26 +10,31 @@ const ExcuseRequestsPage = () => {
   const [instructorId, setInstructorId] = useState(null);
 
   useEffect(() => {
-    const storedInstructor = localStorage.getItem("instructor");
+    const storedInstructor = localStorage.getItem("instructor"); 
     if (storedInstructor) {
       try {
         const instructorData = JSON.parse(storedInstructor); 
+
         if (instructorData && instructorData.instructor_id) {
           setInstructorId(instructorData.instructor_id);
         } else {
           setError("Instructor data in localStorage is incomplete or missing ID. Please log in again.");
+
         }
       } catch (e) {
+
         setError("Failed to parse instructor data from localStorage. Please log in again.");
         console.error("Error parsing instructor data from localStorage:", e);
+
       }
     } else {
       setError("Instructor not logged in. Please log in to view requests.");
+
     }
   }, []);
 
   const fetchRequests = (currentInstructorId) => {
-    setError(null);
+    setError(null); 
     if (!currentInstructorId) {
       console.log("No instructor ID provided, skipping fetch.");
       setError("Cannot fetch requests: Instructor ID is missing.");
@@ -62,7 +67,7 @@ const ExcuseRequestsPage = () => {
   };
 
   useEffect(() => {
-    if (instructorId) { 
+    if (instructorId) {
       fetchRequests(instructorId);
     }
   }, [instructorId]); 
@@ -88,7 +93,7 @@ const ExcuseRequestsPage = () => {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/instructor_backend/update_excuse_req.php",
+          "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -100,7 +105,7 @@ const ExcuseRequestsPage = () => {
         if (result.error) {
           alert("Failed to update status.");
         } else {
-          fetchRequests(instructorId); 
+          fetchRequests(instructorId);
         }
       } catch (error) {
         alert("An error occurred while updating the request.");
