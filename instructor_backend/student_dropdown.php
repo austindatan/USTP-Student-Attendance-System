@@ -21,9 +21,9 @@ if ($conn->connect_error) {
 }
 
 $instructor_id = $_GET['instructor_id'] ?? null;
-$section_id = $_GET['section_id'] ?? null;
+$section_course_id = $_GET['section_course_id'] ?? null;
 
-if (!$instructor_id || !$section_id) {
+if (!$instructor_id || !$section_course_id) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing instructor_id or section_id']);
     exit;
@@ -34,7 +34,7 @@ $sql = "SELECT sd.student_details_id,
         FROM student_details sd
         INNER JOIN student s ON sd.student_id = s.student_id
         INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id -- Added join to section_courses
-        WHERE sd.instructor_id = ?
+        WHERE sc.instructor_id = ?
           AND sc.section_id = ? -- Changed to sc.section_id
           AND sd.student_details_id NOT IN (
               SELECT student_details_id 
@@ -49,7 +49,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("ii", $instructor_id, $section_id);
+$stmt->bind_param("ii", $instructor_id, $section_course_id);
 $stmt->execute();
 $result = $stmt->get_result();
 

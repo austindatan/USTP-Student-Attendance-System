@@ -299,11 +299,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
         const fetchDropdownStudents = async () => {
             try {
                 // Ensure instructor and sectionId are available
-                if (!instructor?.instructor_id || !sectionId) {
+                if (!instructor?.instructor_id || !sectionInfo?.section_course_id) {
                     console.log("DEBUG (fetchDropdownStudents): Prerequisites not met.");
                     return;
                 }
-                const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+                const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_course_id=${sectionInfo?.section_course_id}`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 setDropdownStudents(data);
@@ -313,7 +313,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         fetchDropdownStudents();
-    }, [instructor?.instructor_id, sectionId]);
+    }, [instructor?.instructor_id, sectionInfo?.section_course_id]);
 
     const markAsLate = async (student) => {
         if (isAttendanceLocked) {
@@ -435,6 +435,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
             alert("An error occurred while trying to unlock attendance.");
         }
     };
+
+    const [showNoClassContent, setShowNoClassContent] = useState(false);
+
+    useEffect(() => {
+    const timer = setTimeout(() => setShowNoClassContent(true), 1500); // 1 second delay
+    return () => clearTimeout(timer);
+    }, []);
+
 
 
     console.log("DEBUG (Render): filteredStudents:", filteredStudents); // New debug log for every render
@@ -706,8 +714,26 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             })}
                     </div>
                 ) : (
-                    <div className="text-center text-gray-500 mt-12 text-lg font-poppins">
-                        No class scheduled for today.
+                    <div className="flex flex-col items-center justify-center w-full min-h-[400px]">
+                        {!showNoClassContent ? (
+                            <div className="w-full h-[400px] rounded-lg bg-gradient-to-r from-white via-gray-200 to-white animate-pulse" />
+                        ) : (
+                            <>
+                            <div className="w-48 h-48 mb-6 animate-fade-in">
+                                <img
+                                src={`${process.env.PUBLIC_URL}/assets/no_schedule_illustration.png`}
+                                alt="No Class"
+                                className="w-full h-full object-contain opacity-80"
+                                />
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-600 font-poppins animate-fade-in">
+                                No class schedule today
+                            </h2>
+                            <p className="text-sm text-gray-500 mt-1 font-[Barlow] animate-fade-in">
+                                Please check your schedule or contact our administrator.
+                            </p>
+                            </>
+                        )}
                     </div>
                 )}
             </section>
