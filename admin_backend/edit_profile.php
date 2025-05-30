@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
 // Connect to the database
-$conn = new mysqli("localhost", "root", "austinreverie", "attendance_monitoring");
+$conn = new mysqli("localhost", "root", "", "attendance_monitoring");
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed."]);

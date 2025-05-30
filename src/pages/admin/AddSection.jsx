@@ -43,7 +43,7 @@ export default function AddSection() {
   // Fetch Courses
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then((res) => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -63,7 +63,7 @@ export default function AddSection() {
   // Fetch Year Levels
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php')
       .then((res) => {
         if (res.data.success) {
           setYearLevels(res.data.year_levels);
@@ -83,7 +83,7 @@ export default function AddSection() {
   // Fetch Semesters
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php')
       .then((res) => {
         if (res.data.success) {
           setSemesters(res.data.semesters);
@@ -103,7 +103,7 @@ export default function AddSection() {
   // Fetch Existing Sections (NEW)
   useEffect(() => {
     axios
-      .get('http://localhost/ustp-student-attendance/admin_backend/get_sections_dropdown.php')
+      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_sections_dropdown.php')
       .then((res) => {
         if (res.data.success) {
           setExistingSections(res.data.sections);
@@ -191,7 +191,7 @@ export default function AddSection() {
         year_level_id: parseInt(formData.year_level_id, 10),
         semester_id: parseInt(formData.semester_id, 10),
       };
-      apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/section_add.php';
+      apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php';
     } else {
       // Data for linking to an existing section (insert into 'section_courses' only)
       submitData = {
@@ -202,7 +202,7 @@ export default function AddSection() {
         end_time: formData.end_time,
         // No year_level_id or semester_id needed here
       };
-      apiUrl = 'http://localhost/ustp-student-attendance/admin_backend/link_section_to_course.php';
+      apiUrl = 'http://localhost/USTP-Student-Attendance-System/admin_backend/link_section_to_course.php';
     }
 
     try {
