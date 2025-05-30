@@ -5,19 +5,30 @@ include '../src/conn.php';
 
 $instructor_id = $_GET['instructor_id'];
 
-// Modified SQL query to join through 'section_courses' as per the latest schema,
-// and include year level name and semester name from the 'section' table.
-$sql = "SELECT DISTINCT sc.section_id, sc.course_id, 
-                s.section_name, sc.schedule_day, sc.start_time, sc.end_time, sc.image, sc.hexcode, 
-                c.course_name, c.course_code, 
-                yl.year_level_name, sem.semester_name
-        FROM student_details sd
-        JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
+$sql = "SELECT
+            sc.section_course_id,
+            sc.section_id,
+            sc.course_id,
+            s.section_name,
+            sc.schedule_day,
+            sc.start_time,
+            sc.end_time,
+            sc.image,
+            sc.hexcode,
+            c.course_name,
+            c.course_code,
+            yl.year_level_name,
+            sem.semester_name
+        FROM section_courses sc
         JOIN section s ON sc.section_id = s.section_id
         JOIN course c ON sc.course_id = c.course_id
-        JOIN year_level yl ON yl.year_id = s.year_level_id
-        JOIN semester sem ON sem.semester_id = s.semester_id
-        WHERE sd.instructor_id = ?";
+        JOIN year_level yl ON s.year_level_id = yl.year_id
+        JOIN semester sem ON s.semester_id = sem.semester_id
+        WHERE sc.section_course_id IN (
+            SELECT DISTINCT section_course_id
+            FROM student_details
+            WHERE instructor_id = ?
+        )";
 
 $stmt = $conn->prepare($sql);
 

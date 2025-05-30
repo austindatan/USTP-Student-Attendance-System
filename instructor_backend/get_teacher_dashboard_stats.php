@@ -42,7 +42,7 @@ if ($row2 = $res2->fetch_assoc()) {
 $stmt2->close();
 
 $classes_result = 0;
-$stmt3 = $conn->prepare("SELECT COUNT(DISTINCT section_id) AS total_classes FROM student_details WHERE instructor_id = ?");
+$stmt3 = $conn->prepare("SELECT COUNT(DISTINCT section_course_id) AS total_classes FROM student_details WHERE instructor_id = ?");
 $stmt3->bind_param("i", $instructor_id);
 $stmt3->execute();
 $res3 = $stmt3->get_result();
