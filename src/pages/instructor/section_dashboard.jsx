@@ -164,7 +164,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -191,7 +191,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const fetchLockStatus = async () => {
             try {
-                const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/get_attendance_lock_status.php', {
+                const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/get_attendance_lock_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -233,7 +233,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 const courseId = sectionInfo.course_id; // Get course_id from sectionInfo
                 console.log("DEBUG (fetchStudents): Fetching students for date:", dateStr, "course_id:", courseId);
                 const response = await fetch(
-                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}` // <--- ADDED course_id HERE
+                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}` // <--- ADDED course_id HERE
                 );
 
                 if (!response.ok) {
@@ -319,7 +319,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         console.log("DEBUG (toggleAttendance): Final attendanceData payload:", attendanceData);
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -355,7 +355,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     console.log("DEBUG (fetchDropdownStudents): Prerequisites not met.");
                     return;
                 }
-                const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}`);
+                const courseId = sectionInfo.course_id; // Get course_id from sectionInfo
+
+                const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`); // Added &course_id=${courseId}
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 setDropdownStudents(data);
@@ -414,7 +416,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         console.log("DEBUG (markAsLate): Final attendanceData payload (Late):", attendanceData);
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -452,7 +454,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/add_drop_request.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData),
@@ -483,7 +485,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
 
         try {
-            const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/unlock_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/unlock_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -703,59 +705,67 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <div className="flex gap-2 items-end"> {/* Added items-end to align bottoms */}
+
+                        {isClassDay() && (
+                            <div className="flex justify-end gap-2"> {/* Removed mb-4 */}
+                                {!isAttendanceLocked ? (
+                                    <button
+                                        onClick={async () => {
+                                            if (window.confirm("Are you sure you want to lock attendance for this section and date? This cannot be undone.")) {
+                                                try {
+                                                    const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/lock_attendance.php', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            section_id: sectionInfo.section_id,
+                                                            course_id: sectionInfo.course_id,
+                                                            date: format(selectedDate, 'yyyy-MM-dd'),
+                                                            lock_status: 1,
+                                                        }),
+                                                    });
+                                                    const data = await response.json();
+                                                    if (data.success) {
+                                                        alert(data.message);
+                                                        setIsAttendanceLocked(true);
+                                                    } else {
+                                                        alert("Failed to lock attendance: " + data.message);
+                                                    }
+                                                } catch (error) {
+                                                    console.error("Error locking attendance:", error);
+                                                    alert("An error occurred while trying to lock attendance.");
+                                                }
+                                            }
+                                        }}
+                                        className="px-4 py-2 h-10 rounded-md bg-red-600 text-white hover:bg-red-700 transition duration-200" // Added h-10
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                        </svg>
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowUnlockModal(true)} // Show unlock modal
+                                        className="px-4 py-2 h-10 rounded-md bg-green-600 text-white hover:bg-green-700 transition duration-200" // Added h-10
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
                         <button
                             onClick={() => setShowRequestModal(true)}
-                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2]"
+                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2] h-10" // Added h-10
                             style={{ borderColor: sectionInfo?.hexcode || '#0097b2', color: sectionInfo?.hexcode || '#0097b2' }}
                         >
-                            Add Request
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
                         </button>
                     </div>
-                )}
-
-                {/* Attendance Lock/Unlock Buttons */}
-                {isClassDay() && (
-                    <div className="flex justify-end gap-2 mb-4">
-                        {!isAttendanceLocked ? (
-                            <button
-                                onClick={async () => {
-                                    if (window.confirm("Are you sure you want to lock attendance for this section and date? This cannot be undone.")) {
-                                        try {
-                                            const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/lock_attendance.php', {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({
-                                                    section_id: sectionInfo.section_id,
-                                                    course_id: sectionInfo.course_id,
-                                                    date: format(selectedDate, 'yyyy-MM-dd'),
-                                                    lock_status: 1,
-                                                }),
-                                            });
-                                            const data = await response.json();
-                                            if (data.success) {
-                                                alert(data.message);
-                                                setIsAttendanceLocked(true);
-                                            } else {
-                                                alert("Failed to lock attendance: " + data.message);
-                                            }
-                                        } catch (error) {
-                                            console.error("Error locking attendance:", error);
-                                            alert("An error occurred while trying to lock attendance.");
-                                        }
-                                    }
-                                }}
-                                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition duration-200"
-                            >
-                                Lock Attendance
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setShowUnlockModal(true)} // Show unlock modal
-                                className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition duration-200"
-                            >
-                                Unlock Attendance
-                            </button>
-                        )}
                     </div>
                 )}
 
@@ -806,7 +816,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                         )}
                                         <div className="overflow-hidden rounded-t-[20px] flex justify-center aspect-w-1 aspect-h-1 w-full">
                                             <img
-                                                src={`http://localhost/USTP-Student-Attendance-System/uploads/${student.image}?${new Date().getTime()}`}
+                                                src={`http://localhost/ustp-student-attendance/uploads/${student.image}?${new Date().getTime()}`}
                                                 className={`object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
                                                 alt={displayedName}
                                                 onError={(e) => {
