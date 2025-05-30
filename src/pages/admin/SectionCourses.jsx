@@ -18,7 +18,7 @@ function SectionCourses() {
     useEffect(() => {
         const fetchSectionCourses = async () => {
             try {
-                const response = await axios.get(`http://localhost/ustp-student-attendance/admin_backend/section_courses.php?section_id=${sectionId}`);
+                const response = await axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/section_courses.php?section_id=${sectionId}`);
                 if (response.data.success) {
                     setSectionDetails(response.data.section);
                     setCourses(response.data.courses);

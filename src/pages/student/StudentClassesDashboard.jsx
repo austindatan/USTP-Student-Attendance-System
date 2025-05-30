@@ -53,39 +53,41 @@ export default function Classes_Dashboard({ selectedDate }) {
     section.course_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
- const handleSectionClick = (section) => {
-  if (!section?.course_code) return; // Changed to check for course_code
+  const handleSectionClick = (section) => {
+    if (!section?.course_code) return;
 
-  const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null;
-  navigate(`/Attendance-Summary/${section.course_code}`, { // Corrected path
-    state: { sectionInfo: section, selectedDate: dateParam }
-  });
-};
+    const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null;
+    navigate(`/Attendance-Summary/${section.course_code}`, {
+      state: { sectionInfo: section, selectedDate: dateParam }
+    });
+  };
 
   return (
-    <section className="w-full pt-12 px-6 sm:px-6 md:px-12">
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
-          <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20">
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-            />
-          </svg>
-        </div>
-        <input
-          type="text"
-          className="font-poppins block w-80 ps-10 py-2 text-sm text-black rounded-lg bg-white focus:ring-pink-500 focus:border-pink-500 placeholder-gray-500"
-          placeholder="Search for classes."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+    <section className="w-full pt-8 px-4 sm:px-6 md:px-12">
+      {/* Search Input */}
+    <div className="relative w-full sm:w-80 md:w-96">
+  <div className="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
+    <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20">
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+      />
+    </svg>
+  </div>
+  <input
+    type="text"
+    className="font-poppins block w-full ps-10 py-2 text-sm text-black rounded-lg bg-white focus:ring-pink-500 focus:border-pink-500 placeholder-gray-500"
+    placeholder="Search for classes."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+  />
+</div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6 mb-12">
+      {/* Class Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8 mb-16">
         {(isLoading ? Array.from({ length: 6 }) : filteredSections).map((section, i) => {
           const key = isLoading
             ? `loading-${i}`

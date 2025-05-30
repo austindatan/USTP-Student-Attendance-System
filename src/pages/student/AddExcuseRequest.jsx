@@ -24,7 +24,7 @@ useEffect(() => {
   const fetchCourses = async () => {
     try {
       const res = await axios.get(
-        `http://localhost/USTP-student-attendance-system/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`
+        `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`
       );
 
       console.log("API response:", res.data);
@@ -59,7 +59,7 @@ useEffect(() => {
       if (!courseId) return;
 
     try {
-        const res = await axios.get(`http://localhost/USTP-student-attendance-system/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`);
+        const res = await axios.get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`);
         console.log("Instructor API response:", res.data); 
         if (res.data.success && res.data.instructor) {
             setInstructor(res.data.instructor);
@@ -105,7 +105,7 @@ const handleSubmit = async (e) => {
     setSuccess(null);
 
     try {
-        const res = await axios.post('http://localhost/USTP-student-attendance-system/api/student_backend/submit_excuse_request.php', formData);
+        const res = await axios.post('http://localhost/USTP-Student-Attendance-System/api/student_backend/submit_excuse_request.php', formData);
         setMessage(res.data.message);
         const isSuccess = res.data.success === true || res.data.success === "true";
         setSuccess(isSuccess);

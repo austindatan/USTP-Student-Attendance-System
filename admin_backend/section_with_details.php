@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 // Database connection parameters
 $servername = "localhost";
 $username = "root"; // Replace with your database username
-$password = "austinreverie";     // Replace with your database password
+$password = "";     // Replace with your database password
 $dbname = "attendance_monitoring";
 
 // Create connection

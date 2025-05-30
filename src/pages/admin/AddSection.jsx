@@ -22,7 +22,7 @@ const AddSection = () => {
     const fetchData = async () => {
       try {
         // Fetch semesters data
-        const semestersRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php');
+        const semestersRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php');
         if (semestersRes.data.success) {
           setSemesters(semestersRes.data.semesters);
         } else {
@@ -30,7 +30,7 @@ const AddSection = () => {
         }
 
         // Fetch year levels data
-        const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php');
+        const yearLevelsRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php');
         if (yearLevelsRes.data.success) {
           setYearLevels(yearLevelsRes.data.year_levels);
         } else {
@@ -68,7 +68,7 @@ const AddSection = () => {
   const handleConfirmAdd = async () => {
     setIsSaving(true);
     try {
-      const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/section_add.php', formData);
+      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php', formData);
       if (res.data.success) {
         setIsAddSectionModalOpen(false);
         alert(res.data.message);
