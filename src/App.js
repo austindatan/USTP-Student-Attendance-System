@@ -94,35 +94,35 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
-  const [studentDetailsId, setStudentDetailsId] = useState(null);
-  console.log("App.js (render): current studentDetailsId state =", studentDetailsId); 
+  const [studentId, setStudentId] = useState(null);
+  console.log("App.js (render): current studentId state =", studentId); 
     
   useEffect(() => {
-    const idFromLocalStorage = localStorage.getItem('studentDetailsId');
-    console.log("App.js (useEffect): Loaded studentDetailsId from localStorage:", idFromLocalStorage, " (type: " + typeof idFromLocalStorage + ")");
+    const idFromLocalStorage = localStorage.getItem('studentId');
+    console.log("App.js (useEffect): Loaded studentId from localStorage:", idFromLocalStorage, " (type: " + typeof idFromLocalStorage + ")");
 
     if (idFromLocalStorage && idFromLocalStorage !== "null" && idFromLocalStorage !== "undefined" && idFromLocalStorage !== "") {
       const parsedId = parseInt(idFromLocalStorage, 10);
       if (!isNaN(parsedId)) { 
-          setStudentDetailsId(parsedId); 
-          console.log("App.js (useEffect): Set studentDetailsId to (parsed):", parsedId, " (type: " + typeof parsedId + ")");
+          setStudentId(parsedId); 
+          console.log("App.js (useEffect): Set studentId to (parsed):", parsedId, " (type: " + typeof parsedId + ")");
       } else {
-          setStudentDetailsId(null);
+          setStudentId(null);
           console.log("App.js (useEffect): Parsed ID was NaN, setting to null.");
       }
     } else {
-      setStudentDetailsId(null);
+      setStudentId(null);
       console.log("App.js (useEffect): localStorage ID was falsy, setting to null.");
     }
 
     const handleStorageChange = (event) => {
-      if (event.key === 'studentDetailsId') {
+      if (event.key === 'studentId') {
         const updatedId = event.newValue;
-        console.log("App.js (storage event): studentDetailsId updated:", updatedId);
+        console.log("App.js (storage event): studentId updated:", updatedId);
         if (updatedId && updatedId !== "null" && updatedId !== "undefined" && updatedId !== "") {
-          setStudentDetailsId(parseInt(updatedId, 10)); // Ensure parsed as number
+          setStudentId(parseInt(updatedId, 10)); // Ensure parsed as number
         } else {
-          setStudentDetailsId(null);
+          setStudentId(null);
         }
       }
     };
@@ -160,11 +160,11 @@ function App() {
         <Route path="/Attendance-Summary/:course_code" element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
                 <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
-                    {/* Render AttendanceSummary ONLY if studentDetailsId is available */}
-                    {studentDetailsId ? (
-                        <AttendanceSummary studentId={studentDetailsId} />
+                    {/* Render AttendanceSummary ONLY if studentId is available */}
+                    {studentId ? (
+                        <AttendanceSummary studentId={studentId} />
                     ) : (
-                        // Show a loading message while studentDetailsId is null/undefined
+                        // Show a loading message while studentId is null/undefined
                         <div>Loading student attendance data...</div>
                     )}
                 </StudentLayout>
@@ -207,7 +207,7 @@ function App() {
                 bgImage={bgImage}
                 setBgImage={setBgImage}
               >
-                <AddExcuseRequest studentDetailsId={studentDetailsId} />
+                <AddExcuseRequest studentId={studentId} />
               </StudentLayout>
             </ProtectedRoute>
           }

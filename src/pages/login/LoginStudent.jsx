@@ -9,8 +9,9 @@ const LoginStudent = () => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem("student");
-        const storedStudentDetailsId = localStorage.getItem("studentDetailsId"); 
-        if (storedUser && storedStudentDetailsId) {
+        // --- ADJUSTMENT 1: Change to check for 'studentId' ---
+        const storedStudentId = localStorage.getItem("studentId");
+        if (storedUser && storedStudentId) { // Check for the new key
             navigate("/student-dashboard", { replace: true });
         }
     }, [navigate]);
@@ -31,15 +32,17 @@ const LoginStudent = () => {
         if (data.success) {
             localStorage.setItem('userRole', 'student');
             localStorage.setItem('student', JSON.stringify(data.user));
-            
-            if (data.user && data.user.id) { 
-                localStorage.setItem('studentDetailsId', data.user.id);
-                console.log("LoginStudent: Successfully set studentDetailsId to localStorage as:", data.user.id); // For debugging
+
+            if (data.user && data.user.id) {
+                // This line is good! It sets the primary student ID as 'studentId'
+                localStorage.setItem('studentId', data.user.id);
+                // --- ADJUSTMENT 2: Correct the console log message ---
+                console.log("LoginStudent: Successfully set studentId to localStorage as:", data.user.id); // For debugging
             } else {
                 console.error("Login response missing 'id' in data.user:", data);
                 setError("Login successful, but student ID not found in response. Please contact support.");
             }
-            
+
             navigate("/student-dashboard");
         } else {
             setError(data.message);
@@ -48,29 +51,23 @@ const LoginStudent = () => {
 
     return (
         <div className="relative min-h-screen flex items-center justify-center font-dm-sans">
-
             <div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
             <div
                 className="absolute inset-0 bg-cover bg-center z-[-1]"
                 style={{ backgroundImage: "url('assets/ustp-cdo-3.jpg')" }}
             ></div>
 
- 
             <form
                 onSubmit={handleLogin}
                 className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl shadow-md w-[90%] sm:w-full max-w-md"
             >
-                
                 <img src="assets/ustp_logo.png" className="w-24 h-24 block mx-auto mb-2" alt="USTP Logo" />
-
                 <h2 className="text-xl sm:text-xl font-bold text-center text-gray-600">Student Attendance Monitor</h2>
-
                 <h2 className="text-xl sm:text-base font-bold text-center mb-4 text-gray-600">Login to your account.</h2>
 
                 {error && <p className="text-red-500 mb-4">{error}</p>}
 
                 <div className="mb-4 relative">
-              
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -96,7 +93,6 @@ const LoginStudent = () => {
                 </div>
 
                 <div className="mb-6 relative">
-            
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -129,7 +125,6 @@ const LoginStudent = () => {
                 </button>
             </form>
         </div>
-
     );
 };
 
