@@ -5,7 +5,8 @@ header("Content-Type: application/json");
 
 define('LOG_PREFIX', '[ATTENDANCE_API_ABSENT]');
 
-require_once("../../src/conn.php");
+// Adjust this path if 'conn.php' is not two directories up from 'get_class_absent.php'
+require_once(__DIR__ . "/../../src/conn.php");
 
 if ($conn->connect_error) {
     error_log(LOG_PREFIX . " Database connection failed: " . $conn->connect_error);
@@ -13,20 +14,18 @@ if ($conn->connect_error) {
     exit;
 }
 
-$input = json_decode(file_get_contents("php://input"), true);
-error_log(LOG_PREFIX . " Received raw input: " . print_r($input, true));
-
-if (!isset($input['student_id']) || !isset($input['course_id'])) {
-    error_log(LOG_PREFIX . " Error: Missing student_id or course_id in request input.");
-    echo json_encode(["error" => "Missing student_id or course_id"]);
+// Changed to $_GET for GET parameters
+if (!isset($_GET['student_id']) || !isset($_GET['course_code'])) {
+    error_log(LOG_PREFIX . " Error: Missing student_id or course_code in request input.");
+    echo json_encode(["error" => "Missing student_id or course_code"]);
     exit;
 }
 
-$student_id = $input['student_id'];
-$course_id = $input['course_id'];
-$year = (int) date("Y");
+$student_id = $_GET['student_id'];
+$course_code = $_GET['course_code']; // Get course_code from GET
+$year = (int) date("Y"); // Assuming current year attendance
 
-error_log(LOG_PREFIX . " Processing request for student_id: '{$student_id}', course_id: '{$course_id}' for year: {$year}");
+error_log(LOG_PREFIX . " Processing request for student_id: '{$student_id}', course_code: '{$course_code}' for year: {$year}");
 
 $sql = "
     SELECT COUNT(a.attendance_id) AS total_absent
@@ -34,8 +33,8 @@ $sql = "
     INNER JOIN student_details sd ON a.student_details_id = sd.student_details_id
     INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
     INNER JOIN course c ON sc.course_id = c.course_id
-    WHERE sd.student_id = ? 
-      AND c.course_id = ? 
+    WHERE sd.student_id = ?
+      AND c.course_code = ?  -- Changed to filter by course_code
       AND a.status = 'Absent'
       AND YEAR(a.date) = ?
 ";
@@ -46,7 +45,8 @@ if (!$stmt = $conn->prepare($sql)) {
     exit;
 }
 
-$stmt->bind_param("sii", $student_id, $course_id, $year);
+// Bind parameters: 's' for student_id (string), 's' for course_code (string), 'i' for year (integer)
+$stmt->bind_param("ssi", $student_id, $course_code, $year);
 
 if (!$stmt->execute()) {
     error_log(LOG_PREFIX . " Failed to execute statement. Error: " . $stmt->error);

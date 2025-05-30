@@ -11,72 +11,6 @@ export default function Admin_Sections() {
     const [selectedSection, setSelectedSection] = useState(null);
     const navigate = useNavigate();
 
-<<<<<<< Updated upstream
-  useEffect(() => {
-    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_section.php')
-      .then(res => {
-        console.log("Fetched sections data:", res.data);
-        if (Array.isArray(res.data)) {
-          setSections(res.data);
-        } else if (res.data && Array.isArray(res.data.sections)) {
-          setSections(res.data.sections);
-        } else {
-          setSections([]);
-          if (res.data !== null && res.data !== undefined && typeof res.data === 'object') {
-            console.warn("Unexpected data format for sections:", res.data);
-          }
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching sections:", err);
-        setError("Failed to fetch sections. Please check your network or server.");
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const handleDeleteClick = (section) => {
-    setSelectedSection(section);
-    setIsModalOpen(true);
-  };
-
-  const confirmDelete = () => {
-    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_section.php', {
-      _method: 'DELETE',
-      section_id: selectedSection.section_id,
-    })
-    .then((res) => {
-      if (res.data.success) {
-        // Refresh or filter out the deleted section
-        setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
-      } else {
-        alert(res.data.message || "Failed to delete section.");
-      }
-    })
-    .catch(() => alert("An error occurred while deleting."))
-    .finally(() => {
-      setIsModalOpen(false);
-      setSelectedSection(null);
-    });
-  };
-
-  const filteredSections = sections.filter(section =>
-    section.section_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
-      <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
-
-        <div
-          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-          style={
-            !loading
-              ? {
-                  backgroundImage: "url('assets/teacher_vector.png')",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right",
-                  backgroundSize: "contain"
-=======
     useEffect(() => {
         // Updated API endpoint to fetch sections with year level and semester details
         axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/sections_with_details.php')
@@ -88,7 +22,6 @@ export default function Admin_Sections() {
                     setSections([]);
                     console.warn("Unexpected data format or no sections found:", res.data);
                     setError(res.data.message || 'No sections found or unexpected data format.');
->>>>>>> Stashed changes
                 }
             })
             .catch((err) => {
