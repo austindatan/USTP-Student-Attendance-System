@@ -249,14 +249,13 @@ export default function EditStudent() {
 
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
-        const submissionData = new FormData();
+        const submissionData = new FormData(); // Initialize submissionData first
         Object.entries(formData).forEach(([key, value]) => {
             submissionData.append(key, value);
         });
-
         if (imageFile) submissionData.append('image', imageFile);
 
-        const enrollmentsToSend = enrollments.map(enrollment => ({
+        const enrollmentsToSend = enrollments.map(enrollment => ({ // Define enrollmentsToSend first
             student_details_id: enrollment.student_details_id,
             instructor_id: enrollment.instructor_id,
             program_details_id: enrollment.program_details_id,
@@ -264,6 +263,11 @@ export default function EditStudent() {
             isNew: enrollment.isNew,
         }));
         submissionData.append('enrollments', JSON.stringify(enrollmentsToSend));
+
+        // Now you can safely log these variables
+        console.log("Submitting data:", Object.fromEntries(submissionData.entries()));
+        console.log("Enrollments to send:", enrollmentsToSend);
+        console.log("Student ID:", student_id);
 
         try {
             const res = await axios.post(
@@ -425,23 +429,6 @@ export default function EditStudent() {
                                         )}
                                     </select>
                                 </div>
-                                {/* Instructor */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700">Instructor</label>
-                                    <select
-                                        value={enrollment.instructor_id}
-                                        onChange={(e) => handleEnrollmentChange(index, 'instructor_id', e.target.value)}
-                                        required
-                                        className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Select Instructor</option>
-                                        {instructors.map((inst) => (
-                                            <option key={inst.instructor_id} value={inst.instructor_id}>
-                                                {inst.firstname} {inst.lastname}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
                                 {/* Program */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700">Program</label>
@@ -526,21 +513,6 @@ export default function EditStudent() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700">Instructor</label>
-                                <select
-                                    value={newEnrollment.instructor_id}
-                                    onChange={(e) => handleNewEnrollmentChange('instructor_id', e.target.value)}
-                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Select Instructor</option>
-                                    {instructors.map((inst) => (
-                                        <option key={inst.instructor_id} value={inst.instructor_id}>
-                                            {inst.firstname} {inst.lastname}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
                                 <label className="block text-sm font-semibold text-gray-700">Program</label>
                                 <select
                                     value={newEnrollment.program_details_id}
@@ -586,32 +558,15 @@ export default function EditStudent() {
                 </form>
             </section>
 
-            {/* Confirmation Modal for Update */}
             <ConfirmationModal
                 isOpen={isEditStudentModalOpen}
                 onClose={handleCloseEditStudentModal}
-            >
-                <div className="p-4">
-                    <h2 className="text-lg font-bold mb-4">Confirm Update</h2>
-                    <p className="mb-4">Are you sure you want to update this student's details and enrollments?</p>
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            onClick={handleCloseEditStudentModal}
-                            disabled={isSaving}
-                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleConfirmUpdate}
-                            disabled={isSaving}
-                            className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 disabled:opacity-50"
-                        >
-                            {isSaving ? 'Updating...' : 'Confirm Update'}
-                        </button>
-                    </div>
-                </div>
-            </ConfirmationModal>
+                onConfirm={handleConfirmUpdate} // Don't forget to pass this if it's not already
+                title="Confirm Update" // Pass the title here
+                message="Are you sure you want to update this student's details and enrollments?" // Pass the message here
+                confirmText={isSaving ? 'Updating...' : 'Confirm Update'} // This was already set up correctly
+                loading={isSaving} // This was already set up correctly
+            />
         </div>
     );
 }

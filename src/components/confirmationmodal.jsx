@@ -18,7 +18,7 @@ export default function ConfirmationModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="font-dm-sans fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
 
     >
       <div
