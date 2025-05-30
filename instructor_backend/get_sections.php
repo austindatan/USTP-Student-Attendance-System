@@ -5,9 +5,8 @@ include '../src/conn.php';
 
 $instructor_id = $_GET['instructor_id'];
 
-// Corrected SQL query: Removed student_details join
-$sql = "SELECT DISTINCT
-            sc.section_course_id, -- Added section_course_id for unique identification
+$sql = "SELECT
+            sc.section_course_id,
             sc.section_id,
             sc.course_id,
             s.section_name,
@@ -23,9 +22,13 @@ $sql = "SELECT DISTINCT
         FROM section_courses sc
         JOIN section s ON sc.section_id = s.section_id
         JOIN course c ON sc.course_id = c.course_id
-        JOIN year_level yl ON yl.year_id = s.year_level_id
-        JOIN semester sem ON sem.semester_id = s.semester_id
-        WHERE sc.instructor_id = ?";
+        JOIN year_level yl ON s.year_level_id = yl.year_id
+        JOIN semester sem ON s.semester_id = sem.semester_id
+        WHERE sc.section_course_id IN (
+            SELECT DISTINCT section_course_id
+            FROM student_details
+            WHERE instructor_id = ?
+        )";
 
 $stmt = $conn->prepare($sql);
 

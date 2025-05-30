@@ -97,19 +97,26 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [bgImage, setBgImage] = useState(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
 
-  
+  const [studentDetailsId, setStudentDetailsId] = useState(null);
+  console.log("App.js (render): current studentDetailsId state =", studentDetailsId); 
+   
+useEffect(() => {
+  const idFromLocalStorage = localStorage.getItem('studentDetailsId');
+  console.log("App.js (useEffect): Loaded studentDetailsId from localStorage:", idFromLocalStorage, " (type: " + typeof idFromLocalStorage + ")"); // Added type log
 
-  const [studentDetailsId, setStudentDetailsId] = useState(null); 
-
-  useEffect(() => {
-    const idFromLocalStorage = localStorage.getItem('studentDetailsId');
-    console.log("App.js (useEffect): Loaded studentDetailsId from localStorage:", idFromLocalStorage);
-
-    if (idFromLocalStorage && idFromLocalStorage !== "null" && idFromLocalStorage !== "undefined" && idFromLocalStorage !== "") {
-      setStudentDetailsId(idFromLocalStorage);
+  if (idFromLocalStorage && idFromLocalStorage !== "null" && idFromLocalStorage !== "undefined" && idFromLocalStorage !== "") {
+    const parsedId = parseInt(idFromLocalStorage, 10);
+    if (!isNaN(parsedId)) { 
+        setStudentDetailsId(parsedId); 
+        console.log("App.js (useEffect): Set studentDetailsId to (parsed):", parsedId, " (type: " + typeof parsedId + ")");
     } else {
-      setStudentDetailsId(null);
+        setStudentDetailsId(null);
+        console.log("App.js (useEffect): Parsed ID was NaN, setting to null.");
     }
+  } else {
+    setStudentDetailsId(null);
+    console.log("App.js (useEffect): localStorage ID was falsy, setting to null.");
+  }
 
     const handleStorageChange = (event) => {
       if (event.key === 'studentDetailsId') {
