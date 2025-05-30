@@ -1,4 +1,3 @@
-// Updated SectionCourses.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -10,30 +9,65 @@ function SectionCourses() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete confirmation modal
+    const [courseToDelete, setCourseToDelete] = useState(null); // State to store course to be deleted
 
     const handleNavigate = (path) => {
-    navigate(path);
-  };
+        navigate(path);
+    };
+
+    const fetchSectionCourses = async () => {
+        try {
+            const response = await axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/section_courses.php?section_id=${sectionId}`);
+            console.log("Fetched section courses data:", response.data);
+            if (response.data.success) {
+                setSectionDetails(response.data.section);
+                setCourses(response.data.courses);
+            } else {
+                setError(response.data.message || 'Failed to fetch section courses.');
+            }
+        } catch (err) {
+            console.error("Error fetching section courses:", err); // Log the actual error
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchSectionCourses = async () => {
-            try {
-                const response = await axios.get(`http://localhost/ustp-student-attendance/admin_backend/section_courses.php?section_id=${sectionId}`);
-                if (response.data.success) {
-                    setSectionDetails(response.data.section);
-                    setCourses(response.data.courses);
-                } else {
-                    setError(response.data.message || 'Failed to fetch section courses.');
-                }
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchSectionCourses();
-    }, [sectionId]);
+    }, [sectionId]); // Re-fetch when sectionId changes
+
+    const handleDeleteClick = (course) => {
+        setCourseToDelete(course);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!courseToDelete) return;
+
+        try {
+            const response = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_sectioncourse.php', {
+                _method: 'DELETE', // Laravel/PHP friendly method override
+                section_course_id: courseToDelete.section_course_id,
+            });
+
+            if (response.data.success) {
+                // Filter out the deleted course from the state
+                setCourses(courses.filter(course => course.section_course_id !== courseToDelete.section_course_id));
+                console.log(response.data.message);
+            } else {
+                console.error(response.data.message || "Failed to delete section course.");
+                setError(response.data.message || "Failed to delete section course."); // Display error to user
+            }
+        } catch (err) {
+            console.error("An error occurred while deleting the course:", err);
+            setError("An error occurred while deleting the course. Please try again.");
+        } finally {
+            setIsDeleteModalOpen(false);
+            setCourseToDelete(null);
+        }
+    };
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
@@ -68,8 +102,7 @@ function SectionCourses() {
                 <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
                     <div className="flex justify-end mb-4">
                         <button
-                            // --- IMPORTANT CHANGE HERE ---
-                            onClick={() => navigate(`/sections/${sectionId}/courses/add`)}
+                            onClick={() => handleNavigate(`/sections/${sectionId}/courses/add`)}
                             className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
                         >
                             + Add Courses
@@ -107,12 +140,20 @@ function SectionCourses() {
                                             <td className="px-3 py-2">{course.start_time}</td>
                                             <td className="px-3 py-2">{course.end_time}</td>
                                             <td className="px-3 py-2 text-center">
-                                                <button
-                                                    onClick={() => navigate(`/sections/${sectionId}/courses/${course.section_course_id}/edit`)}
-                                                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs sm:text-sm"
-                                                >
-                                                    Edit
-                                                </button>
+                                                <div className="flex gap-1 justify-center items-center">
+                                                    <button
+                                                        onClick={() => navigate(`/sections/${sectionId}/courses/${course.section_course_id}/edit`)}
+                                                        className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteClick(course)}
+                                                        className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -130,6 +171,35 @@ function SectionCourses() {
                     </div>
                 </div>
             </section>
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && courseToDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                            Confirm Delete
+                        </h2>
+                        <p className="text-gray-700 mb-6">
+                            Are you sure you want to delete the course{" "}
+                            <span className="font-bold">{courseToDelete.course_name}</span> from this section?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -9,9 +9,8 @@ const LoginStudent = () => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem("student");
-        // --- ADJUSTMENT 1: Change to check for 'studentId' ---
         const storedStudentId = localStorage.getItem("studentId");
-        if (storedUser && storedStudentId) { // Check for the new key
+        if (storedUser && storedStudentId) { 
             navigate("/student-dashboard", { replace: true });
         }
     }, [navigate]);
@@ -34,9 +33,7 @@ const LoginStudent = () => {
             localStorage.setItem('student', JSON.stringify(data.user));
 
             if (data.user && data.user.id) {
-                // This line is good! It sets the primary student ID as 'studentId'
                 localStorage.setItem('studentId', data.user.id);
-                // --- ADJUSTMENT 2: Correct the console log message ---
                 console.log("LoginStudent: Successfully set studentId to localStorage as:", data.user.id); // For debugging
             } else {
                 console.error("Login response missing 'id' in data.user:", data);

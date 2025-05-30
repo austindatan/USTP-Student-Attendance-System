@@ -1,49 +1,66 @@
 <?php
 header('Content-Type: application/json');
-header("Access-Control-Allow-Origin: *"); 
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-    // Enable error reporting for debugging
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
 
     if ($conn->connect_error) {
-        echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
+        echo json_encode(['success' => false, 'error' => 'Database connection failed: ' . $conn->connect_error]);
+        exit;
+    }
+
+    $instructorId = isset($_GET['instructor_id']) ? intval($_GET['instructor_id']) : 0;
+
+    if ($instructorId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid instructor ID provided.']);
         exit;
     }
 
     $sql = "
-        SELECT 
-            excused_request.excused_request_id, 
-            student_details.student_details_id, 
-            CONCAT(student.firstname, ' ', student.middlename, ' ', student.lastname) AS student_name, 
-            course.course_name, 
-            excused_request.reason, 
-            excused_request.date_requested, 
-            excused_request.date_of_absence,
-            excused_request.status 
-        FROM excused_request
-        INNER JOIN student_details 
-            ON excused_request.student_details_id = student_details.student_details_id
-        INNER JOIN student 
-            ON student.student_id = student_details.student_id
-        INNER JOIN section_courses sc -- Join with section_courses to get course_id
-            ON student_details.section_course_id = sc.section_course_id
-        INNER JOIN course 
-            ON course.course_id = sc.course_id; -- Use course_id from section_courses
+        SELECT
+            er.excused_request_id,
+            sd.student_details_id,
+            CONCAT(s.firstname, ' ', s.middlename, ' ', s.lastname) AS student_name,
+            c.course_name,
+            er.reason,
+            er.date_requested,
+            er.date_of_absence,
+            er.status
+        FROM
+            excused_request er
+        INNER JOIN
+            student_details sd ON er.student_details_id = sd.student_details_id
+        INNER JOIN
+            student s ON sd.student_id = s.student_id
+        INNER JOIN
+            section_courses sc ON sd.section_course_id = sc.section_course_id
+        INNER JOIN
+            course c ON c.course_id = sc.course_id
+        WHERE
+            sc.instructor_id = ?; -- Filter by the logged-in instructor's ID
     ";
-    
-    // Using query() for simple SELECT without parameters
-    $result = $conn->query($sql);
+
+    $stmt = $conn->prepare($sql);
+    if ($stmt === false) {
+        echo json_encode(['success' => false, 'error' => 'Failed to prepare SQL statement: ' . $conn->error]);
+        exit;
+    }
+
+    $stmt->bind_param("i", $instructorId); 
+    $stmt->execute();
+
+    $result = $stmt->get_result();
 
     if ($result === false) {
-        echo json_encode(['error' => 'SQL query failed: ' . $conn->error]);
+        echo json_encode(['success' => false, 'error' => 'SQL query execution failed: ' . $stmt->error]);
         exit;
     }
 
@@ -52,12 +69,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         while ($row = $result->fetch_assoc()) {
             $req[] = $row;
         }
+    } else {
+        echo json_encode([]);
+        exit;
     }
-    echo json_encode($req);
 
+    echo json_encode($req); 
+
+    $stmt->close();
     $conn->close();
 
 } else {
-    echo json_encode(["error" => "Invalid request method for GET endpoint"]);
+    echo json_encode(["success" => false, "error" => "Invalid request method for GET endpoint"]);
 }
 ?>

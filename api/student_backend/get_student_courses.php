@@ -16,22 +16,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 include __DIR__ . '/../../src/conn.php';
 
-if (!isset($_GET['student_id'])) { // Change parameter name to student_id
+if (!isset($_GET['student_id'])) { 
     echo json_encode(["success" => false, "message" => "Missing student_id"]);
     exit;
 }
 
-$studentId = $_GET['student_id']; // Use studentId
+$studentId = $_GET['student_id']; 
 
-// --- ADJUSTMENT HERE: Add sd.student_details_id to the SELECT statement ---
 $sql = "SELECT DISTINCT c.course_id, c.course_name, sd.student_details_id 
         FROM student_details sd
         JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
         JOIN course c ON sc.course_id = c.course_id
-        WHERE sd.student_id = ?"; // Filter by student_id from student_details table
+        WHERE sd.student_id = ?";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $studentId); // Bind studentId
+$stmt->bind_param("i", $studentId);
 $stmt->execute();
 $result = $stmt->get_result();
 

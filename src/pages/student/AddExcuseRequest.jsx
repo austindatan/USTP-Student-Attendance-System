@@ -6,7 +6,7 @@ const AddExcuseRequest = ({ studentId }) => {
 
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState('');
-  const [selectedStudentDetailsId, setSelectedStudentDetailsId] = useState(''); // <--- MISSING: DECLARE THIS STATE
+  const [selectedStudentDetailsId, setSelectedStudentDetailsId] = useState(''); 
   const [instructor, setInstructor] = useState(null);
   const [instructorId, setInstructorId] = useState('');
   const [reason, setReason] = useState('');
@@ -57,7 +57,6 @@ const AddExcuseRequest = ({ studentId }) => {
 
   useEffect(() => {
     const fetchInstructorByCourse = async () => {
-      // Ensure courseId and studentId are available before fetching instructor
       if (!courseId || !studentId) return;
 
       try {
@@ -70,7 +69,7 @@ const AddExcuseRequest = ({ studentId }) => {
         } else {
           setInstructor(null);
           setInstructorId('');
-          setMessage("Instructor not found for selected course."); // Specific message
+          setMessage("Instructor not found for selected course."); 
           setSuccess(false);
           console.log("Instructor not found or API failed, instructorId reset.");
         }
@@ -82,7 +81,7 @@ const AddExcuseRequest = ({ studentId }) => {
     };
 
     fetchInstructorByCourse();
-  }, [courseId, studentId]); // studentId also needed for this dependency
+  }, [courseId, studentId]); 
 
 
   const handleCourseChange = (e) => {
@@ -93,7 +92,6 @@ const AddExcuseRequest = ({ studentId }) => {
     setMessage('');
     setSuccess(null);
 
-    // <--- MISSING: ADD THIS LOGIC TO FIND AND SET student_details_id
     const selectedCourse = courses.find(course => course.course_id.toString() === selectedCourseId);
     if (selectedCourse) {
       setSelectedStudentDetailsId(selectedCourse.student_details_id);
@@ -102,7 +100,7 @@ const AddExcuseRequest = ({ studentId }) => {
       setSelectedStudentDetailsId('');
       console.log("No course found for selected ID, student_details_id reset.");
     }
-    // END MISSING LOGIC --->
+
   };
 
   const handleSubmit = async (e) => {
@@ -120,34 +118,30 @@ const AddExcuseRequest = ({ studentId }) => {
         console.log(pair[0] + ': ' + pair[1]);
     }
 
-    // --- ADD THESE NEW CONSOLE LOGS HERE ---
+
     console.log("--- State values before client-side validation ---");
     console.log("selectedStudentDetailsId:", selectedStudentDetailsId);
     console.log("instructorId:", instructorId);
     console.log("reason:", reason);
     console.log("dateOfAbsence:", dateOfAbsence);
     console.log("--------------------------------------------------");
-    // --- END NEW CONSOLE LOGS ---
 
-    // Basic client-side validation before sending
     if (!selectedStudentDetailsId || !instructorId || !reason || !dateOfAbsence) {
         setMessage("Please fill in all required fields (Course, Instructor, Reason, Date of Absence).");
         setSuccess(false);
         setLoading(false);
-        return; // Stop submission
+        return;
     }
 
     setLoading(true);
     setMessage('');
     setSuccess(null);
 
-
-    // Basic client-side validation before sending
     if (!selectedStudentDetailsId || !instructorId || !reason || !dateOfAbsence) {
         setMessage("Please fill in all required fields (Course, Instructor, Reason, Date of Absence).");
         setSuccess(false);
         setLoading(false);
-        return; // Stop submission
+        return; 
     }
 
     try {
@@ -158,7 +152,7 @@ const AddExcuseRequest = ({ studentId }) => {
 
       if (isSuccess) {
         setCourseId('');
-        setSelectedStudentDetailsId(''); // Reset this on success too
+        setSelectedStudentDetailsId(''); 
         setInstructor(null);
         setInstructorId('');
         setReason('');
@@ -205,7 +199,6 @@ const AddExcuseRequest = ({ studentId }) => {
         >
           <option value="">Select a course</option>
           {courses.map(course => (
-            // Ensure course.course_id is unique and consistent with backend values
             <option key={course.course_id} value={course.course_id}>{course.course_name}</option>
           ))}
         </select>
