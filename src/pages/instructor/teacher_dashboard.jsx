@@ -33,7 +33,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
       try {
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         const response = await fetch(
-          `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
+          `http://localhost/ustp-student-attendance/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
         );
         const data = await response.json();
         setTotalStudents(data.totalStudents);
@@ -53,7 +53,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const fetchMessages = async () => {
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_recent_requests.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_recent_requests.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setMessages(data);
       } catch (err) {
@@ -73,7 +73,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!instructor) return;
 
         const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`);
         const data = await res.json();
 
         setTotalStudents(data.totalStudents);
@@ -106,7 +106,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   useEffect(() => {
     const fetchWeeklyAttendance = async () => {
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setAttendanceData(data);
       } catch (err) {
@@ -122,7 +122,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSections(data);
       } catch (err) {
@@ -220,19 +220,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-          {sections.map((section, i) => (
-            <ClassCard
-              key={i}
-              isLoading={false}
-              code={`${section.course_code}`}
-              title={section.course_name}
-              room={section.section_name || 'TBA'}
-              schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
-              onClick={() => navigate(`/section-dashboard/${section.section_id}`)}
-              bgImage={`${process.env.PUBLIC_URL}/${section?.image}`}
-              bgColor={section?.hexcode || "#0097b2"}
-            />
-          ))}
+            {sections.slice(0, 3).map((section, i) => ( // <-- Added .slice(0, 3) here
+                <ClassCard
+                    key={i}
+                    isLoading={false}
+                    code={`${section.course_code}`}
+                    title={section.course_name}
+                    room={section.section_name || 'TBA'}
+                    schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
+                    onClick={() => navigate(`/section-dashboard/${section.section_id}`)}
+                    bgImage={`${process.env.PUBLIC_URL}/assets/${section?.image}`}
+                    bgColor={section?.hexcode || "#0097b2"}
+                />
+            ))}
         </div>
 
       </section>
