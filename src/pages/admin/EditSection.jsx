@@ -10,49 +10,60 @@ const EditSection = () => {
   const [formData, setFormData] = useState({
     section_id: '',
     section_name: '',
-    course_id: '',
-    schedule_day: '',
-    start_time: '',
-    end_time: '',
+    semester_id: '',
+    year_level_id: '',
   });
 
-  const [courses, setCourses] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [yearLevels, setYearLevels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isEditSectionModalOpen, setIsEditSectionModalOpen] = useState(false); // State for modal
-  const [isSaving, setIsSaving] = useState(false); // State for saving/loading in modal
+  const [isEditSectionModalOpen, setIsEditSectionModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Fetch single section data
-    axios
-      .get(`http://localhost/USTP-Student-Attendance-System/admin_backend/get_single_section.php?section_id=${id}`)
-      .then((res) => {
-        if (res.data.success && res.data.section) {
-          setFormData({ ...res.data.section, section_id: id });
+    const fetchData = async () => {
+      try {
+        // Fetch single section data
+        const sectionRes = await axios.get(`http://localhost/ustp-student-attendance/admin_backend/get_single_section.php?section_id=${id}`);
+        if (sectionRes.data.success && sectionRes.data.section) {
+          setFormData({
+            section_id: id,
+            section_name: sectionRes.data.section.section_name,
+            semester_id: String(sectionRes.data.section.semester_id || ''),
+            year_level_id: String(sectionRes.data.section.year_level_id || ''),
+          });
         } else {
-          alert(res.data.message || 'Failed to load section data.');
+          alert(sectionRes.data.message || 'Failed to load section data.');
           navigate('/admin-sections');
+          return;
         }
-        setLoading(false);
-      })
-      .catch(() => {
-        alert('Error fetching section data.');
-        navigate('/admin-sections');
-        setLoading(false);
-      });
 
-    // Fetch courses data
-    axios
-      .get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_courses.php')
-      .then((res) => {
-        if (res.data.success) {
-          setCourses(res.data.courses);
+        // Fetch semesters data
+        const semestersRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php');
+        if (semestersRes.data.success) {
+          setSemesters(semestersRes.data.semesters);
         } else {
-          console.warn("Failed to load courses:", res.data.message);
+          console.warn("Failed to load semesters:", semestersRes.data.message);
         }
-      })
-      .catch((err) => {
-        console.error("Error fetching courses:", err);
-      });
+
+        // Fetch year levels data
+        const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php');
+        if (yearLevelsRes.data.success) {
+          setYearLevels(yearLevelsRes.data.year_levels);
+        } else {
+          console.warn("Failed to load year levels:", yearLevelsRes.data.message);
+        }
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        alert('Error fetching section or related data.');
+        navigate('/admin-sections');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id, navigate]);
 
   const handleChange = (e) => {
@@ -63,33 +74,31 @@ const EditSection = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Basic validation before opening modal
-    if (!formData.section_name || !formData.course_id || !formData.schedule_day || !formData.start_time || !formData.end_time) {
-        alert('Please fill in all required fields.');
-        return;
+    if (!formData.section_name || !formData.semester_id || !formData.year_level_id) {
+      alert('Please fill in all required fields (Section Name, Semester, Year Level).');
+      return;
     }
 
-    setIsEditSectionModalOpen(true); // Open confirmation modal
+    setIsEditSectionModalOpen(true);
   };
 
   const handleConfirmUpdate = async () => {
-    setIsSaving(true); // Start loading animation in modal
+    setIsSaving(true);
     try {
-      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/update_section.php', formData);
+      const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/update_section.php', formData);
       if (res.data.success) {
-        // Removed the alert here
-        setIsEditSectionModalOpen(false); // Close modal
-        navigate('/admin-sections'); // Redirect to sections list
+        setIsEditSectionModalOpen(false);
+        navigate('/admin-sections');
       } else {
         alert(res.data.message || 'Update failed.');
-        setIsEditSectionModalOpen(false); // Close modal on failure
+        setIsEditSectionModalOpen(false);
       }
     } catch (error) {
       console.error("Server error during update:", error);
       alert('Server error during update.');
-      setIsEditSectionModalOpen(false); // Close modal on error
+      setIsEditSectionModalOpen(false);
     } finally {
-      setIsSaving(false); // Stop loading animation
+      setIsSaving(false);
     }
   };
 
@@ -127,82 +136,44 @@ const EditSection = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700">Course</label>
+              <label className="block text-sm font-semibold text-gray-700">Semester</label>
               <select
-                name="course_id"
-                value={formData.course_id}
+                name="semester_id"
+                value={formData.semester_id}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select a course</option>
-                {courses.map((course) => (
-                  <option key={course.course_id} value={course.course_id}>
-                    {course.course_name}
+                <option value="">Select a Semester</option>
+                {semesters.map((semester) => (
+                  <option key={semester.semester_id} value={String(semester.semester_id)}>
+                    {semester.semester_name}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Day:</label>
-            <select
-              name="schedule_day"
-              value={formData.schedule_day}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-            >
-              <option value="">Select a day</option>
-              {[
-                'Monday & Tuesday',
-                'Monday & Wednesday',
-                'Monday & Thursday',
-                'Monday & Friday',
-                'Monday & Saturday',
-                'Tuesday & Wednesday',
-                'Tuesday & Thursday',
-                'Tuesday & Friday',
-                'Tuesday & Saturday',
-                'Wednesday & Thursday',
-                'Wednesday & Friday',
-                'Wednesday & Saturday',
-                'Thursday & Friday',
-                'Thursday & Saturday',
-                'Friday & Saturday'
-              ].map((day) => (
-                <option key={day} value={day}>{day}</option>
-              ))}
-            </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">Start Time</label>
-              <input
-                type="time"
-                name="start_time"
-                value={formData.start_time}
+              <label className="block text-sm font-semibold text-gray-700">Year Level</label>
+              <select
+                name="year_level_id"
+                value={formData.year_level_id}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">End Time</label>
-              <input
-                type="time"
-                name="end_time"
-                value={formData.end_time}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" // Changed focus color
-              />
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select a Year Level</option>
+                {yearLevels.map((yearLevel) => (
+                  <option key={yearLevel.year_id} value={String(yearLevel.year_id)}> {/* Changed key and value to yearLevel.year_id */}
+                    {yearLevel.year_level_name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="md:col-span-2 flex justify-end items-center gap-3">
@@ -224,7 +195,6 @@ const EditSection = () => {
         </div>
       </section>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={isEditSectionModalOpen}
         onClose={handleCloseEditSectionModal}

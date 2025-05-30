@@ -41,6 +41,7 @@ import EditSection from './pages/admin/EditSection';
 import EditCourse from './pages/admin/EditCourse';
 import SectionCourses from './pages/admin/SectionCourses';
 import EditSectionCourse from './pages/admin/EditSectionCourse';
+import AddSectionCourse from './pages/admin/AddSectionCourse';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -445,6 +446,19 @@ function App() {
                 </ProtectedRoute>
             }
         />
+
+        <Route
+            path="/sections/:sectionId/courses/add"
+            element={
+                <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <AdminLayout>
+                        <AddSectionCourse />
+                    </AdminLayout>
+                </ProtectedRoute>
+            }
+        />
+
+
 
         <Route path="*" element={<NotFound />} />
       </Routes>

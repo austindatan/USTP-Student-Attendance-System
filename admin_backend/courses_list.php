@@ -6,18 +6,12 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
-// Database connection parameters
-$servername = "localhost";
-$username = "root"; // Replace with your database username
-$password = "";     // Replace with your database password
-$dbname = "attendance_monitoring";
+include __DIR__ . '/../src/conn.php';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
+    exit();
 }
 
 // SQL query to fetch all courses

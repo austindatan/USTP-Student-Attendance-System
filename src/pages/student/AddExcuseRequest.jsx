@@ -15,7 +15,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`)
+      .get(`http://localhost/ustp-student-attendance/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`)
       .then(res => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -32,7 +32,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
       return;
     }
     axios
-      .get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`)
+      .get(`http://localhost/ustp-student-attendance/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`)
       .then(res => {
         if (res.data.success) {
           setInstructor(res.data.instructor_name || '');
@@ -55,7 +55,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
     formData.append('date_of_absence', dateOfAbsence);
 
     try {
-      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/api/student_backend/submit_excuse_request.php', formData);
+      const res = await axios.post('http://localhost/ustp-student-attendance/api/student_backend/submit_excuse_request.php', formData);
       if (res.data.message) {
         setMessage(res.data.message);
         setSuccess(res.data.success === true || res.data.success === "true");

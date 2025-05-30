@@ -25,21 +25,15 @@ if ($data === null) {
     exit();
 }
 
-// Extract all fields
+// Extract only the fields relevant for the 'section' table
 $section_name = $data['section_name'] ?? null;
-$course_id = $data['course_id'] ?? null;
-$schedule_day = $data['schedule_day'] ?? null;
-$start_time = $data['start_time'] ?? null;
-$end_time = $data['end_time'] ?? null;
 $year_level_id = $data['year_level_id'] ?? null;
 $semester_id = $data['semester_id'] ?? null;
 
-// Validate incoming data (basic check for null values)
-if (is_null($section_name) || is_null($course_id) || is_null($schedule_day) ||
-    is_null($start_time) || is_null($end_time) || is_null($year_level_id) ||
-    is_null($semester_id)) {
+// Validate incoming data (basic check for null values for section creation)
+if (is_null($section_name) || is_null($year_level_id) || is_null($semester_id)) {
     error_log("Missing required data in section_add.php. Received: " . print_r($data, true));
-    echo json_encode(["success" => false, "message" => "Missing required data for section creation or course/schedule linkage."]);
+    echo json_encode(["success" => false, "message" => "Missing required data for section creation (Section Name, Year Level, Semester)."]);
     exit();
 }
 
@@ -59,20 +53,12 @@ try {
     $new_section_id = $conn->insert_id; // Get the ID of the newly inserted section
     $stmt_section->close();
 
-    // 2. Insert into the 'section_courses' table
-    $stmt_section_courses = $conn->prepare("INSERT INTO section_courses (section_id, course_id, schedule_day, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
-    if ($stmt_section_courses === false) {
-        throw new Exception("Failed to prepare section_courses insert statement: " . $conn->error);
-    }
-    $stmt_section_courses->bind_param("iisss", $new_section_id, $course_id, $schedule_day, $start_time, $end_time);
-    if (!$stmt_section_courses->execute()) {
-        throw new Exception("Failed to link section with course and schedule: " . $stmt_section_courses->error);
-    }
-    $stmt_section_courses->close();
+    // The section_courses insertion with course_id, schedule_day, start_time, end_time is REMOVED.
+    // If you need to link courses to sections, you'll need a separate process for that.
 
     // Commit the transaction if all operations were successful
     $conn->commit();
-    echo json_encode(["success" => true, "message" => "Section and its course/schedule added successfully!", "section_id" => $new_section_id]);
+    echo json_encode(["success" => true, "message" => "Section added successfully!", "section_id" => $new_section_id]);
 
 } catch (Exception $e) {
     // Rollback the transaction on error

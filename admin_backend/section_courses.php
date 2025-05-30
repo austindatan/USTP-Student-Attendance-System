@@ -6,18 +6,12 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
-// Database connection parameters
-$servername = "localhost";
-$username = "root"; // Replace with your database username
-$password = "";     // Replace with your database password
-$dbname = "attendance_monitoring";
+include __DIR__ . '/../src/conn.php';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
+    exit();
 }
 
 // Get section_id from GET request
@@ -27,7 +21,7 @@ if ($sectionId === 0) {
     die(json_encode(["success" => false, "message" => "Section ID is required."]));
 }
 
-// SQL query to fetch section details and its courses
+// SQL query to fetch section details and its courses, including instructor details
 $sql = "SELECT
             s.section_id,
             s.section_name,
@@ -38,7 +32,9 @@ $sql = "SELECT
             c.course_name,
             sc.schedule_day,
             sc.start_time,
-            sc.end_time
+            sc.end_time,
+            i.firstname AS instructor_firstname,  -- Select instructor's first name
+            i.lastname AS instructor_lastname    -- Select instructor's last name
         FROM
             section_courses sc
         JOIN
@@ -49,6 +45,8 @@ $sql = "SELECT
             year_level yl ON s.year_level_id = yl.year_id
         LEFT JOIN
             semester sem ON s.semester_id = sem.semester_id
+        LEFT JOIN
+            instructor i ON sc.instructor_id = i.instructor_id -- Join with instructor table
         WHERE
             sc.section_id = ?
         ORDER BY
@@ -73,14 +71,16 @@ if ($result->num_rows > 0) {
                 "semester_name" => $row["semester_name"]
             ];
         }
-        // Add course details
+        // Add course details, including instructor names
         $courses[] = [
             "section_course_id" => $row["section_course_id"],
             "course_id" => $row["course_id"],
             "course_name" => $row["course_name"],
             "schedule_day" => $row["schedule_day"],
             "start_time" => $row["start_time"],
-            "end_time" => $row["end_time"]
+            "end_time" => $row["end_time"],
+            "instructor_firstname" => $row["instructor_firstname"], // Add to course array
+            "instructor_lastname" => $row["instructor_lastname"]   // Add to course array
         ];
     }
     echo json_encode(["success" => true, "section" => $sectionDetails, "courses" => $courses]);
@@ -112,6 +112,12 @@ if ($result->num_rows > 0) {
     }
 }
 
-$stmt->close();
+// Close statements if they were successfully prepared and executed
+if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+    $stmt->close();
+}
+if (isset($stmt_section_only) && $stmt_section_only instanceof mysqli_stmt) {
+    $stmt_section_only->close();
+}
 $conn->close();
 ?>
