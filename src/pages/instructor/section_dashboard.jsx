@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { FiSettings } from "react-icons/fi";
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { FaPalette, FaImage } from "react-icons/fa6";
 import axios from 'axios';
 
 export default function Teacher_Dashboard({ selectedDate }) {
@@ -12,8 +13,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const [isLoading, setIsLoading] = useState(true);
     const location = useLocation();
     const [sectionInfo, setSectionInfo] = useState(location.state?.sectionInfo || null);
-
-
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showRequestModal, setShowRequestModal] = useState(false);
@@ -26,6 +25,20 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const colorModalRef = useRef(null);
     const settingsButtonRef = useRef(null);
 
+    // NEW STATE FOR IMAGE MODAL
+    const [showImageSelectModal, setShowImageSelectModal] = useState(false);
+    const [selectedVectorImage, setSelectedVectorImage] = useState(sectionInfo?.image || 'classes_vector_2.png');
+
+    const imageModalRef = useRef(null);
+
+    const availableVectorImages = [
+        'classes_vector_2.png',
+        'classes_vector_3.png',
+        'classes_vector_7.png',
+        'classes_vector_5.png',
+        'classes_vector_6.png',
+        'classes_vector_8.png',
+    ];
     const [lateStudents, setLateStudents] = useState([]);
     const [isAttendanceLocked, setIsAttendanceLocked] = useState(false); // Attendance locked state
     const [showUnlockModal, setShowUnlockModal] = useState(false); // State for unlock modal
@@ -98,6 +111,45 @@ export default function Teacher_Dashboard({ selectedDate }) {
         const result = scheduledDays.includes(today);
         console.log("DEBUG: isClassDay - Does scheduledDays include 'today'?", result);
         return result;
+    };
+
+    const handleSaveImage = async () => { // It might have been called handleImageUpload before
+        if (!sectionInfo?.section_course_id) {
+            alert("Section information is missing. Cannot update image.");
+            return;
+        }
+        if (!selectedVectorImage) {
+            alert("Please select an image.");
+            return;
+        }
+
+        try {
+            // We'll update the PHP script to accept a string path
+            const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_image.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    section_course_id: sectionInfo.section_course_id,
+                    image_path: selectedVectorImage, // Sending the selected path
+                }),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                // Update sectionInfo with the new image path from the backend (should be the same as selectedVectorImage)
+                setSectionInfo(prevInfo => ({
+                    ...prevInfo,
+                    image: selectedVectorImage // The backend confirms the path
+                }));
+                setShowImageSelectModal(false); // Close modal on success
+            } else {
+                alert("Image update failed: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error updating image:", error);
+            alert("An error occurred during image update.");
+        }
     };
 
     useEffect(() => {
@@ -317,6 +369,26 @@ export default function Teacher_Dashboard({ selectedDate }) {
         fetchDropdownStudents();
     }, [instructor?.instructor_id, sectionId, sectionInfo?.course_id]);
 
+    useEffect(() => {
+        function handleClickOutside(event) {
+            // Handle color modal
+            if (colorModalRef.current && !colorModalRef.current.contains(event.target) &&
+                settingsButtonRef.current && !settingsButtonRef.current.contains(event.target)) {
+                setShowColorModal(false);
+            }
+            // Handle image modal (ADD THIS BLOCK)
+            if (imageModalRef.current && !imageModalRef.current.contains(event.target) &&
+                event.target !== document.querySelector('.FaImage')) { // Assuming .FaImage is a class your FaImage icon has, or you can use its ref if you assign one.
+                setShowImageSelectModal(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [colorModalRef, settingsButtonRef, imageModalRef]); // ADD imageModalRef to dependencies
+    
+
     const markAsLate = async (student) => {
         if (isAttendanceLocked) {
             alert("Attendance for this session is locked and cannot be modified.");
@@ -479,61 +551,117 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 </svg>
                             </button>
                             <div className="relative">
-                                <FiSettings
-                                    ref={settingsButtonRef}
-                                    className="text-xl cursor-pointer"
-                                    onClick={() => setShowColorModal(prev => !prev)}
-                                />
+                                <div className="flex gap-2">
+                                    <FaPalette
+                                        ref={settingsButtonRef} // Keep this ref if needed for positioning
+                                        className="text-xl cursor-pointer"
+                                        onClick={() => {
+                                            setShowColorModal(prev => !prev);
+                                            setShowImageSelectModal(false); // Close image modal if color is opened
+                                        }}
+                                    />
 
-                                {showColorModal && (
-                                    <div ref={colorModalRef} className="absolute right-0 mt-2 w-60 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200">
+                                    <FaImage
+                                        className="text-xl cursor-pointer"
+                                        onClick={() => {
+                                            setShowImageSelectModal(prev => !prev); // Toggle the image selection modal
+                                            setShowColorModal(false); // Close color modal if image is opened
+                                        }}
+                                    />
 
-                                        <h2 className="text-sectionInfo?.hexcode font-bold text-sm mb-2" style={{ color: sectionInfo?.hexcode }}>Change Section Color</h2>
-                                        <input
-                                            type="color"
-                                            value={selectedColor}
-                                            onChange={(e) => setSelectedColor(e.target.value)}
-                                            className="w-24 h-12 mb-2"
-                                        />
-                                        <div className="flex justify-center gap-4">
-                                            <button
-                                                onClick={async () => {
-                                                    try {
-                                                        const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({
-                                                                section_course_id: sectionInfo?.section_course_id,
-                                                                hexcode: selectedColor
-                                                            }),
-                                                        });
+                                    {showColorModal && (
+                                        <div ref={colorModalRef} className="absolute right-0 mt-2 w-79 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200">
 
-                                                        const result = await res.json();
-                                                        if (result.success) {
-                                                            setSectionInfo(prev => ({ ...prev, hexcode: selectedColor }));
-                                                            alert('Color updated successfully!');
-                                                            setShowColorModal(false);
-                                                        } else {
-                                                            alert('Update failed: ' + (result.error || 'Unknown error'));
+                                            <h2 className="text-xl font-bold text-sm mb-2" style={{ color: sectionInfo?.hexcode }}>Change Color</h2>
+                                            <input
+                                                type="color"
+                                                value={selectedColor}
+                                                onChange={(e) => setSelectedColor(e.target.value)}
+                                                className="w-24 h-12 mb-2"
+                                            />
+                                            <div className="flex justify-center gap-4">
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({
+                                                                    section_course_id: sectionInfo?.section_course_id,
+                                                                    hexcode: selectedColor
+                                                                }),
+                                                            });
+
+                                                            const result = await res.json();
+                                                            if (result.success) {
+                                                                setSectionInfo(prev => ({ ...prev, hexcode: selectedColor }));
+                                                                alert('Color updated successfully!');
+                                                                setShowColorModal(false);
+                                                            } else {
+                                                                alert('Update failed: ' + (result.error || 'Unknown error'));
+                                                            }
+                                                        } catch (err) {
+                                                            console.error('Failed to update color:', err);
+                                                            alert('Error updating color.');
                                                         }
-                                                    } catch (err) {
-                                                        console.error('Failed to update color:', err);
-                                                        alert('Error updating color.');
-                                                    }
-                                                }}
-                                                className="bg-blue-500 text-white text-xs px-4 py-2 rounded hover:bg-blue-600"
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={() => setShowColorModal(false)}
-                                                className="bg-gray-300 px-4 py-2 text-xs rounded hover:bg-gray-400"
-                                            >
-                                                Cancel
-                                            </button>
+                                                    }}
+                                                    className="bg-blue-500 text-white text-xs px-4 py-2 rounded hover:bg-blue-600"
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={() => setShowColorModal(false)}
+                                                    className="bg-gray-300 px-4 py-2 text-xs rounded hover:bg-gray-400"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+
+                                </div>
+
+                                {/* NEW IMAGE UPLOAD MODAL - Place this block here, after the color modal */}
+                                {showImageSelectModal && (
+                                        <div
+                                            className="absolute right-0 mt-2 w-72 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200"
+                                            // You might need a ref here too if you want to implement click-outside-to-close
+                                            // For simplicity, for now, closing happens via buttons or if another modal opens.
+                                        >
+                                            <h2 className="text-xl font-bold mb-4" style={{ color: sectionInfo?.hexcode }}>Select Section Image</h2>
+
+                                            <div className="grid grid-cols-3 gap-2 mb-4"> {/* Grid for image options */}
+                                                {availableVectorImages.map((imagePath, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`p-1 border rounded-md cursor-pointer ${selectedVectorImage === imagePath ? 'border-2 border-blue-500 shadow-md' : 'border-gray-200 hover:border-gray-400'}`}
+                                                        onClick={() => setSelectedVectorImage(imagePath)}
+                                                    >
+                                                        <img
+                                                            src={`http://localhost/ustp-student-attendance/public/assets/${imagePath}`}
+                                                            alt={`Vector ${index + 1}`}
+                                                            className="w-full h-auto object-contain"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="flex justify-center gap-4">
+                                                <button
+                                                    onClick={() => setShowImageSelectModal(false)}
+                                                    className="bg-gray-300 px-4 py-2 text-xs rounded hover:bg-gray-400"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleSaveImage}
+                                                    className="bg-blue-500 text-white text-xs px-4 py-2 rounded hover:bg-blue-600"
+                                                >
+                                                    Save Image
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                             </div>
                         </div>
                         <div>
@@ -641,10 +769,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     </div>
                 )}
 
-                
-
-
-                {/* Student Cards */}
                 {isClassDay() ? (
                     <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mt-6 mb-6">
                         {isLoading
