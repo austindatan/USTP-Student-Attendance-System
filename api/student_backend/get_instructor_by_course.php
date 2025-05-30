@@ -16,40 +16,42 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 include __DIR__ . '/../../src/conn.php';
 
-$studentDetailsId = $_GET['student_details_id'] ?? null;
-$courseId = $_GET['course_id'] ?? null;
+if (!isset($_GET['student_id']) || !isset($_GET['course_id'])) {
+    echo json_encode(["success" => false, "message" => "Missing parameters"]);
+    exit;
+}
 
-if ($studentDetailsId && $courseId) {
-    $sql = "SELECT i.instructor_id, i.firstname, i.lastname, i.email
-            FROM student_details sd
-            JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
-            JOIN course c ON sc.course_id = c.course_id
-            JOIN instructor i ON sc.instructor_id = i.instructor_id
-            WHERE sd.student_details_id = ? AND c.course_id = ?";
+$studentId = $_GET['student_id'];
+$courseId = $_GET['course_id'];
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $studentDetailsId, $courseId);
-    $stmt->execute();
-    $result = $stmt->get_result();
+// SQL query to find the instructor for a specific student's enrollment in a given course
+$sql = "SELECT i.instructor_id, i.firstname, i.lastname
+        FROM student_details sd
+        JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
+        JOIN instructor i ON sc.instructor_id = i.instructor_id
+        WHERE sd.student_id = ? AND sc.course_id = ?";
 
-    if ($row = $result->fetch_assoc()) {
-        echo json_encode([
-            "success" => true,
-            "instructor" => $row
-        ]);
-    } else {
-        echo json_encode([
-            "success" => false,
-            "message" => "No instructor found for this course"
-        ]);
-    }
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $studentId, $courseId);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    $stmt->close();
+// --- ADD THIS PART ---
+$instructor = $result->fetch_assoc(); // Fetch the single instructor row
+
+if ($instructor) {
+    echo json_encode([
+        "success" => true,
+        "instructor" => $instructor
+    ]);
 } else {
+    // If no instructor is found for the given student_id and course_id
     echo json_encode([
         "success" => false,
-        "message" => "Missing parameters"
+        "message" => "Instructor not found for this student and course combination."
     ]);
 }
 
+$stmt->close();
 $conn->close();
+?>
