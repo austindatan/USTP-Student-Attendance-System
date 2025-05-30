@@ -25,7 +25,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_sections.php?student_id=${student.id}`
+        `http://localhost/ustp-student-attendance/api/student_backend/get_sections.php?student_id=${student.id}`
       );
 
       if (!response.ok) {

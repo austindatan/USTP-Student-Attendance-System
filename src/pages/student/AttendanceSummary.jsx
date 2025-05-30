@@ -25,7 +25,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
   useEffect(() => {
     if (studentId && course_code) {
       // --- Fetch Course Name ---
-      const fetchCourseNameUrl = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchCourseNameUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchCourseNameUrl)
         .then((res) => {
@@ -49,7 +49,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
         });
 
       // --- Fetch Total Present Count ---
-      const fetchPresentUrl = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_class_present.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchPresentUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_present.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchPresentUrl)
         .then((res) => {
@@ -75,7 +75,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
         });
 
       // --- Fetch Total Absent Count ---
-      const fetchAbsentUrl = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_class_absent.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchAbsentUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_absent.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchAbsentUrl)
         .then((res) => {
@@ -101,7 +101,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
         });
 
       // --- NEW: Fetch Total Late Count ---
-      const fetchLateUrl = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_class_late.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchLateUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_late.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchLateUrl)
         .then((res) => {
@@ -127,7 +127,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
         });
 
       // --- NEW: Fetch Total Excused Count ---
-      const fetchExcusedUrl = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_class_excused.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchExcusedUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_excused.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchExcusedUrl)
         .then((res) => {
