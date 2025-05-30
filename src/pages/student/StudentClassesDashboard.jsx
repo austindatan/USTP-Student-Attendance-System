@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../App.css';
+import '../../App.css'; // Ensure this CSS file is correctly imported and defines global styles
 import ClassCard from './components/class_card';
 import { format } from 'date-fns';
 
@@ -63,31 +63,31 @@ export default function Classes_Dashboard({ selectedDate }) {
   };
 
   return (
-    <section className="w-full pt-8 px-4 sm:px-6 md:px-12">
+    <section className="w-full pt-8 px-4 sm:px-6 md:px-12 mx-auto">
       {/* Search Input */}
-    <div className="relative w-full sm:w-80 md:w-96">
-  <div className="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
-    <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20">
-      <path
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-      />
-    </svg>
-  </div>
-  <input
-    type="text"
-    className="font-poppins block w-full ps-10 py-2 text-sm text-black rounded-lg bg-white focus:ring-pink-500 focus:border-pink-500 placeholder-gray-500"
-    placeholder="Search for classes."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-  />
-</div>
+      <div className="relative w-full sm:w-80 md:w-96 mb-6"> {/* Added mb-6 for spacing */}
+        <div className="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
+          <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20">
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+            />
+          </svg>
+        </div>
+        <input
+          type="text"
+          className="font-poppins block w-full ps-10 py-2 text-sm text-black rounded-lg bg-white focus:ring-pink-500 focus:border-pink-500 placeholder-gray-500"
+          placeholder="Search for classes."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
       {/* Class Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8 mb-16">
+      <div className="lg:w-[75%] xl:w-[75%] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-6 mt-8 mb-16">
         {(isLoading ? Array.from({ length: 6 }) : filteredSections).map((section, i) => {
           const key = isLoading
             ? `loading-${i}`
@@ -110,7 +110,7 @@ export default function Classes_Dashboard({ selectedDate }) {
                   handleSectionClick(section);
                 }
               }}
-              bgImage={!isLoading ? `${process.env.PUBLIC_URL}/${section.image}` : ''}
+              bgImage={!isLoading ? `${process.env.PUBLIC_URL}/assets/${section.image}` : ''}
               bgColor={!isLoading ? section.hexcode || "#0097b2" : "#f0f0f0"}
             />
           );

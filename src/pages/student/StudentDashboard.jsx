@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
-import ClassCard from "./Classcard";
+import ClassCard from './components/class_card'; // Correct import for ClassCard
+import { format } from 'date-fns'; // Used for formatting date for navigation
 
 function DashboardCard({ icon, label, count }) {
   return (
@@ -19,7 +20,18 @@ function SkeletonCard() {
   return <div className="bg-gray-200 rounded-2xl h-20 animate-pulse w-full"></div>;
 }
 
-function StudentDashboard() {
+// Skeleton for the actual ClassCard component
+function SkeletonClassCard() {
+  return (
+    <div className="bg-gray-200 rounded-2xl p-5 shadow-lg flex flex-col gap-3 animate-pulse w-full">
+      <div className="h-6 w-3/4 bg-gray-300 rounded mb-2"></div>
+      <div className="h-4 w-1/2 bg-gray-300 rounded mb-1"></div>
+      <div className="h-4 w-2/3 bg-gray-300 rounded"></div>
+    </div>
+  );
+}
+
+export default function StudentDashboard({ selectedDate }) { // Added selectedDate prop
   const navigate = useNavigate();
 
   const [present, setPresent] = useState(null);
@@ -31,30 +43,28 @@ function StudentDashboard() {
   const [student, setStudent] = useState(null);
 
   const [messages, setMessages] = useState([]);
-  const [classes, setClasses] = useState([]);
+  const [classes, setClasses] = useState([]); // State for sections/classes
+
+  const studentMemo = useMemo(() => {
+    const rawStudentData = localStorage.getItem("student");
+    try {
+      return rawStudentData ? JSON.parse(rawStudentData) : null;
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-    const rawStudentData = localStorage.getItem("student");
-
-    if (!rawStudentData) {
+    if (!studentMemo || !studentMemo.id) {
       navigate("/login-student");
       return;
     }
+    setStudent(studentMemo);
 
-    let parsedStudent;
-    try {
-      parsedStudent = JSON.parse(rawStudentData);
-      if (!parsedStudent || !parsedStudent.id) {
-        navigate("/login-student");
-        return;
-      }
-      setStudent(parsedStudent);
-    } catch (e) {
-      navigate("/login-student");
-      return;
-    }
+    const commonHeaders = { "Content-Type": "application/json" };
+    const studentIdBody = { student_id: studentMemo.id };
 
-    const endpoints = [
+    const attendanceEndpoints = [
       {
         url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
@@ -77,17 +87,17 @@ function StudentDashboard() {
       },
     ];
 
-    Promise.all(
-      endpoints.map(({ url, setter, key }) =>
+    const fetchAttendanceData = Promise.all(
+      attendanceEndpoints.map(({ url, setter, key }) =>
         fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ student_id: parsedStudent.id }),
+          headers: commonHeaders,
+          body: JSON.stringify(studentIdBody),
         })
           .then(async (res) => {
             if (!res.ok) {
               const err = await res.json();
-              throw new Error(err.error || "Unknown error");
+              throw new Error(err.error || `Error fetching ${key}`);
             }
             return res.json();
           })
@@ -99,64 +109,40 @@ function StudentDashboard() {
             }
           })
       )
+    );
+
+    // New API call for classes, using GET and query parameter
+    const fetchClassesData = fetch(
+      `http://localhost/ustp-student-attendance/api/student_backend/get_sections.php?student_id=${studentMemo.id}`
     )
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status} fetching classes`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setClasses(data); // Assuming data is directly the array of sections
+      })
+      .catch((err) => {
+        console.error('Error fetching classes:', err);
+        setClasses([]); // Set to empty array on error
+        throw err; // Re-throw to be caught by Promise.all's catch
+      });
+
+    Promise.all([fetchAttendanceData, fetchClassesData])
       .then(() => {
         setMessages([
           { id: 1, subject: "Exam Schedule", sender: "Professor Smith", time: "2h ago" },
           { id: 2, subject: "Project Update", sender: "Team Lead", time: "1d ago" },
           { id: 3, subject: "Holiday Announcement", sender: "Admin Office", time: "3d ago" },
         ]);
-
-        setClasses([
-          {
-            section_id: 101,
-            code: "IT101",
-            title: "Introduction to IT",
-            room: "B201",
-            schedule: "Mon, Wed 10:00 AM - 12:00 PM",
-            teacher: "Mr. Smith",
-            present: 20,
-            absent: 2,
-            late: 1,
-            excused: 0,
-            bgImage: "/images/computer.png",
-            bgColor: "#007acc",
-          },
-          {
-            section_id: 102,
-            code: "DS201",
-            title: "Data Structures",
-            room: "C305",
-            schedule: "Tue, Thu 01:00 PM - 03:00 PM",
-            teacher: "Ms. Garcia",
-            present: 18,
-            absent: 4,
-            late: 2,
-            excused: 1,
-            bgImage: "/images/math.png",
-            bgColor: "#d97706",
-          },
-          {
-            section_id: 103,
-            code: "DM301",
-            title: "Discrete Mathematics",
-            room: "A102",
-            schedule: "Fri 09:00 AM - 11:00 AM",
-            teacher: "Mr. Lee",
-            present: 22,
-            absent: 0,
-            late: 0,
-            excused: 1,
-            bgImage: "/images/book.png",
-            bgColor: "#10b981",
-          },
-        ]);
       })
       .catch((err) => {
-        setError(err.message || "Failed to fetch attendance.");
+        setError(err.message || "Failed to fetch dashboard data.");
       })
       .finally(() => setLoading(false));
-  }, [navigate]);
+  }, [studentMemo, navigate]); // Depend on studentMemo and navigate
 
   const handleLogout = () => {
     localStorage.removeItem("student");
@@ -164,13 +150,18 @@ function StudentDashboard() {
     navigate("/login-student");
   };
 
+  const handleSectionClick = (section) => {
+    if (!section?.course_code) return;
+
+    const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null;
+    navigate(`/Attendance-Summary/${section.course_code}`, {
+      state: { sectionInfo: section, selectedDate: dateParam }
+    });
+  };
+
   return (
-    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen overflow-y-auto">
-      <section className="w-full py-8 **px-4** pr-0
-                          sm:px-6 md:px-6
-                          md:w-full md:mr-auto md:pr-[200px]
-                          lg:max-w-screen-xl lg:mr-auto lg:pr-[200px]
-                          xl:max-w-[calc(100%-200px)]">
+    <div className="font-dm-sans min-h-screen overflow-y-auto">
+      <section className="lg:w-[75%] xl:w-[77%] w-full pt-12 px-6 sm:px-6 md:px-12">
         {/* Header + Attendance Cards */}
         <div className="flex flex-col lg:flex-row gap-6 items-start mb-10 w-full">
           {/* Welcome Card */}
@@ -221,44 +212,34 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* Upcoming Classes Header */}
-        <div className="bg-[#7685fc] p-4 rounded-lg shadow-lg mb-6 w-full">
-          <h2 className="text-2xl font-bold text-white font-poppins">Upcoming Classes</h2>
+        {/* My Classes Section */}
+        <div className="mb-10 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              [...Array(3)].map((_, i) => <SkeletonClassCard key={i} />)
+            ) : error ? (
+              <p className="text-red-600 font-medium col-span-full text-center">{error}</p>
+            ) : classes.length > 0 ? (
+              classes.map((section) => (
+                <ClassCard
+                  key={`${section.section_id}-${section.course_id}`}
+                  isLoading={loading}
+                  code={section.course_code}
+                  title={section.course_name}
+                  room={section.section_name || 'TBA'}
+                  schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
+                  onClick={() => handleSectionClick(section)}
+                  bgImage={section.image ? `${process.env.PUBLIC_URL}/assets/${section.image}` : ''}
+                  bgColor={section.hexcode || "#0097b2"} // Default color if hexcode is missing
+                />
+              ))
+            ) : (
+              <p className="text-gray-500 col-span-full text-center">No classes found.</p>
+            )}
+          </div>
         </div>
 
-        {/* Class Cards */}
-        {/* Reverted to w-full. The padding from the parent section will handle the mobile spacing. */}
-<div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-
-          {loading ? (
-            [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
-          ) : error ? (
-            <p className="text-red-600 font-medium col-span-full text-center">{error}</p>
-          ) : classes.length === 0 ? (
-            <p className="text-gray-600 col-span-full text-center">No upcoming classes found.</p>
-          ) : (
-            classes.map((cls) => (
-              <ClassCard
-                key={cls.section_id}
-                sectionId={cls.section_id}
-                code={cls.code}
-                title={cls.title}
-                room={cls.room}
-                schedule={cls.schedule}
-                teacher={cls.teacher}
-                present={cls.present}
-                absent={cls.absent}
-                late={cls.late}
-                excused={cls.excused}
-                bgImage={cls.bgImage}
-                bgColor={cls.bgColor}
-              />
-            ))
-          )}
-        </div>
       </section>
     </div>
   );
 }
-
-export default StudentDashboard;

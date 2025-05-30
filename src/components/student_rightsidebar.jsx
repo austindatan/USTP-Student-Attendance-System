@@ -67,7 +67,7 @@
 
         {/* Sidebar */}
         <aside
-          className={`fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[23%] bg-white shadow-lg flex flex-col z-40 border-l border-gray-200 transform transition-transform duration-300 ease-in-out ${
+          className={`fixed top-0 right-0 h-full w-[85%] sm:w-[60%] lg:w-[22%] bg-white shadow-lg flex flex-col z-40 border-l border-gray-200 transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "translate-x-full"
           } lg:translate-x-0`}
         >
@@ -82,8 +82,7 @@
           </div>
 
           {/* Settings Dropdown */}
-  <div className="flex justify-start items-center px-4 pb-2 mt-5">
-
+          <div className="flex justify-start items-center px-4 pb-2 mt-5">
             <div className="relative" ref={dropdownRef}>
               <FiSettings
                 className="text-xl text-gray-700 cursor-pointer"

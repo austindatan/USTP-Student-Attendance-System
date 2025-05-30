@@ -81,7 +81,7 @@ function StudentLayout({ children, bgImage, setBgImage }) {
   return (
     <div className="flex h-screen w-full">
       <StudentLeftSideBar setBgImage={setBgImage} />
-      <div className="flex-1 overflow-y-auto" style={{ backgroundImage: bgImage }}>
+      <div className="flex-1 overflow-y-auto bg-cover bg-center bg-fixed" style={{ backgroundImage: bgImage }}>
         {children}
       </div>
       <StudentRightSidebar />

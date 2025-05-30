@@ -23,10 +23,10 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
   useEffect(() => {
     if (studentId && course_code) {
-      // --- Fetch Course Name ---
-      const fetchCourseNameUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
+      // --- Fetch Course Name, Image, and Hexcode ---
+      const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
 
-      fetch(fetchCourseNameUrl)
+      fetch(fetchCourseInfoUrl)
         .then((res) => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -37,13 +37,13 @@ export default function SubjectAttendanceSummary({ studentId }) {
           if (data && data.error) {
             setCourseInfo({ course_name: "Error loading course" });
           } else if (data && data.course_name) {
-            setCourseInfo(data);
+            setCourseInfo(data); // data now includes image and hexcode
           } else {
             setCourseInfo({ course_name: "Course Not Found" });
           }
         })
         .catch((err) => {
-          console.error("Error fetching course name info from API:", err);
+          console.error("Error fetching course info from API:", err);
           setCourseInfo({ course_name: "Failed to Load Course" });
         });
 
@@ -99,7 +99,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
           setTotalAbsent(0);
         });
 
-      // --- NEW: Fetch Total Late Count ---
+      // --- Fetch Total Late Count ---
       const fetchLateUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_late.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchLateUrl)
@@ -125,7 +125,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
           setTotalLate(0);
         });
 
-      // --- NEW: Fetch Total Excused Count ---
+      // --- Fetch Total Excused Count ---
       const fetchExcusedUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_excused.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchExcusedUrl)
@@ -260,49 +260,56 @@ export default function SubjectAttendanceSummary({ studentId }) {
   };
 
   return (
-    <div className="mt-10 p-4 sm:p-6 md:p-8 max-w-full lg:max-w-5xl">
-      {/* Header Section */}
-      <div
-        className="bg-[#7685fc] rounded-lg p-6 md:p-10 text-white font-poppins mb-6 relative overflow-hidden"
-        style={{
-          backgroundImage: "url('assets/teacher_vector.png')",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right center",
-          backgroundSize: "contain",
-        }}
-      >
-        <div className="leading-snug max-w-xl">
-          <h2 className="text-lg sm:text-xl font-medium">Attendance Summary for</h2>
-          <h1 className="text-2xl sm:text-3xl font-bold truncate">
-            {courseInfo?.course_name || "Loading..."}
-          </h1>
-          <p className="text-sm sm:text-base mt-4 sm:mt-6">
-            Keep track of attendance and stay informed.
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content Section */}
-      <div className="bg-[#7685fc] p-4 sm:p-6 rounded-lg max-w-full lg:max-w-5xl flex flex-col md:flex-row gap-6">
-        {/* Calendar */}
-        <div className="bg-[#f5f5f0] rounded-lg p-4 md:p-6 text-gray-700 w-full md:w-[320px] flex-shrink-0 overflow-auto">
-          {renderHeader()}
-          {renderDays()}
-          {renderCells()}
-        </div>
-
-        {/* Attendance Statistics */}
-        <div className="flex flex-col justify-center items-start w-full min-h-[220px] md:min-h-[300px] gap-6 px-2 sm:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            <StatCard label="Total No. of Present" value={totalPresent} />
-            <StatCard label="Total No. of Absent" value={totalAbsent} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            <StatCard label="Total No. of Late" value={totalLate} />
-            <StatCard label="Total No. of Excused" value={totalExcused} />
+    <div className="font-dm-sans min-h-screen overflow-y-auto">
+      <section className="lg:w-[75%] xl:w-[76%] w-full pt-12 px-6 sm:px-6 md:px-12">
+        {/* Header Section */}
+        <div
+          className="rounded-lg p-6 md:p-10 text-white font-poppins mb-6 relative overflow-hidden"
+          style={{
+            backgroundColor: courseInfo?.hexcode || '#7685fc', // Apply hexcode for background
+            backgroundImage: courseInfo?.image ? `url(${process.env.PUBLIC_URL}/assets/${courseInfo.image})` : "url('assets/teacher_vector.png')", // Apply image
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 20px center",
+            backgroundSize: "contain",
+          }}
+        >
+          <div className="leading-snug max-w-xl">
+            <h2 className="text-lg sm:text-xl font-medium">Attendance Summary for</h2>
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">
+              {courseInfo?.course_name || "Loading..."}
+            </h1>
+            <p className="text-sm sm:text-base mt-4 sm:mt-6">
+              Keep track of attendance and stay informed.
+            </p>
           </div>
         </div>
-      </div>
+
+        {/* Main Content Section */}
+        <div className="p-4 sm:p-6 rounded-lg max-w-full lg:max-w-5xl flex flex-col md:flex-row gap-6"
+          style={{
+            backgroundColor: courseInfo?.hexcode || '#7685fc',
+          }}
+        >
+          {/* Calendar */}
+          <div className="bg-[#f5f5f0] rounded-lg p-4 md:p-6 text-gray-700 w-full md:w-[320px] flex-shrink-0 overflow-auto">
+            {renderHeader()}
+            {renderDays()}
+            {renderCells()}
+          </div>
+
+          {/* Attendance Statistics */}
+          <div className="flex flex-col justify-center items-start w-full min-h-[220px] md:min-h-[300px] gap-6 px-2 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+              <StatCard label="Total No. of Present" value={totalPresent} />
+              <StatCard label="Total No. of Absent" value={totalAbsent} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+              <StatCard label="Total No. of Late" value={totalLate} />
+              <StatCard label="Total No. of Excused" value={totalExcused} />
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

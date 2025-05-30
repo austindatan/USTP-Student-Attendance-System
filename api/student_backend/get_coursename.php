@@ -12,12 +12,13 @@ if (isset($_GET['student_id']) && isset($_GET['course_code'])) {
     $studentId = intval($_GET['student_id']);
     $courseCode = $_GET['course_code']; // Get the course_code from the URL
 
-    // SQL query to join tables and fetch the course_name
-    // based on student_details_id and course_code.
-    // We assume 'student_id' in Student_Details is the primary key.
-    // And 'course_code' in Course table is what you're passing.
+    // SQL query to join tables and fetch the course_name, image, and hexcode
     $stmt = $conn->prepare("
-        SELECT course.course_name FROM student_details
+        SELECT
+            course.course_name,
+            section_courses.image,  -- Added image column
+            section_courses.hexcode -- Added hexcode column
+        FROM student_details
         INNER JOIN section_courses ON section_courses.section_course_id = student_details.section_course_id
         INNER JOIN course ON course.course_id = section_courses.course_id
         INNER JOIN student ON student.student_id = student_details.student_id
@@ -39,6 +40,8 @@ if (isset($_GET['student_id']) && isset($_GET['course_code'])) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $response['course_name'] = $row['course_name'];
+        $response['image'] = $row['image'];   // Included image in response
+        $response['hexcode'] = $row['hexcode']; // Included hexcode in response
     } else {
         $response['error'] = "Course not found for the given student and course code.";
     }

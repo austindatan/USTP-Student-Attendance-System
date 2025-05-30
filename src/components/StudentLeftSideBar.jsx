@@ -125,36 +125,6 @@ const StudentLeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Classes_Dashboard}
-                        className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-                            classes_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
-                        }`}
-                    >
-                        {loading ? (
-                            <div className="w-6 h-8 mb-1 rounded bg-gray-200 animate-pulse" />
-                        ) : (
-                            <>
-                                <img
-                                    src={`${process.env.PUBLIC_URL}/assets/classes.png`}
-                                    alt="Classes"
-                                    className={`w-6 h-8 mb-1 block ${classes_active ? 'hidden' : 'group-hover:hidden'}`}
-                                />
-                                <img
-                                    src={`${process.env.PUBLIC_URL}/assets/classes-active.png`}
-                                    alt="Classes Active"
-                                    className={`w-6 h-8 mb-1 ${classes_active ? 'block' : 'hidden group-hover:block'}`}
-                                />
-                            </>
-                        )}
-                        {loading ? (
-                            <div className="w-10 h-3 rounded bg-gray-200 animate-pulse" />
-                        ) : (
-                            <span className="text-xs">Classes</span>
-                        )}
-                    </button>
-
-                    <button
-                        type="button"
                         onClick={Add_Excuse_Request_Page}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
                             excuse_requests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
