@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
+// Component Imports (Ensure these paths are correct for your project)
 import EditProfile from "./pages/instructor/EditProfile";
 import LeftSidebar from './components/leftsidebar';
 import AdminLeftSidebar from './components/AdminLeftSidebar';
@@ -22,8 +23,8 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRightSidebar from './components/student_rightsidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
 import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
-import StudentSectionDashboard from "./pages/student/StudentSectionDashboard";
 import AddExcuseRequest from './pages/student/AddExcuseRequest';
+import AttendanceSummary from './pages/student/AttendanceSummary'; // Import your AttendanceSummary component
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
@@ -44,12 +45,8 @@ import EditSectionCourse from './pages/admin/EditSectionCourse';
 import AddSectionCourse from './pages/admin/AddSectionCourse';
 
 import ProtectedRoute from "./components/ProtectedRoute";
-
 import NotFound from "./components/NotFound";
 
-
-import AttendanceSummary from './pages/student/AttendanceSummary'; // Assuming you have this component
-<Route path="/Attendance-Summary/:classCode" element={<AttendanceSummary/>} />
 
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
   const location = useLocation();
@@ -80,11 +77,11 @@ function AdminLayout({ children }) {
   );
 }
 
-function StudentLayout({ children, bgImage, setBgImage }) { // Correctly accepts bgImage and setBgImage
+function StudentLayout({ children, bgImage, setBgImage }) {
   return (
     <div className="flex h-screen w-full">
-      <StudentLeftSideBar setBgImage={setBgImage} /> {/* StudentLeftSideBar is always rendered here */}
-      <div className="flex-1 overflow-y-auto" style={{ backgroundImage: bgImage }}> {/* Background applied here */}
+      <StudentLeftSideBar setBgImage={setBgImage} />
+      <div className="flex-1 overflow-y-auto" style={{ backgroundImage: bgImage }}>
         {children}
       </div>
       <StudentRightSidebar />
@@ -99,31 +96,31 @@ function App() {
 
   const [studentDetailsId, setStudentDetailsId] = useState(null);
   console.log("App.js (render): current studentDetailsId state =", studentDetailsId); 
-   
-useEffect(() => {
-  const idFromLocalStorage = localStorage.getItem('studentDetailsId');
-  console.log("App.js (useEffect): Loaded studentDetailsId from localStorage:", idFromLocalStorage, " (type: " + typeof idFromLocalStorage + ")"); // Added type log
+    
+  useEffect(() => {
+    const idFromLocalStorage = localStorage.getItem('studentDetailsId');
+    console.log("App.js (useEffect): Loaded studentDetailsId from localStorage:", idFromLocalStorage, " (type: " + typeof idFromLocalStorage + ")");
 
-  if (idFromLocalStorage && idFromLocalStorage !== "null" && idFromLocalStorage !== "undefined" && idFromLocalStorage !== "") {
-    const parsedId = parseInt(idFromLocalStorage, 10);
-    if (!isNaN(parsedId)) { 
-        setStudentDetailsId(parsedId); 
-        console.log("App.js (useEffect): Set studentDetailsId to (parsed):", parsedId, " (type: " + typeof parsedId + ")");
+    if (idFromLocalStorage && idFromLocalStorage !== "null" && idFromLocalStorage !== "undefined" && idFromLocalStorage !== "") {
+      const parsedId = parseInt(idFromLocalStorage, 10);
+      if (!isNaN(parsedId)) { 
+          setStudentDetailsId(parsedId); 
+          console.log("App.js (useEffect): Set studentDetailsId to (parsed):", parsedId, " (type: " + typeof parsedId + ")");
+      } else {
+          setStudentDetailsId(null);
+          console.log("App.js (useEffect): Parsed ID was NaN, setting to null.");
+      }
     } else {
-        setStudentDetailsId(null);
-        console.log("App.js (useEffect): Parsed ID was NaN, setting to null.");
+      setStudentDetailsId(null);
+      console.log("App.js (useEffect): localStorage ID was falsy, setting to null.");
     }
-  } else {
-    setStudentDetailsId(null);
-    console.log("App.js (useEffect): localStorage ID was falsy, setting to null.");
-  }
 
     const handleStorageChange = (event) => {
       if (event.key === 'studentDetailsId') {
         const updatedId = event.newValue;
         console.log("App.js (storage event): studentDetailsId updated:", updatedId);
         if (updatedId && updatedId !== "null" && updatedId !== "undefined" && updatedId !== "") {
-          setStudentDetailsId(updatedId);
+          setStudentDetailsId(parseInt(updatedId, 10)); // Ensure parsed as number
         } else {
           setStudentDetailsId(null);
         }
@@ -146,24 +143,30 @@ useEffect(() => {
         <Route path="/login-instructor" element={<LoginInstructor />} />
         <Route path="/register-instructor" element={<RegisterInstructor />} />
 
-             <Route
+        <Route
           path="/student-dashboard"
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <StudentLayout
-                bgImage={bgImage} // Pass the current background image
-                setBgImage={setBgImage} // Pass the function to change it
+                bgImage={bgImage}
+                setBgImage={setBgImage}
               >
                 <StudentDashboard />
               </StudentLayout>
             </ProtectedRoute>
           }
         />
-         {/* Your new route for Attendance Summary */}
-        <Route path="/Attendance-Summary/:classCode" element={
+        {/* Route for Attendance Summary with conditional rendering */}
+        <Route path="/Attendance-Summary/:course_code" element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
                 <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
-                    <AttendanceSummary />
+                    {/* Render AttendanceSummary ONLY if studentDetailsId is available */}
+                    {studentDetailsId ? (
+                        <AttendanceSummary studentId={studentDetailsId} />
+                    ) : (
+                        // Show a loading message while studentDetailsId is null/undefined
+                        <div>Loading student attendance data...</div>
+                    )}
                 </StudentLayout>
             </ProtectedRoute>
         } />
@@ -173,22 +176,11 @@ useEffect(() => {
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <StudentLayout
-                bgImage={bgImage} // Pass the current background image
-                setBgImage={setBgImage} // Pass the function to change it
+                bgImage={bgImage}
+                setBgImage={setBgImage}
               >
-                <StudentClassesDashboard /> {/* This is where DemoCards is likely rendered */}
+                <StudentClassesDashboard />
               </StudentLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/student-section-dashboard/:sectionId"
-          element={
-            <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
-              <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
-                <StudentSectionDashboard selectedDate={selectedDate} />
-              </DashboardLayout>
             </ProtectedRoute>
           }
         />
@@ -198,8 +190,8 @@ useEffect(() => {
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <StudentLayout
-                bgImage={bgImage} // Pass the current background image
-                setBgImage={setBgImage} // Pass the function to change it
+                bgImage={bgImage}
+                setBgImage={setBgImage}
               >
                 <StudentEditProfile />
               </StudentLayout>
@@ -212,8 +204,8 @@ useEffect(() => {
           element={
             <ProtectedRoute allowedRoles={['student']} redirectPath="/login-student">
               <StudentLayout
-                bgImage={bgImage} // <-- This correctly passes the current background image
-                setBgImage={setBgImage} // <-- This correctly passes the setter function
+                bgImage={bgImage}
+                setBgImage={setBgImage}
               >
                 <AddExcuseRequest studentDetailsId={studentDetailsId} />
               </StudentLayout>
