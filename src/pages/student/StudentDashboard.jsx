@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
+import ClassCard from "./Classcard";
 
-
-// Helper components
 function DashboardCard({ icon, label, count }) {
   return (
     <div className="font-dm-sans bg-white backdrop-blur-md p-5 rounded-2xl shadow-lg flex items-center gap-4 hover:scale-[1.02] transition-transform min-w-[130px]">
@@ -57,22 +56,22 @@ function StudentDashboard() {
 
     const endpoints = [
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_absent_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_excused_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
         setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_late_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
         setter: setMissed,
         key: "total_late",
       },
@@ -111,30 +110,45 @@ function StudentDashboard() {
         setClasses([
           {
             section_id: 101,
-            subject: "Introduction to IT",
+            code: "IT101",
+            title: "Introduction to IT",
+            room: "B201",
+            schedule: "Mon, Wed 10:00 AM - 12:00 PM",
             teacher: "Mr. Smith",
             present: 20,
             absent: 2,
             late: 1,
             excused: 0,
+            bgImage: "/images/computer.png",
+            bgColor: "#007acc",
           },
           {
             section_id: 102,
-            subject: "Data Structures",
+            code: "DS201",
+            title: "Data Structures",
+            room: "C305",
+            schedule: "Tue, Thu 01:00 PM - 03:00 PM",
             teacher: "Ms. Garcia",
             present: 18,
             absent: 4,
             late: 2,
             excused: 1,
+            bgImage: "/images/math.png",
+            bgColor: "#d97706",
           },
           {
             section_id: 103,
-            subject: "Discrete Mathematics",
+            code: "DM301",
+            title: "Discrete Mathematics",
+            room: "A102",
+            schedule: "Fri 09:00 AM - 11:00 AM",
             teacher: "Mr. Lee",
             present: 22,
             absent: 0,
             late: 0,
             excused: 1,
+            bgImage: "/images/book.png",
+            bgColor: "#10b981",
           },
         ]);
       })
@@ -156,7 +170,8 @@ function StudentDashboard() {
         {/* Header + Attendance Cards in Flex Row */}
         <div className="flex flex-col lg:flex-row gap-6 items-start mb-8">
           {/* Welcome Header */}
-          <div className="bg-[#7685fc] rounded-lg p-6 text-white font-poppins relative overflow-hidden w-full lg:w-1/3 aspect-square lg:aspect-auto"
+          <div
+            className="bg-[#7685fc] rounded-lg px-6 py-8 text-white font-poppins relative overflow-hidden w-full lg:w-1/3 aspect-square lg:aspect-auto"
             style={
               !loading
                 ? {
@@ -202,7 +217,41 @@ function StudentDashboard() {
           </div>
         </div>
 
+        {/* Upcoming Classes Container with only header */}
+        <div className="bg-[#7685fc] p-3 rounded-lg shadow-lg mb-6 mt-4 w-[900px]">
+          <h2 className="text-2xl font-bold text-white font-poppins mb-3 ml-2 mt-1">
+            Upcoming Classes
+          </h2>
+        </div>
 
+        {/* Class cards BELOW the container */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-6 lg:pr-[400px] mt-6 ml-[-20px]">
+          {loading ? (
+            [...Array(3)].map((_, i) => <SkeletonCard key={i} />)
+          ) : error ? (
+            <p className="text-red-600 font-medium w-full text-center">{error}</p>
+          ) : classes.length === 0 ? (
+            <p className="text-gray-600 w-full text-center">No upcoming classes found.</p>
+          ) : (
+            classes.map((cls) => (
+              <ClassCard
+                key={cls.section_id}
+                sectionId={cls.section_id}
+                code={cls.code}
+                title={cls.title}
+                room={cls.room}
+                schedule={cls.schedule}
+                teacher={cls.teacher}
+                present={cls.present}
+                absent={cls.absent}
+                late={cls.late}
+                excused={cls.excused}
+                bgImage={cls.bgImage}
+                bgColor={cls.bgColor}
+              />
+            ))
+          )}
+        </div>
       </section>
     </div>
   );

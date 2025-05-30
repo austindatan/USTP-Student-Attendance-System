@@ -51,7 +51,7 @@ const StudentEditProfile = () => {
 
     // Now, `studentIdToFetch` should definitely have a valid ID
     fetch(
-      `http://localhost/ustp-student-attendance/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/USTP-Student-Attendance-System/api/get_student.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
@@ -70,7 +70,7 @@ const StudentEditProfile = () => {
 
           const image = data.student.image;
           const resolvedURL = image
-            ? `http://localhost/ustp-student-attendance/uploads/${image.replace("uploads/", "")}`
+            ? `http://localhost/USTP-Student-Attendance-System/uploads/${image.replace("uploads/", "")}`
             : "";
           setPreviewURL(resolvedURL);
         } else {
@@ -113,7 +113,7 @@ const StudentEditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/ustp-student-attendance/api/edit_student_profile.php",
+        "http://localhost/USTP-Student-Attendance-System/api/edit_student_profile.php",
         {
           method: "POST",
           body: formPayload,
@@ -147,7 +147,7 @@ const StudentEditProfile = () => {
   };
 
   return (
-    <div className="font-dm-sans px-4 sm:px-10 py-6 sm:py-10 text-left w-full max-w-[85%] sm:max-w-2xl mx-auto text-sm sm:text-base mt-10 mb-10 bg-white rounded-lg shadow-lg transition-all duration-300">
+   <div className="font-dm-sans px-4 sm:px-10 py-6 sm:py-10 text-left w-full max-w-[85%] sm:max-w-2xl ml-4 sm:ml-[200px] text-sm sm:text-base mt-10 mb-10 bg-white rounded-lg shadow-lg transition-all duration-300">
       <div className="mb-8">
         <button
           type="button"

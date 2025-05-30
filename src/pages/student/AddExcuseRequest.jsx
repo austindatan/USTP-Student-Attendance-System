@@ -15,7 +15,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost/USTP-student-attendance-system/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_student_courses.php?student_details_id=${studentDetailsId}`)
       .then(res => {
         if (res.data.success) {
           setCourses(res.data.courses);
@@ -32,7 +32,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
       return;
     }
     axios
-      .get(`http://localhost/USTP-student-attendance-system/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`)
+      .get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_instructor_by_course.php?student_details_id=${studentDetailsId}&course_id=${courseId}`)
       .then(res => {
         if (res.data.success) {
           setInstructor(res.data.instructor_name || '');
@@ -55,7 +55,7 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
     formData.append('date_of_absence', dateOfAbsence);
 
     try {
-      const res = await axios.post('http://localhost/USTP-student-attendance-system/api/student_backend/submit_excuse_request.php', formData);
+      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/api/student_backend/submit_excuse_request.php', formData);
       if (res.data.message) {
         setMessage(res.data.message);
         setSuccess(res.data.success === true || res.data.success === "true");
@@ -78,8 +78,11 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
-      <h2 className="text-2xl font-semibold text-center mb-6">Excuse Request Form</h2>
+    <form 
+      onSubmit={handleSubmit}
+      className="font-dm-sans px-4 sm:px-10 py-6 sm:py-10 text-left w-full max-w-[85%] sm:max-w-2xl ml-4 sm:ml-[200px] text-sm sm:text-base mt-10 mb-10 bg-white rounded-lg shadow-lg transition-all duration-300 space-y-6"
+    >
+      <h2 className="text-2xl font-semibold text-center mb-4">Excuse Request Form</h2>
 
       {message && (
         <div
@@ -91,14 +94,14 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
         </div>
       )}
 
-      <div className="flex flex-col">
-        <label htmlFor="course" className="mb-2 font-medium">Course</label>
+      <div>
+        <label htmlFor="course" className="block mb-2 font-medium">Course</label>
         <select
           id="course"
           value={courseId}
           onChange={e => setCourseId(e.target.value)}
           required
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">Select a course</option>
           {courses.map(course => (
@@ -107,49 +110,49 @@ const AddExcuseRequest = ({ studentDetailsId }) => {
         </select>
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="instructor" className="mb-2 font-medium">Instructor</label>
+      <div>
+        <label htmlFor="instructor" className="block mb-2 font-medium">Instructor</label>
         <input
           id="instructor"
           type="text"
           value={instructor}
           readOnly
-          className="border bg-gray-100 rounded px-3 py-2"
+          className="w-full border bg-gray-100 rounded px-3 py-2"
         />
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="reason" className="mb-2 font-medium">Reason</label>
+      <div>
+        <label htmlFor="reason" className="block mb-2 font-medium">Reason</label>
         <textarea
           id="reason"
           value={reason}
           onChange={e => setReason(e.target.value)}
           required
           rows={4}
-          className="border rounded px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="file" className="mb-2 font-medium">Upload File (Optional)</label>
+      <div>
+        <label htmlFor="file" className="block mb-2 font-medium">Upload File (Optional)</label>
         <input
           id="file"
           type="file"
           onChange={e => setFile(e.target.files[0])}
-          className="focus:outline-none"
+          className="w-full focus:outline-none"
           ref={fileInputRef}
         />
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="dateOfAbsence" className="mb-2 font-medium">Date of Absence</label>
+      <div>
+        <label htmlFor="dateOfAbsence" className="block mb-2 font-medium">Date of Absence</label>
         <input
           id="dateOfAbsence"
           type="date"
           value={dateOfAbsence}
           onChange={e => setDateOfAbsence(e.target.value)}
           required
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 

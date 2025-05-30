@@ -6,6 +6,7 @@ const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used 
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [showThemes, setShowThemes] = useState(false); // Add this state
 
     // studentDetailsId is read directly here, which is fine for UI logic
     // as it doesn't cause a render loop like in App.js trying to pass it as a prop
@@ -31,15 +32,11 @@ const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used 
         navigate("/add-excuse-request");
     };
 
-    // --- START OF FIX ---
-    // Corrected path comparisons for student specific routes
-    const dashboard_active = location.pathname === '/student-dashboard'; // Corrected path
-    const classes_active = location.pathname === '/student-classes-dashboard'; // Simpler check for student classes
-    // Note: If you have dynamic student class routes like /student-classes/:id, you'd use startsWith
-    // For now, based on your routes, exact match is sufficient.
-    const excuse_requests_active = location.pathname === '/add-excuse-request'; // Corrected path
-    // --- END OF FIX ---
-
+    const dashboard_active = location.pathname === '/student-dashboard'; // Adjusted for student dashboard
+    const classes_active = ['/student-classes-dashboard', '/section-dashboard/:sectionId'].some(path => // Adjusted for student classes
+        location.pathname.startsWith(path)
+    );
+    const excuse_requests_active = location.pathname === '/excuse-requests';
 
     return (
         <>
@@ -98,7 +95,6 @@ const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used 
                 </div>
 
                 <nav className="flex flex-col items-center gap-6 mt-5 text-sm text-[#737373]">
-
                     <button
                         type="button"
                         onClick={Student_Dashboard} 
@@ -188,13 +184,13 @@ const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used 
                             <span className="text-xs">Excuse <br />Requests</span>
                         )}
                     </button>
-
                 </nav>
 
                 <div className="absolute bottom-4 w-full flex justify-center">
                     <div className="relative group">
                         <button
                             type="button"
+                            onClick={() => setShowThemes(prev => !prev)} // Add this onClick handler
                             className="group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center text-[#737373] hover:text-[#7685fc]"
                         >
                             {loading ? (
@@ -221,28 +217,44 @@ const StudentLeftSidebar = ({ setBgImage }) => { // setBgImage prop is not used 
                         </button>
 
                         {!loading && (
-                            <div className="absolute bottom-full font-dm-sans text-sm left-1 bg-white border rounded-md shadow-md hidden group-hover:block z-50">
+                            <div
+                                className={`absolute bottom-full font-dm-sans text-sm left-1 bg-white border rounded-md shadow-md z-50 ${
+                                    showThemes ? "block" : "hidden" // Use showThemes state here
+                                } md:group-hover:block`}
+                            >
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/water_theme.png')`)}
+                                    onClick={() => {
+                                        setBgImage(`url('${process.env.PUBLIC_URL}/assets/water_theme.png')`);
+                                        setShowThemes(false); // Close dropdown after selection
+                                    }}
                                 >
                                     Water
                                 </button>
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/forest_theme.png')`)}
+                                    onClick={() => {
+                                        setBgImage(`url('${process.env.PUBLIC_URL}/assets/forest_theme.png')`);
+                                        setShowThemes(false); // Close dropdown after selection
+                                    }}
                                 >
                                     Forest
                                 </button>
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`)}
+                                    onClick={() => {
+                                        setBgImage(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
+                                        setShowThemes(false); // Close dropdown after selection
+                                    }}
                                 >
                                     USTP
                                 </button>
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-                                    onClick={() => setBgImage(`url('${process.env.PUBLIC_URL}/assets/white_theme.png')`)}
+                                    onClick={() => {
+                                        setBgImage(`url('${process.env.PUBLIC_URL}/assets/white_theme.png')`);
+                                        setShowThemes(false); // Close dropdown after selection
+                                    }}
                                 >
                                     Default
                                 </button>
