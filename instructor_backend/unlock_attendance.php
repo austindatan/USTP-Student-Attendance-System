@@ -3,28 +3,64 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
+// Include the database connection file
 require_once('../src/conn.php');
 
-// Enable error reporting for debugging
+// Enable error reporting for debugging purposes.
+// In a production environment, these should be disabled or logged to a file.
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Check if the database connection was successful
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $conn->connect_error]);
     exit;
 }
 
+// Decode the JSON input received from the client
 $data = json_decode(file_get_contents("php://input"), true);
 
+// Extract and sanitize input data
 $section_id = isset($data['section_id']) ? (int)$data['section_id'] : 0;
 $date = isset($data['date']) ? $data['date'] : null;
-$passcode = isset($data['passcode']) ? trim($data['passcode']) : '';
+$submitted_passcode = isset($data['passcode']) ? trim($data['passcode']) : '';
+$instructor_id = isset($data['instructor_id']) ? (int)$data['instructor_id'] : 0; // Added to get instructor_id
 
-$EXPECTED_PASSCODE = '1234'; // 🔐 Replace this with secure value or verify from DB
+// Validate essential input fields, now including instructor_id
+if (!$section_id || !$date || !$submitted_passcode || !$instructor_id) {
+    echo json_encode(['success' => false, 'message' => 'Missing required fields (section_id, date, passcode, or instructor_id).']);
+    exit;
+}
 
-if (!$section_id || !$date || $passcode !== $EXPECTED_PASSCODE) {
-    echo json_encode(['success' => false, 'message' => 'Missing fields or invalid passcode.']);
+// --- Fetch the expected password from the instructor table ---
+$getPasscodeQuery = "SELECT password FROM instructor WHERE instructor_id = ?";
+$stmt_passcode = $conn->prepare($getPasscodeQuery);
+
+if ($stmt_passcode === false) {
+    echo json_encode(['success' => false, 'message' => 'Failed to prepare password retrieval statement: ' . $conn->error]);
+    exit;
+}
+
+$stmt_passcode->bind_param("i", $instructor_id);
+$stmt_passcode->execute();
+$result_passcode = $stmt_passcode->get_result();
+
+if ($result_passcode->num_rows === 0) {
+    echo json_encode(['success' => false, 'message' => 'Instructor not found.']);
+    $stmt_passcode->close();
+    $conn->close();
+    exit;
+}
+
+$instructor_data = $result_passcode->fetch_assoc();
+$expected_passcode_hash = $instructor_data['password']; // This should be the hashed password
+
+// --- IMPORTANT: Use password_verify() if your passwords are hashed! ---
+if (!password_verify($submitted_passcode, $expected_passcode_hash)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid passcode.']);
+    $stmt_passcode->close();
+    $conn->close();
     exit;
 }
 
