@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal'; // Assuming this path is correct
+import ConfirmationModal from '../../components/confirmationmodal';
 
 export default function EditStudent() {
     const { student_id } = useParams();
@@ -22,48 +22,49 @@ export default function EditStudent() {
         country: '',
     });
 
-    const [enrollments, setEnrollments] = useState([]);
     const [imageFile, setImageFile] = useState(null);
+    const [studentAcademicDetails, setStudentAcademicDetails] = useState({
+        program_details_id: '',
+        year_level_id: '',
+        semester_id: '',
+    });
+
+    const [academicDetailsLocked, setAcademicDetailsLocked] = useState(false);
 
     const [programDetails, setProgramDetails] = useState([]);
     const [yearLevels, setYearLevels] = useState([]);
     const [semesters, setSemesters] = useState([]);
-
-    const [newEnrollment, setNewEnrollment] = useState({
-        program_details_id: '',
-        year_level_id: '',
-        semester_id: '',
-        section_course_id: '',
-        isNew: true,
-    });
+    const [enrollments, setEnrollments] = useState([]);
+    const [newEnrollmentSectionCourseId, setNewEnrollmentSectionCourseId] = useState('');
 
     const [cachedSections, setCachedSections] = useState({});
+
     const [isEditStudentModalOpen, setIsEditStudentModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
 
     const fetchSections = useCallback(async (yearLevelId, semesterId) => {
         if (!yearLevelId || !semesterId) {
-            return [];
+            return []; 
         }
         const cacheKey = `${yearLevelId}-${semesterId}`;
+
         if (cachedSections[cacheKey]) {
-            return cachedSections[cacheKey];
+            return cachedSections[cacheKey]; 
         }
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
             const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
-            setCachedSections(prev => ({ ...prev, [cacheKey]: fetchedSections }));
+            setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
         } catch (error) {
             console.error(`Error fetching sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
             return [];
         }
-    }, [cachedSections]);
+    }, []); 
 
-    // Initial Data Fetch Effect
     useEffect(() => {
         const fetchData = async () => {
             setIsLoadingInitialData(true);
@@ -96,37 +97,46 @@ export default function EditStudent() {
                     country: studentData.country || '',
                 });
 
-                const tempCachedSections = {};
-                const sectionFetchPromises = [];
-
-                const initialEnrollments = (studentData.enrollments || []).map((enrollment) => {
-                    if (enrollment.year_level_id && enrollment.semester_id) {
-                        const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
-                        if (!tempCachedSections[cacheKey]) {
-                            sectionFetchPromises.push(
-                                axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', {
-                                    params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
-                                }).then(res => {
-                                    tempCachedSections[cacheKey] = res.data;
-                                }).catch(error => {
+                const newSectionsCache = {};
+                const initialEnrollments = await Promise.all(
+                    (studentData.enrollments || []).map(async (enrollment) => {
+                        if (enrollment.year_level_id && enrollment.semester_id) {
+                            const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
+                            if (!newSectionsCache[cacheKey]) {
+                                try {
+                                    const res = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', {
+                                        params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
+                                    });
+                                    newSectionsCache[cacheKey] = res.data;
+                                } catch (error) {
                                     console.error(`Error fetching sections for Year ${enrollment.year_level_id}, Semester ${enrollment.semester_id}:`, error);
-                                    tempCachedSections[cacheKey] = [];
-                                })
-                            );
+                                    newSectionsCache[cacheKey] = [];
+                                }
+                            }
                         }
-                    }
-                    return {
-                        ...enrollment,
-                        isNew: false,
-                        year_level_id: enrollment.year_level_id || '',
-                        semester_id: enrollment.semester_id || '',
-                        section_course_id: enrollment.section_course_id || '',
-                    };
-                });
+                        return {
+                            ...enrollment,
+                            isNew: false, 
+                            year_level_id: enrollment.year_level_id || '',
+                            semester_id: enrollment.semester_id || '',
+                            section_course_id: enrollment.section_course_id || '',
+                        };
+                    })
+                );
 
-                await Promise.all(sectionFetchPromises);
-                setCachedSections(tempCachedSections);
+                setCachedSections(newSectionsCache); 
                 setEnrollments(initialEnrollments);
+
+                if (initialEnrollments.length > 0) {
+                    const firstEnrollment = initialEnrollments[0];
+                    setStudentAcademicDetails({
+                        program_details_id: firstEnrollment.program_details_id,
+                        year_level_id: firstEnrollment.year_level_id,
+                        semester_id: firstEnrollment.semester_id,
+                    });
+                    setAcademicDetailsLocked(true);
+                }
+
 
             } catch (err) {
                 console.error('Failed to fetch data:', err);
@@ -140,6 +150,13 @@ export default function EditStudent() {
         fetchData();
     }, [student_id, navigate]);
 
+    useEffect(() => {
+        const { year_level_id, semester_id } = studentAcademicDetails;
+        if (year_level_id && semester_id) {
+            fetchSections(year_level_id, semester_id);
+        }
+    }, [studentAcademicDetails.year_level_id, studentAcademicDetails.semester_id, fetchSections]);
+
     const handleStudentDataChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -149,91 +166,89 @@ export default function EditStudent() {
         setImageFile(e.target.files[0]);
     };
 
-    // Handles changes for existing enrollments
     const handleEnrollmentChange = useCallback(async (index, field, value) => {
         setEnrollments(prevEnrollments => {
             const updatedEnrollments = [...prevEnrollments];
-            const currentEnrollment = { ...updatedEnrollments[index] }; // Create a mutable copy
+            const currentEnrollment = { ...updatedEnrollments[index] };
 
-            currentEnrollment[field] = value; // Update the field
+            currentEnrollment[field] = value;
 
-            // If a key field of an *existing* enrollment is changed,
-            // mark it as 'new' and remove its old ID.
-            // This enables the "delete and re-insert" strategy on the backend.
             if (
-                currentEnrollment.student_details_id && // It's an existing enrollment loaded from DB
-                (field === 'program_details_id' || field === 'year_level_id' || field === 'semester_id' || field === 'section_course_id')
+                currentEnrollment.student_details_id && 
+                field === 'section_course_id'
             ) {
                 currentEnrollment.isNew = true;
                 delete currentEnrollment.student_details_id;
             }
 
-
-            if (field === 'year_level_id' || field === 'semester_id') {
-                currentEnrollment.section_course_id = ''; // Clear section if year/semester changes
-                const year = field === 'year_level_id' ? value : currentEnrollment.year_level_id;
-                const semester = field === 'semester_id' ? value : currentEnrollment.semester_id;
-
-                if (year && semester) {
-                    fetchSections(year, semester); // Re-fetch sections for this enrollment
-                } else {
-                    // Clear sections for this index if year/semester is incomplete
-                    setCachedSections(prev => ({ ...prev, [`${year}-${semester}`]: [] }));
-                }
-            }
-            updatedEnrollments[index] = currentEnrollment; // Assign the updated enrollment back
+            updatedEnrollments[index] = currentEnrollment;
             return updatedEnrollments;
         });
-    }, [fetchSections]);
+    }, []); 
 
+    const handleStudentAcademicDetailsChange = (e) => {
+        const { name, value } = e.target;
+        const updatedDetails = { ...studentAcademicDetails, [name]: value };
+        setStudentAcademicDetails(updatedDetails);
 
-    // Handles changes for the 'newEnrollment' state
-    const handleNewEnrollmentChange = useCallback(async (field, value) => {
-        setNewEnrollment(currentEnrollmentState => ({ ...currentEnrollmentState, [field]: value }));
-
-        if (field === 'year_level_id' || field === 'semester_id') {
-            setNewEnrollment(currentEnrollmentState => ({ ...currentEnrollmentState, section_course_id: '' }));
-            const year = field === 'year_level_id' ? value : newEnrollment.year_level_id;
-            const semester = field === 'semester_id' ? value : newEnrollment.semester_id;
-            if (year && semester) {
-                await fetchSections(year, semester);
-            }
+        if (updatedDetails.program_details_id && updatedDetails.year_level_id && updatedDetails.semester_id) {
+            setAcademicDetailsLocked(true);
         }
-    }, [fetchSections, newEnrollment.year_level_id, newEnrollment.semester_id]);
+    };
 
     const addEnrollment = () => {
-        if (!newEnrollment.program_details_id || !newEnrollment.section_course_id || !newEnrollment.year_level_id || !newEnrollment.semester_id) {
-            alert('Please select Year Level, Semester, Program, and Section for the new enrollment before adding.');
+        if (
+            !studentAcademicDetails.program_details_id ||
+            !studentAcademicDetails.year_level_id ||
+            !studentAcademicDetails.semester_id
+        ) {
+            alert('Please select Program, Year Level, and Semester in the "Student\'s Academic Details" section first.');
             return;
         }
 
+        if (!newEnrollmentSectionCourseId) {
+            alert('Please select a Class Section to add.');
+            return;
+        }
+
+        const newFullEnrollment = {
+            program_details_id: studentAcademicDetails.program_details_id,
+            year_level_id: studentAcademicDetails.year_level_id,
+            semester_id: studentAcademicDetails.semester_id,
+            section_course_id: newEnrollmentSectionCourseId,
+            isNew: true, 
+        };
         const isDuplicate = enrollments.some(existing =>
-            String(existing.section_course_id) === String(newEnrollment.section_course_id) &&
-            String(existing.program_details_id) === String(newEnrollment.program_details_id)
+            String(existing.section_course_id) === String(newFullEnrollment.section_course_id) &&
+            String(existing.program_details_id) === String(newFullEnrollment.program_details_id) &&
+            String(existing.year_level_id) === String(newFullEnrollment.year_level_id) &&
+            String(existing.semester_id) === String(newFullEnrollment.semester_id)
         );
-
         if (isDuplicate) {
-            alert('This student is already enrolled in this exact class combination.');
+            alert('This class (combination of program, year, semester, and section) has already been added.');
             return;
         }
 
-        setEnrollments(prev => [...prev, { ...newEnrollment, isNew: true }]);
-        setNewEnrollment({
-            program_details_id: '',
-            year_level_id: '',
-            semester_id: '',
-            section_course_id: '',
-            isNew: true,
-        });
+        setEnrollments(prevEnrollments => [...prevEnrollments, newFullEnrollment]);
+        setNewEnrollmentSectionCourseId(''); 
     };
 
     const removeEnrollment = (index) => {
         setEnrollments(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handleResetAcademicDetails = () => {
+        setStudentAcademicDetails({
+            program_details_id: '',
+            year_level_id: '',
+            semester_id: '',
+        });
+        setAcademicDetailsLocked(false);
+        setNewEnrollmentSectionCourseId('');
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-
         if (!formData.firstname || !formData.lastname || !formData.email || !formData.date_of_birth || !formData.contact_number) {
             alert('Please fill in all required personal information fields: First Name, Last Name, Email, Date of Birth, and Contact Number.');
             return;
@@ -244,14 +259,11 @@ export default function EditStudent() {
             return;
         }
 
-        // Validate all existing enrollments before opening modal
         const hasInvalidEnrollment = enrollments.some(enrollment => {
-            return !enrollment.program_details_id || !enrollment.year_level_id ||
-                   !enrollment.semester_id || !enrollment.section_course_id;
+            return !enrollment.section_course_id;
         });
-
         if (hasInvalidEnrollment) {
-            alert('Please ensure all existing enrollment fields (Program, Year Level, Semester, Section/Course) are selected for every enrollment.');
+            alert('Please ensure all existing enrollment fields (Class Section) are selected for every enrollment.');
             return;
         }
 
@@ -263,29 +275,27 @@ export default function EditStudent() {
         setIsSaving(true);
         const submissionData = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
-            if (value !== null) { // Ensure null values are not appended, empty strings are fine
+            if (value !== null) {
                 submissionData.append(key, value);
             }
         });
-
         if (imageFile) {
             if (imageFile instanceof File) {
                 submissionData.append('image', imageFile);
             }
         } else {
-            // If imageFile is null, it means the user cleared the image.
-            // Send a flag to explicitly tell PHP to clear the image.
             submissionData.append('clear_image', 'true');
         }
 
         const enrollmentsToSend = enrollments.map(enrollment => ({
             student_details_id: enrollment.student_details_id,
             program_details_id: enrollment.program_details_id,
+            year_level_id: enrollment.year_level_id,
+            semester_id: enrollment.semester_id,
             section_course_id: enrollment.section_course_id,
             isNew: enrollment.isNew,
         }));
         submissionData.append('enrollments', JSON.stringify(enrollmentsToSend));
-
 
         try {
             const res = await axios.post(
@@ -323,6 +333,14 @@ export default function EditStudent() {
         return <div className="text-center mt-10">Loading student data...</div>;
     }
 
+    const isAcademicDetailsSelectedForNew = studentAcademicDetails.program_details_id &&
+        studentAcademicDetails.year_level_id &&
+        studentAcademicDetails.semester_id;
+
+    const currentSectionsForNewEnrollment = isAcademicDetailsSelectedForNew
+        ? (cachedSections[`${studentAcademicDetails.year_level_id}-${studentAcademicDetails.semester_id}`] || [])
+        : [];
+
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
@@ -343,6 +361,8 @@ export default function EditStudent() {
                     className="bg-white shadow-md p-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4"
                     encType="multipart/form-data"
                 >
+                    {/* Student Personal Information Inputs */}
+                    <h2 className="md:col-span-2 text-xl font-bold text-blue-700 mb-2">Personal Information</h2>
                     {[
                         ['firstname', 'First Name'],
                         ['middlename', 'Middle Name'],
@@ -371,6 +391,7 @@ export default function EditStudent() {
                         </div>
                     ))}
 
+                    {/* Profile Image */}
                     <div>
                         <label className="block text-sm font-semibold text-blue-700">Profile Image</label>
                         <input
@@ -381,162 +402,30 @@ export default function EditStudent() {
                         />
                     </div>
 
+                    {/* Student Overall Academic Details */}
                     <div className="md:col-span-2 mt-6 border-t pt-4">
-                        <h2 className="text-xl font-bold text-blue-700 mb-4">Student Enrollments</h2>
-
-                        {enrollments.length === 0 && (
-                            <p className="text-gray-600 mb-4">No enrollments added yet. Add a new one below.</p>
-                        )}
-
-                        {enrollments.map((enrollment, index) => (
-                            <div key={enrollment.student_details_id || `new-${index}`} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg mb-4 bg-gray-50">
-                                {/* Year Level */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700">Year Level</label>
-                                    <select
-                                        value={enrollment.year_level_id}
-                                        onChange={(e) => handleEnrollmentChange(index, 'year_level_id', e.target.value)}
-                                        required
-                                        className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Select Year Level</option>
-                                        {Array.isArray(yearLevels) && yearLevels.map((yl) => (
-                                            <option key={yl.year_id} value={yl.year_id}>
-                                                {yl.year_level_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {/* Semester */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700">Semester</label>
-                                    <select
-                                        value={enrollment.semester_id}
-                                        onChange={(e) => handleEnrollmentChange(index, 'semester_id', e.target.value)}
-                                        required
-                                        className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Select Semester</option>
-                                        {semesters.map((sem) => (
-                                            <option key={sem.semester_id} value={sem.semester_id}>
-                                                {sem.semester_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {/* Section */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700">Section</label>
-                                    <select
-                                        value={enrollment.section_course_id}
-                                        onChange={(e) => handleEnrollmentChange(index, 'section_course_id', e.target.value)}
-                                        required
-                                        className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Select Section</option>
-                                        {cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`] &&
-                                            cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`].length > 0 ? (
-                                            cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`].map((sec) => (
-                                                <option key={sec.section_course_id} value={sec.section_course_id}>
-                                                    {sec.section_name} - {sec.course_code} ({sec.course_name})
-                                                </option>
-                                            ))
-                                        ) : (
-                                            <option value="" disabled>
-                                                {enrollment.year_level_id && enrollment.semester_id ? "No sections found" : "Select Year & Semester"}
-                                            </option>
-                                        )}
-                                    </select>
-                                </div>
-                                {/* Program */}
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700">Program</label>
-                                    <select
-                                        value={enrollment.program_details_id}
-                                        onChange={(e) => handleEnrollmentChange(index, 'program_details_id', e.target.value)}
-                                        required
-                                        className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Select Program</option>
-                                        {programDetails.map((prog) => (
-                                            <option key={prog.program_details_id} value={prog.program_details_id}>
-                                                {prog.program_name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="col-span-1 md:col-span-4 flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={() => removeEnrollment(index)}
-                                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
-                                    >
-                                        Remove Enrollment
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-blue-50 mt-6">
-                            <h3 className="col-span-full text-lg font-semibold text-blue-700 mb-2">Add New Enrollment</h3>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700">Year Level</label>
-                                <select
-                                    value={newEnrollment.year_level_id}
-                                    onChange={(e) => handleNewEnrollmentChange('year_level_id', e.target.value)}
-                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        <h2 className="text-xl font-bold text-blue-700 mb-4 flex justify-between items-center">
+                            Student's Academic Details for New Enrollments
+                            {academicDetailsLocked && (
+                                <button
+                                    type="button"
+                                    onClick={handleResetAcademicDetails}
+                                    className="text-sm text-blue-600 hover:text-blue-800 underline ml-4"
                                 >
-                                    <option value="">Select Year Level</option>
-                                    {Array.isArray(yearLevels) && yearLevels.map((yl) => (
-                                        <option key={yl.year_id} value={yl.year_id}>
-                                            {yl.year_level_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700">Semester</label>
-                                <select
-                                    value={newEnrollment.semester_id}
-                                    onChange={(e) => handleNewEnrollmentChange('semester_id', e.target.value)}
-                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Select Semester</option>
-                                    {semesters.map((sem) => (
-                                        <option key={sem.semester_id} value={sem.semester_id}>
-                                            {sem.semester_name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700">Section</label>
-                                <select
-                                    value={newEnrollment.section_course_id}
-                                    onChange={(e) => handleNewEnrollmentChange('section_course_id', e.target.value)}
-                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Select Section</option>
-                                    {newEnrollment.year_level_id && newEnrollment.semester_id && cachedSections[`${newEnrollment.year_level_id}-${newEnrollment.semester_id}`] &&
-                                        cachedSections[`${newEnrollment.year_level_id}-${newEnrollment.semester_id}`].length > 0 ? (
-                                        cachedSections[`${newEnrollment.year_level_id}-${newEnrollment.semester_id}`].map((sec) => (
-                                            <option key={sec.section_course_id} value={sec.section_course_id}>
-                                                {sec.section_name} - {sec.course_code} ({sec.course_name})
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="" disabled>
-                                            {newEnrollment.year_level_id && newEnrollment.semester_id ? "No sections found" : "Select Year & Semester first"}
-                                        </option>
-                                    )}
-                                </select>
-                            </div>
+                                    Reset
+                                </button>
+                            )}
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Program */}
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700">Program</label>
                                 <select
-                                    value={newEnrollment.program_details_id}
-                                    onChange={(e) => handleNewEnrollmentChange('program_details_id', e.target.value)}
+                                    name="program_details_id"
+                                    value={studentAcademicDetails.program_details_id}
+                                    onChange={handleStudentAcademicDetailsChange}
                                     className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={academicDetailsLocked}
                                 >
                                     <option value="">Select Program</option>
                                     {programDetails.map((prog) => (
@@ -546,11 +435,136 @@ export default function EditStudent() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="col-span-full flex justify-end">
+                            {/* Year Level */}
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700">Year Level</label>
+                                <select
+                                    name="year_level_id"
+                                    value={studentAcademicDetails.year_level_id}
+                                    onChange={handleStudentAcademicDetailsChange}
+                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={academicDetailsLocked}
+                                >
+                                    <option value="">Select Year Level</option>
+                                    {Array.isArray(yearLevels) && yearLevels.map((yl) => (
+                                        <option key={yl.year_id} value={yl.year_id}>
+                                            {yl.year_level_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Semester */}
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700">Semester</label>
+                                <select
+                                    name="semester_id"
+                                    value={studentAcademicDetails.semester_id}
+                                    onChange={handleStudentAcademicDetailsChange}
+                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={academicDetailsLocked}
+                                >
+                                    <option value="">Select Semester</option>
+                                    {semesters.map((sem) => (
+                                        <option key={sem.semester_id} value={sem.semester_id}>
+                                            {sem.semester_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        {academicDetailsLocked && (
+                            <p className="text-sm text-gray-600 mt-2">
+                                * Program, Year Level, and Semester are locked. Click "Reset" to change.
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Dynamic Enrollments Section */}
+                    <div className="md:col-span-2 mt-6 border-t pt-4">
+                        <h2 className="text-xl font-bold text-blue-700 mb-4">Existing Student Enrollments (Classes)</h2>
+                        {enrollments.length === 0 && (
+                            <p className="text-gray-600 mb-4">No enrollments added yet. Add a new one below.</p>
+                        )}
+                        {/* Display existing enrollments */}
+                        {enrollments.map((enrollment, index) => {
+                            // Find the section details for display
+                            const sectionForDisplay = (cachedSections[`${enrollment.year_level_id}-${enrollment.semester_id}`] || [])
+                                .find(sec => String(sec.section_course_id) === String(enrollment.section_course_id));
+
+                            return (
+                                <div key={enrollment.student_details_id || `new-${index}`} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-blue-50 mt-6">
+                    
+                                    {/* Section (Read-Only) */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700">Section</label>
+                                        <p className="text-black w-full px-3 py-1 mt-1 border border-gray-300 rounded bg-gray-100">
+                                            {sectionForDisplay ? `${sectionForDisplay.section_name} - ${sectionForDisplay.course_code} (${sectionForDisplay.course_name})` : 'N/A'}
+                                        </p>
+                                    </div>
+                                    <div className="col-span-1 md:col-span-4 flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => removeEnrollment(index)}
+                                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
+                                        >
+                                            Remove Enrollment
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {/* Add New Enrollment Section */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-blue-50 mt-6">
+                            <h3 className="col-span-full text-lg font-semibold text-blue-700 mb-2">Add New Class Enrollment</h3>
+                            {/* Display selected academic details for context */}
+                            <div className="col-span-full">
+                                <p className="text-sm text-gray-700">
+                                    Adding class for:
+                                    <span className="font-medium ml-1">
+                                        {programDetails.find(p => String(p.program_details_id) === String(studentAcademicDetails.program_details_id))?.program_name || 'N/A'}
+                                    </span>,
+                                    <span className="font-medium ml-1">
+                                        Year {yearLevels.find(yl => String(yl.year_id) === String(studentAcademicDetails.year_level_id))?.year_level_name || 'N/A'}
+                                    </span>,
+                                    <span className="font-medium ml-1">
+                                        Semester {semesters.find(s => String(s.semester_id) === String(studentAcademicDetails.semester_id))?.semester_name || 'N/A'}
+                                    </span>
+                                </p>
+                                {!isAcademicDetailsSelectedForNew && (
+                                    <p className="text-red-500 text-sm mt-1">Please select Program, Year Level, and Semester above to enable adding classes.</p>
+                                )}
+                            </div>
+
+                            {/* Section/Course for new enrollment */}
+                            <div className="md:col-span-3">
+                                <label className="block text-sm font-semibold text-gray-700">Class Section</label>
+                                <select
+                                    value={newEnrollmentSectionCourseId}
+                                    onChange={(e) => setNewEnrollmentSectionCourseId(e.target.value)}
+                                    className="text-black w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={!isAcademicDetailsSelectedForNew}
+                                >
+                                    <option value="">Select Class Section</option>
+                                    {currentSectionsForNewEnrollment.length > 0 ? (
+                                        currentSectionsForNewEnrollment.map((sec) => (
+                                            <option key={sec.section_course_id} value={sec.section_course_id}>
+                                                {sec.section_name} - {sec.course_code} ({sec.course_name})
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="" disabled>
+                                            {isAcademicDetailsSelectedForNew ? "No sections found" : "Select Year & Semester above"}
+                                        </option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="md:col-span-1 flex items-end">
                                 <button
                                     type="button"
                                     onClick={addEnrollment}
-                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200"
+                                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200"
+                                    disabled={!isAcademicDetailsSelectedForNew}
                                 >
                                     Add Enrollment
                                 </button>

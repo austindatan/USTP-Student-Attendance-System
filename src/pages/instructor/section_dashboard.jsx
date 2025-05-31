@@ -167,7 +167,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
