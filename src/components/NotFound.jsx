@@ -1,7 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; 
 
 const NotFound = () => {
+  const navigate = useNavigate(); 
+
+  const handleGoBack = () => {
+    navigate(-1); 
+  };
+
   return (
     <div
       style={{
@@ -14,7 +20,7 @@ const NotFound = () => {
         backgroundColor: '#f0f2f5',
         color: '#333',
         padding: '2em',
-        fontFamily: "'DM Sans', sans-serif", // Apply DM Sans
+        fontFamily: "'DM Sans', sans-serif",
       }}
     >
       <img
@@ -30,25 +36,27 @@ const NotFound = () => {
             fontWeight: 'normal',
             marginTop: '0',
             marginBottom: '1em',
-            fontFamily: "'DM Sans', sans-serif", // Apply DM Sans
+            fontFamily: "'DM Sans', sans-serif",
           }}
         >
           Oops! The page you're looking for doesn't exist.
         </p>
-        <Link
-          to="/"
+        <button 
+          onClick={handleGoBack} 
           style={{
             padding: '10px 20px',
             backgroundColor: '#1D4ED8',
             color: 'white',
-            textDecoration: 'none',
+            textDecoration: 'none', 
             borderRadius: '5px',
             fontSize: '1em',
-            fontFamily: "'DM Sans', sans-serif", // Apply DM Sans
+            fontFamily: "'DM Sans', sans-serif", 
+            border: 'none', 
+            cursor: 'pointer', 
           }}
         >
-          Back to Login Page
-        </Link>
+          Back
+        </button>
       </div>
     </div>
   );
