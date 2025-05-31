@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             er.reason,
             er.date_requested,
             er.date_of_absence,
+            er.file_path,
             er.status
         FROM
             excused_request er
