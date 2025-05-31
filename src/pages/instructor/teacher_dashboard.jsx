@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import {
-  FiSettings,
   FiUsers,
   FiCheckCircle,
   FiBookOpen,
@@ -12,13 +11,12 @@ import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ClassCard from './components/class_card';
 
-
 export default function Teacher_Dashboard({ selectedDate }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   const [sections, setSections] = useState([]);
-  const [messages, setMessages] = useState([]);
+  const [simplifiedNotifications, setSimplifiedNotifications] = useState([]); // For get_recent_req_notif.php
 
   const [totalStudents, setTotalStudents] = useState(0);
   const [studentsPresentToday, setStudentsPresentToday] = useState(0);
@@ -26,14 +24,15 @@ export default function Teacher_Dashboard({ selectedDate }) {
   const [upcomingEvents, setUpcomingEvents] = useState(0);
   const instructor = JSON.parse(localStorage.getItem('instructor'));
 
+  // Effect to fetch dashboard statistics
   useEffect(() => {
     async function fetchDashboardStats() {
-      if (!instructor?.instructor_id || !selectedDate) return;
+      if (!instructor?.instructor_id) return;
 
       try {
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
         const response = await fetch(
-          `http://localhost/ustp-student-attendance-system/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
+          `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
         );
         const data = await response.json();
         setTotalStudents(data.totalStudents);
@@ -42,71 +41,40 @@ export default function Teacher_Dashboard({ selectedDate }) {
         setUpcomingEvents(data.upcomingEvents);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
+      } finally {
+        setTimeout(() => setLoading(false), 1500);
       }
     }
 
     fetchDashboardStats();
   }, [instructor?.instructor_id, selectedDate]);
 
+  // Effect to fetch simplified notifications (from get_recent_req_notif.php)
   useEffect(() => {
     if (!instructor?.instructor_id) return;
 
-    const fetchMessages = async () => {
+    const fetchSimplifiedNotifications = async () => {
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_recent_requests.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_recent_req_notif.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
-        setMessages(data);
+        setSimplifiedNotifications(data);
       } catch (err) {
-        console.error("Error fetching recent messages:", err);
+        console.error("Error fetching simplified notifications:", err);
+        setSimplifiedNotifications([]);
       }
     };
 
-    fetchMessages();
+    fetchSimplifiedNotifications();
   }, [instructor?.instructor_id]);
 
 
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const instructor = JSON.parse(localStorage.getItem('instructor'));
-        if (!instructor) return;
-
-        const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`);
-        const data = await res.json();
-
-        setTotalStudents(data.totalStudents);
-        setStudentsPresentToday(data.studentsPresentToday);
-        setTotalClasses(data.totalClasses);
-        setUpcomingEvents(data.upcomingEvents);
-      } catch (err) {
-        console.error("Failed to fetch dashboard stats:", err);
-      } finally {
-        setTimeout(() => setLoading(false), 1500);
-      }
-    };
-
-    fetchStats();
-  }, [selectedDate]);
-
-  
-
-  const attendanceRate = Math.round((studentsPresentToday / totalStudents) * 100 || 0);
-
-  const emailList = [
-    { id: 1, subject: "Reminder: Midterm Grading", sender: "Admin", time: "10 mins ago" },
-    { id: 2, subject: "Meeting with Dept. Head", sender: "Principal", time: "1 hour ago" },
-    { id: 3, subject: "Student Request", sender: "John Doe", time: "Yesterday" },
-  ];
-
-
+  // Effect to fetch weekly attendance data for the chart
   const [attendanceData, setAttendanceData] = useState([]);
-
   useEffect(() => {
     const fetchWeeklyAttendance = async () => {
+      if (!instructor?.instructor_id) return;
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setAttendanceData(data);
       } catch (err) {
@@ -115,14 +83,14 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     if (!loading) fetchWeeklyAttendance();
-  }, [loading]);
+  }, [loading, instructor?.instructor_id]);
 
-  
-
+  // Effect to fetch sections (classes)
   useEffect(() => {
     const fetchSections = async () => {
+      if (!instructor?.instructor_id) return;
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSections(data);
       } catch (err) {
@@ -131,7 +99,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     };
 
     if (!loading) fetchSections();
-  }, [loading]);
+  }, [loading, instructor?.instructor_id]);
 
   return (
     <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
@@ -176,6 +144,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Attendance Chart */}
           <div className="bg-white p-5 rounded-2xl shadow-lg col-span-2">
             <h3 className="text-lg font-semibold mb-4 text-gray-800">Attendance This Week</h3>
             {loading ? (
@@ -193,9 +162,10 @@ export default function Teacher_Dashboard({ selectedDate }) {
             )}
           </div>
 
+          {/* New Section for Simplified Notifications */}
           <div className="bg-white p-5 rounded-2xl shadow-lg col-span-2 lg:col-span-1 w-full">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800">
-              <FiMail /> Recent Messages
+              <FiMail /> General Notifications
             </h3>
             {loading ? (
               <ul className="space-y-3 animate-pulse">
@@ -208,33 +178,38 @@ export default function Teacher_Dashboard({ selectedDate }) {
               </ul>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {messages.map(msg => (
-                  <li key={msg.id} className="py-2">
-                    <p className="font-medium text-gray-800">{msg.subject}</p>
-                    <p className="text-sm text-gray-500">{msg.sender} • {msg.time}</p>
-                  </li>
-                ))}
+                {simplifiedNotifications.length > 0 ? (
+                  simplifiedNotifications.map(notif => (
+                    <li key={notif.id} className="py-2">
+                      {/* Assuming get_recent_req_notif.php returns an object with 'sender' */}
+                      <p className="font-medium text-gray-800">{notif.sender} excuse request !</p>
+                    </li>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center">No general notifications.</p>
+                )}
               </ul>
             )}
           </div>
+
         </div>
 
+        {/* Class Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-            {sections.slice(0, 3).map((section, i) => ( // <-- Added .slice(0, 3) here
-                <ClassCard
-                    key={i}
-                    isLoading={false}
-                    code={`${section.course_code}`}
-                    title={section.course_name}
-                    room={section.section_name || 'TBA'}
-                    schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
-                    onClick={() => navigate(`/section-dashboard/${section.section_id}`, { state: { sectionInfo: section } })}
-                    bgImage={`${process.env.PUBLIC_URL}/assets/${section?.image}`}
-                    bgColor={section?.hexcode || "#0097b2"}
-                />
-            ))}
+          {sections.slice(0, 3).map((section, i) => (
+            <ClassCard
+              key={i}
+              isLoading={false}
+              code={`${section.course_code}`}
+              title={section.course_name}
+              room={section.section_name || 'TBA'}
+              schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
+              onClick={() => navigate(`/section-dashboard/${section.section_id}`, { state: { sectionInfo: section } })}
+              bgImage={`${process.env.PUBLIC_URL}/assets/${section?.image}`}
+              bgColor={section?.hexcode || "#0097b2"}
+            />
+          ))}
         </div>
-
       </section>
     </div>
   );
