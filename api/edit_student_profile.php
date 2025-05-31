@@ -17,8 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0); // Exit immediately after handling OPTIONS
 }
 
-// Assuming conn.php contains your database connection logic
-// CORRECTED PATH: Go up one directory (from 'api/') then into 'src/'
 require_once("../src/conn.php");
 
 // Check if the connection is successful

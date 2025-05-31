@@ -33,7 +33,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
       try {
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         const response = await fetch(
-          `http://localhost/ustp-student-attendance-system/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
+          `http://localhost/ustp-student-attendance/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
         );
         const data = await response.json();
         setTotalStudents(data.totalStudents);
@@ -53,7 +53,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const fetchMessages = async () => {
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_recent_requests.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_recent_requests.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setMessages(data);
       } catch (err) {
@@ -73,7 +73,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!instructor) return;
 
         const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`);
         const data = await res.json();
 
         setTotalStudents(data.totalStudents);
@@ -106,7 +106,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   useEffect(() => {
     const fetchWeeklyAttendance = async () => {
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setAttendanceData(data);
       } catch (err) {
@@ -122,7 +122,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSections(data);
       } catch (err) {

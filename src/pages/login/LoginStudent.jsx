@@ -30,7 +30,7 @@ const LoginStudent = () => {
         setError(""); 
 
         try {
-            const response = await fetch("http://localhost/USTP-Student-Attendance-System/api/auth/login-student.php", {
+            const response = await fetch("http://localhost/ustp-student-attendance/api/auth/login-student.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

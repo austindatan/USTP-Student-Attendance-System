@@ -8,8 +8,7 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-// Connect to the database
-$conn = new mysqli("localhost", "root", "", "attendance_monitoring");
+require_once("../src/conn.php");
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed."]);
