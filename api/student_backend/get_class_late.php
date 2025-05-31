@@ -3,9 +3,8 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-define('LOG_PREFIX', '[ATTENDANCE_API_LATE]'); // Changed LOG_PREFIX
+define('LOG_PREFIX', '[ATTENDANCE_API_LATE]');
 
-// Adjust this path if 'conn.php' is not two directories up from 'get_class_late.php'
 require_once(__DIR__ . "/../../src/conn.php");
 
 if ($conn->connect_error) {
@@ -26,43 +25,69 @@ $year = (int) date("Y");
 
 error_log(LOG_PREFIX . " Processing request for student_id: '{$student_id}', course_code: '{$course_code}' for year: {$year}");
 
-$sql = "
-    SELECT COUNT(a.attendance_id) AS total_late 
+// Query for total count
+$sql_count = "
+    SELECT COUNT(a.attendance_id) AS total_late
     FROM attendance a
     INNER JOIN student_details sd ON a.student_details_id = sd.student_details_id
     INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
     INNER JOIN course c ON sc.course_id = c.course_id
     WHERE sd.student_id = ?
       AND c.course_code = ?
-      AND a.status = 'Late' 
+      AND a.status = 'Late'
       AND YEAR(a.date) = ?
 ";
 
-if (!$stmt = $conn->prepare($sql)) {
-    error_log(LOG_PREFIX . " Failed to prepare statement. MySQL Error: " . $conn->error);
-    echo json_encode(["error" => "SQL prepare failed", "mysql_error" => $conn->error]);
-    exit;
-}
+// Query for specific dates
+$sql_dates = "
+    SELECT DATE_FORMAT(a.date, '%Y-%m-%d') AS attendance_date
+    FROM attendance a
+    INNER JOIN student_details sd ON a.student_details_id = sd.student_details_id
+    INNER JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
+    INNER JOIN course c ON sc.course_id = c.course_id
+    WHERE sd.student_id = ?
+      AND c.course_code = ?
+      AND a.status = 'Late'
+      AND YEAR(a.date) = ?
+";
 
-$stmt->bind_param("ssi", $student_id, $course_code, $year);
+$response_data = ["total_late" => 0, "late_dates" => []];
 
-if (!$stmt->execute()) {
-    error_log(LOG_PREFIX . " Failed to execute statement. Error: " . $stmt->error);
-    echo json_encode(["error" => "SQL execute failed", "mysql_error" => $stmt->error]);
-    $stmt->close();
-    $conn->close();
-    exit;
-}
-
-$result = $stmt->get_result();
-
-if ($result && $row = $result->fetch_assoc()) {
-    $total_late = (int) $row['total_late']; // Changed variable name
-    echo json_encode(["total_late" => $total_late]); // Changed JSON key
+// Fetch count
+if ($stmt_count = $conn->prepare($sql_count)) {
+    $stmt_count->bind_param("ssi", $student_id, $course_code, $year);
+    if ($stmt_count->execute()) {
+        $result_count = $stmt_count->get_result();
+        if ($row_count = $result_count->fetch_assoc()) {
+            $response_data["total_late"] = (int) $row_count['total_late'];
+        }
+    } else {
+        error_log(LOG_PREFIX . " Failed to execute count statement. Error: " . $stmt_count->error);
+    }
+    $stmt_count->close();
 } else {
-    echo json_encode(["total_late" => 0]); // Changed JSON key
+    error_log(LOG_PREFIX . " Failed to prepare count statement. MySQL Error: " . $conn->error);
 }
 
-$stmt->close();
+// Fetch dates
+if ($stmt_dates = $conn->prepare($sql_dates)) {
+    $stmt_dates->bind_param("ssi", $student_id, $course_code, $year);
+    if ($stmt_dates->execute()) {
+        $result_dates = $stmt_dates->get_result();
+        $dates_array = [];
+        while ($row_date = $result_dates->fetch_assoc()) {
+            $dates_array[] = $row_date['attendance_date'];
+        }
+        $response_data["late_dates"] = $dates_array;
+    } else {
+        error_log(LOG_PREFIX . " Failed to execute dates statement. Error: " . $stmt_dates->error);
+    }
+    $stmt_dates->close();
+} else {
+    error_log(LOG_PREFIX . " Failed to prepare dates statement. MySQL Error: " . $conn->error);
+}
+
+echo json_encode($response_data);
+
 $conn->close();
 ?>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   format,
   startOfMonth,
@@ -10,7 +10,7 @@ import {
   isSameDay,
 } from "date-fns";
 import { useParams } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export default function SubjectAttendanceSummary({ studentId }) {
   const navigate = useNavigate();
@@ -18,15 +18,51 @@ export default function SubjectAttendanceSummary({ studentId }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [courseInfo, setCourseInfo] = useState(null);
+
+  // State for counts
   const [totalPresent, setTotalPresent] = useState(0);
   const [totalAbsent, setTotalAbsent] = useState(0);
   const [totalLate, setTotalLate] = useState(0);
   const [totalExcused, setTotalExcused] = useState(0);
 
+  // State for attendance dates (YYYY-MM-DD format)
+  const [presentDates, setPresentDates] = useState(new Set()); // Using Set for efficient lookups
+  const [absentDates, setAbsentDates] = useState(new Set());
+  const [lateDates, setLateDates] = useState(new Set());
+  const [excusedDates, setExcusedDates] = useState(new Set());
+
+  // Helper function to fetch attendance data
+  const fetchAttendanceData = useCallback(async (status) => {
+    const url = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_class_${status}.php?student_id=${studentId}&course_code=${course_code}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      if (data && data.error) {
+        console.error(`API returned an error for ${status} count/dates:`, data.error);
+        return { total: 0, dates: [] };
+      } else {
+        const totalKey = `total_${status}`;
+        const datesKey = `${status}_dates`;
+        return {
+          total: data[totalKey] !== undefined ? data[totalKey] : 0,
+          dates: Array.isArray(data[datesKey]) ? data[datesKey] : [],
+        };
+      }
+    } catch (err) {
+      console.error(`Error fetching ${status} data from API:`, err);
+      return { total: 0, dates: [] };
+    }
+  }, [studentId, course_code]);
+
+
   useEffect(() => {
     if (studentId && course_code) {
       // --- Fetch Course Name, Image, and Hexcode ---
-      const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchCourseInfoUrl = `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchCourseInfoUrl)
         .then((res) => {
@@ -49,108 +85,21 @@ export default function SubjectAttendanceSummary({ studentId }) {
           setCourseInfo({ course_name: "Failed to Load Course" });
         });
 
-      // --- Fetch Total Present Count ---
-      const fetchPresentUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_present.php?student_id=${studentId}&course_code=${course_code}`;
+      // --- Fetch all attendance data concurrently ---
+      const statuses = ["present", "absent", "late", "excused"];
+      Promise.all(statuses.map(status => fetchAttendanceData(status)))
+        .then(([presentData, absentData, lateData, excusedData]) => {
+          setTotalPresent(presentData.total);
+          setPresentDates(new Set(presentData.dates));
 
-      fetch(fetchPresentUrl)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.error) {
-            console.error("API returned an error for present count:", data.error);
-            setTotalPresent(0);
-          } else if (data && typeof data.total_present !== 'undefined') {
-            setTotalPresent(data.total_present);
-          } else {
-            console.warn("API response for present count missing 'total_present' or unexpected format:", data);
-            setTotalPresent(0);
-          }
-        })
-        .catch((err) => {
-          console.error("Error fetching present count from API:", err);
-          setTotalPresent(0);
-        });
+          setTotalAbsent(absentData.total);
+          setAbsentDates(new Set(absentData.dates));
 
-      // --- Fetch Total Absent Count ---
-      const fetchAbsentUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_absent.php?student_id=${studentId}&course_code=${course_code}`;
+          setTotalLate(lateData.total);
+          setLateDates(new Set(lateData.dates));
 
-      fetch(fetchAbsentUrl)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.error) {
-            console.error("API returned an error for absent count:", data.error);
-            setTotalAbsent(0);
-          } else if (data && typeof data.total_absent !== 'undefined') {
-            setTotalAbsent(data.total_absent);
-          } else {
-            console.warn("API response for absent count missing 'total_absent' or unexpected format:", data);
-            setTotalAbsent(0);
-          }
-        })
-        .catch((err) => {
-          console.error("Error fetching absent count from API:", err);
-          setTotalAbsent(0);
-        });
-
-      // --- Fetch Total Late Count ---
-      const fetchLateUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_late.php?student_id=${studentId}&course_code=${course_code}`;
-
-      fetch(fetchLateUrl)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.error) {
-            console.error("API returned an error for late count:", data.error);
-            setTotalLate(0);
-          } else if (data && typeof data.total_late !== 'undefined') {
-            setTotalLate(data.total_late);
-          } else {
-            console.warn("API response for late count missing 'total_late' or unexpected format:", data);
-            setTotalLate(0);
-          }
-        })
-        .catch((err) => {
-          console.error("Error fetching late count from API:", err);
-          setTotalLate(0);
-        });
-
-      // --- Fetch Total Excused Count ---
-      const fetchExcusedUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_class_excused.php?student_id=${studentId}&course_code=${course_code}`;
-
-      fetch(fetchExcusedUrl)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data && data.error) {
-            console.error("API returned an error for excused count:", data.error);
-            setTotalExcused(0);
-          } else if (data && typeof data.total_excused !== 'undefined') {
-            setTotalExcused(data.total_excused);
-          } else {
-            console.warn("API response for excused count missing 'total_excused' or unexpected format:", data);
-            setTotalExcused(0);
-          }
-        })
-        .catch((err) => {
-          console.error("Error fetching excused count from API:", err);
-          setTotalExcused(0);
+          setTotalExcused(excusedData.total);
+          setExcusedDates(new Set(excusedData.dates));
         });
 
     } else {
@@ -159,8 +108,12 @@ export default function SubjectAttendanceSummary({ studentId }) {
       setTotalAbsent(0);
       setTotalLate(0);
       setTotalExcused(0);
+      setPresentDates(new Set());
+      setAbsentDates(new Set());
+      setLateDates(new Set());
+      setExcusedDates(new Set());
     }
-  }, [studentId, course_code]);
+  }, [studentId, course_code, fetchAttendanceData]);
 
   useEffect(() => {
     setCurrentMonth(selectedDate);
@@ -221,29 +174,65 @@ export default function SubjectAttendanceSummary({ studentId }) {
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         const cloneDay = day;
+        const formattedDay = format(cloneDay, "yyyy-MM-dd"); // Format date for lookup
         const isSelected = isSameDay(day, selectedDate);
         const isToday = isSameDay(day, new Date());
         const isCurrentMonth = isSameMonth(day, monthStart);
         const isSunday = day.getDay() === 0;
 
+        // Determine attendance status for coloring
+        let attendanceClass = "";
+        let attendanceTitle = "";
+
+        if (absentDates.has(formattedDay)) {
+          attendanceClass = "bg-red-500 text-white"; // Red for Absent
+          attendanceTitle = "Absent";
+        } else if (lateDates.has(formattedDay)) {
+          attendanceClass = "bg-yellow-500 text-white"; // Yellow/Orange for Late
+          attendanceTitle = "Late";
+        } else if (excusedDates.has(formattedDay)) {
+          attendanceClass = "bg-purple-500 text-white"; // Purple for Excused
+          attendanceTitle = "Excused";
+        } else if (presentDates.has(formattedDay)) {
+          attendanceClass = "bg-green-500 text-white"; // Green for Present
+          attendanceTitle = "Present";
+        }
+
+        // Combine base styles with attendance status styles
+        const cellClasses = `text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150 relative
+          ${
+            isSelected
+              ? "ring-2 ring-offset-2 ring-[#7685fc]" // Add a ring for selected date
+              : ""
+          }
+          ${
+            isToday && !attendanceClass // Only show default today border if no attendance status overrides it
+              ? "border border-[#7685fc] text-[#7685fc]"
+              : ""
+          }
+          ${
+            isCurrentMonth && !attendanceClass // Only apply default text color if no attendance status
+              ? isSunday
+                ? "text-red-500"
+                : "text-gray-700"
+              : ""
+          }
+          ${
+            !isCurrentMonth && !attendanceClass
+              ? "text-gray-300"
+              : ""
+          }
+          ${attendanceClass}
+        `;
+
         days.push(
           <button
-            key={`${format(cloneDay, "yyyy-MM-dd")}-cell`}
-            className={`text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150
-              ${
-                isSelected
-                  ? "bg-[#7685fc] text-white"
-                  : isToday
-                  ? "border border-[#7685fc] text-[#7685fc]"
-                  : isCurrentMonth
-                  ? isSunday
-                    ? "text-red-500"
-                    : "text-gray-700"
-                  : "text-gray-300"
-              }`}
+            key={`${formattedDay}-cell`}
+            className={cellClasses}
             onClick={() => setSelectedDate(cloneDay)}
             aria-pressed={isSelected}
-            aria-label={`Select ${format(cloneDay, "MMMM do, yyyy")}`}
+            aria-label={`Select ${format(cloneDay, "MMMM do, yyyy")}${attendanceTitle ? `, Status: ${attendanceTitle}` : ""}`}
+            title={attendanceTitle ? `Status: ${attendanceTitle}` : ""}
           >
             {format(day, "d")}
           </button>
@@ -293,16 +282,38 @@ export default function SubjectAttendanceSummary({ studentId }) {
         </div>
 
         {/* Main Content Section */}
-        <div className="p-4 sm:p-6 rounded-lg max-w-full lg:max-w-5xl flex flex-col md:flex-row gap-3"
+   <div className="p-4 sm:p-6 rounded-lg max-w-full lg:max-w-5xl flex flex-col md:flex-row gap-3 mb-6"
           style={{
             backgroundColor: courseInfo?.hexcode || '#7685fc',
           }}
         >
           {/* Calendar */}
-          <div className="ml-0 sm:ml-4 bg-[#f5f5f0] rounded-lg p-4 md:p-6 text-gray-700 w-full md:w-[320px] flex-shrink-0 overflow-auto">
+          <div className="ml-0 sm:ml-4 bg-[#f5f5f0] rounded-lg p-4 md:p-6 text-gray-700 w-full md:w-[380px] flex-shrink-0 overflow-auto">
             {renderHeader()}
             {renderDays()}
             {renderCells()}
+            {/* Attendance Legend */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-semibold mb-2">Legend:</h3>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-green-500"></span>
+                  <span>Present</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-red-500"></span>
+                  <span>Absent</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-yellow-500"></span>
+                  <span>Late</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-purple-500"></span> {/* Changed to purple */}
+                  <span>Excused</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Attendance Statistics */}
@@ -324,9 +335,9 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
 function StatCard({ label, value }) {
   return (
-    <div className="bg-[#f5f5f0] p-5 rounded-lg text-gray-700 
-                    flex flex-col items-center justify-center 
-                    shadow-md hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-[#f5f5f0] p-5 rounded-lg text-gray-700
+                         flex flex-col items-center justify-center
+                         shadow-md hover:shadow-lg transition-shadow duration-300">
       {/* Label on top, typically smaller */}
       <p className="text-base sm:text-lg font-semibold text-center w-full truncate mb-1">
         {label}
