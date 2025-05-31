@@ -26,6 +26,7 @@ const ExcuseRequestsPage = () => {
       }
     } else {
       setError("Instructor not logged in. Please log in to view requests.");
+    
     }
   }, []);
 
@@ -47,7 +48,7 @@ const ExcuseRequestsPage = () => {
       })
       .then(data => {
         if (Array.isArray(data)) {
-          setRequests(data); 
+          setRequests(data);
         } else if (data.success === false) {
           setError(data.message || 'No requests found or unexpected error from backend.');
           setRequests([]);
@@ -230,9 +231,10 @@ const ExcuseRequestsPage = () => {
 
                 <div className="pt-4 border-t border-gray-200 mt-4">
                   <p className="font-bold mb-2 text-[#737373]">Attachment:</p>
-                  {selectedRequest.supporting_document_path ? (
+                  {selectedRequest.file_path ? (
                     <a
-                      href={`http://localhost/USTP-Student-Attendance-System/instructor_backend/download_document.php?request_id=${selectedRequest.excused_request_id}&instructor_id=${instructorId}`}
+                      // !! MODIFIED LINE HERE !!
+                      href={`http://localhost/USTP-Student-Attendance-System/api/student_backend/${selectedRequest.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-4 py-2 bg-gray-100 text-indigo-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-base font-semibold border border-indigo-200"
@@ -240,7 +242,7 @@ const ExcuseRequestsPage = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      View/Download
+                      View Attachment
                     </a>
                   ) : (
                     <span className="text-gray-600 italic">No attachment uploaded.</span>
