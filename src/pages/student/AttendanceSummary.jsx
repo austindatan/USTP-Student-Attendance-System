@@ -10,8 +10,10 @@ import {
   isSameDay,
 } from "date-fns";
 import { useParams } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 export default function SubjectAttendanceSummary({ studentId }) {
+  const navigate = useNavigate();
   const { course_code } = useParams();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -274,8 +276,14 @@ export default function SubjectAttendanceSummary({ studentId }) {
           }}
         >
           <div className="leading-snug max-w-xl">
-            <h2 className="text-lg sm:text-xl font-medium">Attendance Summary for</h2>
-            <h1 className="text-2xl sm:text-3xl font-bold truncate">
+            <button onClick={() => navigate("/student-dashboard")}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <h2 className="text-base sm:text-lg font-medium">Attendance Summary for</h2>
+            <h1 className="text-xl sm:text-3xl font-bold truncate">
               {courseInfo?.course_name || "Loading..."}
             </h1>
             <p className="text-sm sm:text-base mt-4 sm:mt-6">
@@ -285,13 +293,13 @@ export default function SubjectAttendanceSummary({ studentId }) {
         </div>
 
         {/* Main Content Section */}
-        <div className="p-4 sm:p-6 rounded-lg max-w-full lg:max-w-5xl flex flex-col md:flex-row gap-6"
+        <div className="p-4 sm:p-6 rounded-lg max-w-full lg:max-w-5xl flex flex-col md:flex-row gap-3"
           style={{
             backgroundColor: courseInfo?.hexcode || '#7685fc',
           }}
         >
           {/* Calendar */}
-          <div className="bg-[#f5f5f0] rounded-lg p-4 md:p-6 text-gray-700 w-full md:w-[320px] flex-shrink-0 overflow-auto">
+          <div className="ml-0 sm:ml-4 bg-[#f5f5f0] rounded-lg p-4 md:p-6 text-gray-700 w-full md:w-[320px] flex-shrink-0 overflow-auto">
             {renderHeader()}
             {renderDays()}
             {renderCells()}
@@ -316,9 +324,16 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
 function StatCard({ label, value }) {
   return (
-    <div className="bg-[#f5f5f0] p-5 rounded-lg text-gray-700 flex items-center justify-center shadow-md hover:shadow-lg transition-shadow duration-300">
-      <p className="text-base sm:text-lg font-semibold text-center w-full truncate">
-        {label}: <span className="font-bold">{value}</span>
+    <div className="bg-[#f5f5f0] p-5 rounded-lg text-gray-700 
+                    flex flex-col items-center justify-center 
+                    shadow-md hover:shadow-lg transition-shadow duration-300">
+      {/* Label on top, typically smaller */}
+      <p className="text-base sm:text-lg font-semibold text-center w-full truncate mb-1">
+        {label}
+      </p>
+      {/* Value below, much larger and bold */}
+      <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center w-full">
+        {value}
       </p>
     </div>
   );
