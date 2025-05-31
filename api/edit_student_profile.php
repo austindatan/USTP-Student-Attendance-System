@@ -81,7 +81,7 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     $file_tmp_name = $_FILES["image"]["tmp_name"];
     $file_name = basename($_FILES["image"]["name"]);
     $file_extension = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     if (!in_array($file_extension, $allowed_extensions)) {
         echo json_encode(["success" => false, "message" => "Invalid image file type."]);

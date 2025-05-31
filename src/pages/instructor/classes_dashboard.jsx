@@ -22,7 +22,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     try {
       console.log('Fetching sections...');
       const response = await fetch(
-        `http://localhost/ustp-student-attendance/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
+        `http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -89,30 +89,26 @@ return (
     </div>
 
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6 mb-12">
-      {(isLoading ? Array.from({ length: 6 }) : filteredSections).map((section, i) => (
-        <ClassCard
-          key={section?.section_id || i}
-          isLoading={isLoading}
-          code={!isLoading ? section.course_code : ''}
-          title={!isLoading ? section.course_name : ''}
-          room={!isLoading ? section.section_name || 'TBA' : ''}
-          schedule={
-            !isLoading
-              ? `${section.schedule_day} ${section.start_time} – ${section.end_time}`
-              : ''
-          }
-          // Pass new props for year level and semester
-          yearLevel={!isLoading ? section.year_level_name : ''}
-          semester={!isLoading ? section.semester_name : ''}
-          onClick={() => {
-            if (!isLoading && section?.section_id) {
-              handleSectionClick(section); // Call handleSectionClick to pass full section object
-            }
-          }}
-          bgImage={`${process.env.PUBLIC_URL}/assets/${section?.image}`}
-          bgColor={section?.hexcode || "#0097b2"}
-        />
-      ))}
+      {isLoading
+        ? Array.from({ length: 6 }).map((_, i) => (
+            <ClassCard key={`loading-${i}`} isLoading={true} />
+          ))
+        : filteredSections.map((section) => (
+            <ClassCard
+              key={section.section_course_id}
+              isLoading={false}
+              code={section.course_code}
+              title={section.course_name}
+              room={section.section_name || 'TBA'}
+              schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
+              yearLevel={section.year_level_name}
+              semester={section.semester_name}
+              onClick={() => handleSectionClick(section)}
+              bgImage={`${process.env.PUBLIC_URL}/assets/${section?.image}`}
+              bgColor={section?.hexcode || "#0097b2"}
+            />
+          ))
+      }
     </div>
   </section>
 );

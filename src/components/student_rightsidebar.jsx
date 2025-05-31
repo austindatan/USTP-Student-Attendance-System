@@ -41,7 +41,7 @@
     };
 
     return (
-      <>
+      <div className="font-dm-sans">
         {/* Hamburger Button for Mobile (only when sidebar is closed) */}
         {!sidebarOpen && (
           <button
@@ -72,20 +72,23 @@
           } lg:translate-x-0`}
         >
           {/* Close button on mobile (left side inside sidebar) */}
-          <div className="lg:hidden flex justify-start p-4">
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="text-gray-600 hover:text-black text-2xl"
-            >
-              &times;
-            </button>
-          </div>
+          
 
           {/* Settings Dropdown */}
-          <div className="flex justify-start items-center px-4 pb-2 mt-5">
+          <div className="flex justify-start items-center px-4 pb-2 mt-2 lg:mt-5">
+            <div className="flex gap-3">
+              <div className="lg:hidden flex justify-start">
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="text-gray-600 hover:text-black text-2xl mt-[5px]"
+                >
+                  &times;
+                </button>
+              </div>
+
             <div className="relative" ref={dropdownRef}>
               <FiSettings
-                className="text-xl text-gray-700 cursor-pointer"
+                className="text-xl text-gray-700 cursor-pointer mt-3 sm:mt-0"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               />
               {dropdownOpen && (
@@ -111,6 +114,7 @@
                 </div>
               )}
             </div>
+            </div>
           </div>
 
           {/* Student Info */}
@@ -127,8 +131,17 @@
             <div className="font-bold text-lg text-center">{fullName}</div>
             <div className="text-gray-500 text-center text-sm mt-1">{email}</div>
           </div>
+
+          <div className="mt-6 px-6 mt-[370px] sm:mt-[380px]">
+            <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded shadow-sm">
+              <p className="text-sm italic text-gray-700">
+                “Success is the sum of small efforts, repeated day in and day out.”
+              </p>
+              <p className="text-right text-xs text-indigo-500 mt-2">– Robert Collier</p>
+            </div>
+          </div>
         </aside>
-      </>
+      </div>
     );
   };
 
