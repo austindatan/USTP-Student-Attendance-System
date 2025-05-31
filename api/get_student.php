@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
-$conn = new mysqli("localhost", "root", "", "attendance_monitoring");
+include __DIR__ . '/../src/conn.php';
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed."]);
