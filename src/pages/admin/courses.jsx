@@ -12,7 +12,7 @@ export default function Admin_Courses() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then(res => {
         if (Array.isArray(res.data)) {
           setCourses(res.data);
@@ -36,23 +36,22 @@ export default function Admin_Courses() {
   };
 
   const confirmDelete = () => {
-    axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_course.php', {
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_course.php', {
       _method: 'DELETE',
       course_id: selectedCourse.course_id,
     })
-    .then((res) => {
-      if (res.data.success) {
-        // Refresh or filter out the deleted instructor
-        setCourses(courses.filter(c => c.course_id !== selectedCourse.course_id));
-      } else {
-        alert(res.data.message || "Failed to delete instructor.");
-      }
-    })
-    .catch(() => alert("An error occurred while deleting."))
-    .finally(() => {
-      setIsModalOpen(false);
-      setSelectedCourse(null);
-    });
+      .then((res) => {
+        if (res.data.success) {
+          setCourses(courses.filter(c => c.course_id !== selectedCourse.course_id));
+        } else {
+          alert(res.data.message || "Failed to delete instructor.");
+        }
+      })
+      .catch(() => alert("An error occurred while deleting."))
+      .finally(() => {
+        setIsModalOpen(false);
+        setSelectedCourse(null);
+      });
   };
 
   const filteredCourses = courses.filter(course =>
@@ -69,11 +68,11 @@ export default function Admin_Courses() {
           style={
             !loading
               ? {
-                  backgroundImage: "url('assets/teacher_vector.png')",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right",
-                  backgroundSize: "contain"
-                }
+                backgroundImage: "url('assets/teacher_vector.png')",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right",
+                backgroundSize: "contain"
+              }
               : {}
           }
         >
@@ -124,8 +123,7 @@ export default function Admin_Courses() {
                     <th className="px-3 py-2 w-[15%]">Course Code</th>
                     <th className="px-3 py-2 w-[20%]">Course Name</th>
                     <th className="px-3 py-2 w-[50%]">Description</th>
-                    {/* Added text-center here */}
-                    <th className="px-3 py-2 w-[10%] text-center">Action</th>
+                    <th className="px-3 py-2 w-[15%] text-center">Action</th> {/* Adjusted width for Action column */}
                   </tr>
                 </thead>
                 <tbody>
@@ -145,17 +143,16 @@ export default function Admin_Courses() {
                         <td className="px-3 py-2 truncate min-w-0">{course.course_name}</td>
                         <td className="px-3 py-2 truncate min-w-0">{course.description}</td>
                         <td className="px-3 py-2">
-                          {/* Wrapped buttons in flex container */}
-                          <div className="flex gap-1 justify-center">
+                          <div className="flex flex-col sm:flex-row gap-1 justify-center items-center"> {/* Changed to flex-col on small screens */}
                             <button
                               onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap" // Adjusted padding and font size
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap w-full sm:w-auto"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteClick(course)}
-                              className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm" // Adjusted padding and font size
+                              className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm w-full sm:w-auto"
                             >
                               Delete
                             </button>
@@ -173,7 +170,7 @@ export default function Admin_Courses() {
 
       {/* Delete Confirmation Modal */}
       {isModalOpen && selectedCourse && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> {/* Added p-4 for modal responsiveness */}
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               Confirm Delete
