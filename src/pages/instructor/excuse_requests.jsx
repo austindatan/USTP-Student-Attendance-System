@@ -10,31 +10,27 @@ const ExcuseRequestsPage = () => {
   const [instructorId, setInstructorId] = useState(null);
 
   useEffect(() => {
-    const storedInstructor = localStorage.getItem("instructor"); 
+    const storedInstructor = localStorage.getItem("instructor");
     if (storedInstructor) {
       try {
-        const instructorData = JSON.parse(storedInstructor); 
+        const instructorData = JSON.parse(storedInstructor);
 
         if (instructorData && instructorData.instructor_id) {
           setInstructorId(instructorData.instructor_id);
         } else {
           setError("Instructor data in localStorage is incomplete or missing ID. Please log in again.");
-
         }
       } catch (e) {
-
         setError("Failed to parse instructor data from localStorage. Please log in again.");
         console.error("Error parsing instructor data from localStorage:", e);
-
       }
     } else {
       setError("Instructor not logged in. Please log in to view requests.");
-
     }
   }, []);
 
   const fetchRequests = (currentInstructorId) => {
-    setError(null); 
+    setError(null);
     if (!currentInstructorId) {
       console.log("No instructor ID provided, skipping fetch.");
       setError("Cannot fetch requests: Instructor ID is missing.");
@@ -51,7 +47,7 @@ const ExcuseRequestsPage = () => {
       })
       .then(data => {
         if (Array.isArray(data)) {
-          setRequests(data);
+          setRequests(data); 
         } else if (data.success === false) {
           setError(data.message || 'No requests found or unexpected error from backend.');
           setRequests([]);
@@ -70,7 +66,7 @@ const ExcuseRequestsPage = () => {
     if (instructorId) {
       fetchRequests(instructorId);
     }
-  }, [instructorId]); 
+  }, [instructorId]);
 
   const openConfirmationModal = (id, type) => {
     setModal({ show: true, id, type });
@@ -188,7 +184,6 @@ const ExcuseRequestsPage = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-center text-sm font-medium">
-
                         {req.status === 'Pending' ? (
                           <div className="flex justify-center space-x-2">
                             <button
@@ -205,7 +200,6 @@ const ExcuseRequestsPage = () => {
                             </button>
                           </div>
                         ) : (
-
                           <span className="text-gray-500">Already {req.status}</span>
                         )}
                       </td>
@@ -217,18 +211,41 @@ const ExcuseRequestsPage = () => {
           )}
         </div>
 
-
         {showModal && selectedRequest && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-auto" onClick={(e) => e.stopPropagation()}>
-
               <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
                 <h3 className="text-2xl font-bold text-indigo-600">Excuse Request Details</h3>
               </div>
-              <div className="space-y-3 text-lg text-[#737373]">
+              <div className="space-y-4 text-lg text-[#737373]">
                 <p><strong>Date Requested:</strong> {selectedRequest.date_requested}</p>
                 <p><strong>Date of Absence:</strong> {selectedRequest.date_of_absence}</p>
-                <p><strong>Reason:</strong> {selectedRequest.reason}</p>
+
+                <div className="pt-2">
+                  <p className="font-bold mb-2 text-[#737373]">Reason:</p>
+                  <div className="bg-gray-100 p-4 rounded-lg border border-gray-200 max-h-48 overflow-y-auto shadow-inner text-base leading-relaxed">
+                    <p className="whitespace-pre-wrap">{selectedRequest.reason}</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200 mt-4">
+                  <p className="font-bold mb-2 text-[#737373]">Attachment:</p>
+                  {selectedRequest.supporting_document_path ? (
+                    <a
+                      href={`http://localhost/USTP-Student-Attendance-System/instructor_backend/download_document.php?request_id=${selectedRequest.excused_request_id}&instructor_id=${instructorId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 bg-gray-100 text-indigo-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-base font-semibold border border-indigo-200"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      View/Download
+                    </a>
+                  ) : (
+                    <span className="text-gray-600 italic">No attachment uploaded.</span>
+                  )}
+                </div>
               </div>
               <div className="mt-6 flex justify-end">
                 <button
@@ -247,7 +264,6 @@ const ExcuseRequestsPage = () => {
         {modal.show && createPortal(
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto" onClick={(e) => e.stopPropagation()}>
-
               <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-indigo-600 text-center">Confirm Action</h2>
               </div>
