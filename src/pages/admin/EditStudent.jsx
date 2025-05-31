@@ -53,7 +53,7 @@ export default function EditStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prev => ({ ...prev, [cacheKey]: fetchedSections }));
             return fetchedSections;
@@ -69,10 +69,10 @@ export default function EditStudent() {
             setIsLoadingInitialData(true);
             try {
                 const [progRes, yearRes, semRes, studentRes] = await Promise.all([
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
-                    axios.get(`http://localhost/ustp-student-attendance/admin_backend/student_get_api.php?student_id=${student_id}`),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
+                    axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/student_get_api.php?student_id=${student_id}`),
                 ]);
 
                 setProgramDetails(progRes.data);
@@ -104,7 +104,7 @@ export default function EditStudent() {
                         const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
                         if (!tempCachedSections[cacheKey]) {
                             sectionFetchPromises.push(
-                                axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', {
+                                axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', {
                                     params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
                                 }).then(res => {
                                     tempCachedSections[cacheKey] = res.data;
@@ -289,7 +289,7 @@ export default function EditStudent() {
 
         try {
             const res = await axios.post(
-                `http://localhost/ustp-student-attendance/admin_backend/student_update_api.php?student_id=${student_id}`,
+                `http://localhost/USTP-Student-Attendance-System/admin_backend/student_update_api.php?student_id=${student_id}`,
                 submissionData,
                 {
                     headers: {
@@ -298,7 +298,6 @@ export default function EditStudent() {
                 }
             );
             if (res.data.success) {
-                alert(res.data.message || 'Student updated successfully!');
                 setIsEditStudentModalOpen(false);
                 navigate('/admin-students');
             } else {
@@ -317,6 +316,8 @@ export default function EditStudent() {
     const handleCloseEditStudentModal = () => {
         setIsEditStudentModalOpen(false);
     };
+
+    const studentFullName = `${formData.firstname} ${formData.lastname}`;
 
     if (isLoadingInitialData) {
         return <div className="text-center mt-10">Loading student data...</div>;
@@ -580,9 +581,9 @@ export default function EditStudent() {
                 isOpen={isEditStudentModalOpen}
                 onClose={handleCloseEditStudentModal}
                 onConfirm={handleConfirmUpdate}
-                title="Confirm Update"
-                message="Are you sure you want to update this student's details and enrollments?"
-                confirmText={isSaving ? 'Updating...' : 'Confirm Update'}
+                title="Confirm Edit"
+                message={`Are you sure you want to update the details and enrollments for "${studentFullName}"?`}
+                confirmText="Update Student"
                 loading={isSaving}
             />
         </div>
