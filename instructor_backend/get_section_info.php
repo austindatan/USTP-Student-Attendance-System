@@ -9,17 +9,17 @@ if (isset($_GET['section_id'])) {
     // Modified SQL query to join through the new `section_courses` table
     // and fetch all courses associated with the given section.
     $sql = "SELECT
-                s.section_id,
+                sc.section_id,
                 s.section_name,
-                s.schedule_day,
-                s.start_time,
-                s.end_time,
-                s.image,
-                s.hexcode,
+                sc.schedule_day,
+                sc.start_time,
+                sc.end_time,
+                sc.image,
+                sc.hexcode,
                 c.course_name,
                 c.course_code
-            FROM section s
-            INNER JOIN section_courses sc ON s.section_id = sc.section_id
+            FROM section_courses sc
+            INNER JOIN section s ON sc.section_id = s.section_id
             INNER JOIN course c ON sc.course_id = c.course_id
             WHERE s.section_id = ?";
     
