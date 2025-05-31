@@ -6,14 +6,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
-// Database connection parameters
-$servername = "localhost";
-$username = "root"; // Replace with your database username
-$password = "";     // Replace with your database password
-$dbname = "attendance_monitoring";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+require_once("../src/conn.php");
 
 // Check connection
 if ($conn->connect_error) {

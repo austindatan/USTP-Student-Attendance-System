@@ -572,7 +572,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 <div className="flex gap-2">
                                     <FaPalette
                                         ref={settingsButtonRef} // Keep this ref if needed for positioning
-                                        className="text-xl cursor-pointer"
+                                        className="text-xl cursor-pointer shadow-"
                                         onClick={() => {
                                             setShowColorModal(prev => !prev);
                                             setShowImageSelectModal(false); // Close image modal if color is opened

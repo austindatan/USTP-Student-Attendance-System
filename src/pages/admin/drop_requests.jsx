@@ -7,22 +7,52 @@ export default function DropRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState({ isOpen: false, type: null, id: null });
   const [selectedReason, setSelectedReason] = useState("");
+  // New state to control viewing history
+  const [showHistory, setShowHistory] = useState(false); // false for active requests, true for dropped history
 
-  const fetchRequests = () => {
+  // Modified fetchRequests to accept a parameter for the view type
+  const fetchRequests = (isHistoryView) => {
     setLoading(true);
-    fetch("http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php")
-      .then((res) => res.json())
-      .then((data) => {
-        setRequests(data);
-        setError(null);
+    setError(null); // Clear previous errors when starting a new fetch
+
+    // Construct the URL based on whether history view is active
+    const url = `http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php?view=${
+      isHistoryView ? "history" : "active"
+    }`;
+
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
       })
-      .catch(() => setError("Failed to fetch drop requests."))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setRequests(data);
+        } else if (data.error) {
+          // Assuming your PHP might return {error: "..."}
+          setError(
+            data.error || "No requests found or unexpected error from backend."
+          );
+          setRequests([]);
+        } else {
+          // Fallback for unexpected non-array response
+          throw new Error("Unexpected response format from backend.");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching drop requests:", err);
+        setError(`Failed to load requests: ${err.message}`);
+        setRequests([]); // Clear requests on error
+      })
       .finally(() => setLoading(false));
   };
 
+  // useEffect now depends on showHistory to re-fetch data
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    fetchRequests(showHistory);
+  }, [showHistory]); // Re-run effect when showHistory changes
 
   const openModal = (type, id, reason = "") => {
     setModal({ isOpen: true, type, id });
@@ -50,24 +80,26 @@ export default function DropRequests() {
 
         const result = await res.json();
         if (result.error) {
-          alert("Failed to update status.");
+          alert(`Failed to perform action: ${result.error}`);
         } else {
-          fetchRequests();
+          alert(result.message || "Action successful!");
+          fetchRequests(showHistory); // Re-fetch based on current view after action
         }
       } catch (error) {
-        alert("An error occurred while updating the request.");
-        console.error(error);
+        alert("An error occurred while performing the action.");
+        console.error("Action error:", error);
       } finally {
         closeModal();
       }
     }
   };
 
-
+  // Simplified filtering: now that backend filters by view, we only search within the fetched data
   const filteredRequests = requests.filter(
     (req) =>
-      req.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.reason.toLowerCase().includes(searchTerm.toLowerCase())
+      (req.student_name &&
+        req.student_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (req.reason && req.reason.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -96,25 +128,53 @@ export default function DropRequests() {
                 <div className="w-1/2 h-8 bg-white/60 rounded"></div>
               </div>
             ) : (
-              <h1 className="text-2xl text-blue-700 font-bold">Drop Requests</h1>
+              <h1 className="text-2xl text-blue-700 font-bold">
+                {showHistory ? "Drop History" : "Drop Requests"}
+              </h1>
             )}
           </div>
         </div>
 
         <div className="bg-white shadow-md rounded-lg p-6">
           {loading ? (
-            <p className="text-center text-gray-500">Loading drop requests...</p>
+            <p className="text-center text-gray-500">
+              Loading {showHistory ? "history" : "drop requests"}...
+            </p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : (
             <>
               <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
                 <p className="text-blue-700 font-semibold">
-                  Total Requests: {filteredRequests.length}
+                  Total {showHistory ? "History Records" : "Requests"}:{" "}
+                  {filteredRequests.length}
                 </p>
+                {/* Buttons to switch between Active and History views */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowHistory(false)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                      !showHistory
+                        ? "bg-blue-600 text-white" // Active state
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300" // Inactive state
+                    }`}
+                  >
+                    Active Requests
+                  </button>
+                  <button
+                    onClick={() => setShowHistory(true)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                      showHistory
+                        ? "bg-blue-600 text-white" // Active state
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300" // Inactive state
+                    }`}
+                  >
+                    History
+                  </button>
+                </div>
                 <input
                   type="text"
-                  placeholder="Search students..."
+                  placeholder="Search students or reason..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
@@ -128,24 +188,30 @@ export default function DropRequests() {
                 <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
                   <thead className="bg-blue-100 uppercase text-blue-700">
                     <tr>
-                      <th className="px-4 py-2">Student ID</th>
+                      {/* Conditionally display Student ID for active requests only */}
+                      {!showHistory && <th className="px-4 py-2">Student ID</th>}
                       <th className="px-4 py-2">Student Name</th>
                       <th className="px-4 py-2">Program</th>
                       <th className="px-4 py-2">Course</th>
                       <th className="px-4 py-2">Instructor</th>
                       <th className="px-4 py-2">Reason</th>
                       <th className="px-4 py-2">Status</th>
-                      <th className="px-4 py-2">Action</th>
+                      {/* Display Dropped At only for history view */}
+                      {showHistory && <th className="px-4 py-2">Dropped At</th>}
+                      {/* Action column only for active requests */}
+                      {!showHistory && <th className="px-4 py-2">Action</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredRequests.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="8"
+                          colSpan={showHistory ? 7 : 8} // Adjust colspan based on view
                           className="px-4 py-6 text-center text-gray-500"
                         >
-                          No drop requests found.
+                          {showHistory
+                            ? "No historical drop requests found."
+                            : "No active drop requests found."}
                         </td>
                       </tr>
                     ) : (
@@ -154,7 +220,10 @@ export default function DropRequests() {
                           key={req.drop_request_id}
                           className="border-b border-blue-200 hover:bg-blue-50"
                         >
-                          <td className="px-4 py-2">{req.student_id}</td>
+                          {/* Conditionally display Student ID for active requests */}
+                          {!showHistory && (
+                            <td className="px-4 py-2">{req.student_id}</td>
+                          )}
                           <td className="px-4 py-2 truncate max-w-[140px]">
                             {req.student_name}
                           </td>
@@ -179,20 +248,38 @@ export default function DropRequests() {
                             </div>
                           </td>
                           <td className="px-4 py-2">{req.status}</td>
-                          <td className="px-4 py-2 space-x-2 whitespace-nowrap">
-                            <button
-                              onClick={() => openModal("drop", req.drop_request_id)}
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                            >
-                              Drop
-                            </button>
-                            <button
-                              onClick={() => openModal("reject", req.drop_request_id)}
-                              className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
-                            >
-                              Reject
-                            </button>
-                          </td>
+                          {/* Display Dropped At only for history view */}
+                          {showHistory && (
+                            <td className="px-4 py-2">
+                              {req.dropped_at
+                                ? new Date(req.dropped_at).toLocaleString()
+                                : "N/A"}
+                            </td>
+                          )}
+                          {/* Action buttons only for active requests */}
+                          {!showHistory && (
+                            <td className="px-4 py-2 space-x-2 whitespace-nowrap">
+                              {/* Only show 'Drop'/'Reject' buttons if status is 'Pending' */}
+                              {req.status === "Pending" ? (
+                                <>
+                                  <button
+                                    onClick={() => openModal("drop", req.drop_request_id)}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                                  >
+                                    Drop
+                                  </button>
+                                  <button
+                                    onClick={() => openModal("reject", req.drop_request_id)}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              ) : (
+                                <span className="text-gray-500">Already {req.status}</span>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       ))
                     )}
