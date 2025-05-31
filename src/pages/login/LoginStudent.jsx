@@ -9,40 +9,61 @@ const LoginStudent = () => {
 
     useEffect(() => {
         const storedUser = localStorage.getItem("student");
-        const storedStudentId = localStorage.getItem("studentId");
-        if (storedUser && storedStudentId) { 
-            navigate("/student-dashboard", { replace: true });
+        if (storedUser) {
+            try {
+                const userData = JSON.parse(storedUser);
+
+                if (userData && userData.id) {
+                    console.log("LoginStudent (useEffect): Student already logged in, redirecting to dashboard.");
+                    navigate("/student-dashboard", { replace: true });
+                }
+            } catch (e) {
+                console.error("LoginStudent (useEffect): Error parsing stored 'student' data:", e);
+                localStorage.removeItem("student");
+                localStorage.removeItem("userRole"); 
+            }
         }
     }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setError(""); 
 
-        const response = await fetch("http://localhost/ustp-student-attendance/api/auth/login-student.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const response = await fetch("http://localhost/USTP-Student-Attendance-System/api/auth/login-student.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
-        const data = await response.json();
-
-        if (data.success) {
-            localStorage.setItem('userRole', 'student');
-            localStorage.setItem('student', JSON.stringify(data.user));
-
-            if (data.user && data.user.id) {
-                localStorage.setItem('studentId', data.user.id);
-                console.log("LoginStudent: Successfully set studentId to localStorage as:", data.user.id); // For debugging
-            } else {
-                console.error("Login response missing 'id' in data.user:", data);
-                setError("Login successful, but student ID not found in response. Please contact support.");
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Login API: Server response not OK (Status:", response.status, "):", errorText);
+                try {
+                    const errorData = JSON.parse(errorText);
+                    setError(errorData.message || "An unexpected server error occurred.");
+                } catch {
+                    setError("Network or server error. Please try again.");
+                }
+                return; 
             }
 
-            navigate("/student-dashboard");
-        } else {
-            setError(data.message);
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem('userRole', 'student');
+                localStorage.setItem('student', JSON.stringify(data.user));
+
+                console.log("LoginStudent: Successfully stored student data in localStorage. Navigating to dashboard.");
+                navigate("/student-dashboard"); 
+            } else {
+                setError(data.message || "Login failed. Please check your credentials.");
+            }
+        } catch (err) {
+            console.error("LoginStudent: Error during login process:", err);
+            setError("An error occurred during login. Please check your network connection and try again.");
         }
     };
 
@@ -62,7 +83,7 @@ const LoginStudent = () => {
                 <h2 className="text-xl sm:text-xl font-bold text-center text-gray-600">Student Attendance Monitor</h2>
                 <h2 className="text-xl sm:text-base font-bold text-center mb-4 text-gray-600">Login to your account.</h2>
 
-                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
                 <div className="mb-4 relative">
                     <svg

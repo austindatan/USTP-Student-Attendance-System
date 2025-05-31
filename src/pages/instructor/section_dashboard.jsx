@@ -40,6 +40,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         'classes_vector_8.png',
     ];
     const [lateStudents, setLateStudents] = useState([]);
+    const [excusedStudents, setExcusedStudents] = useState([]);
     const [isAttendanceLocked, setIsAttendanceLocked] = useState(false); // Attendance locked state
     const [showUnlockModal, setShowUnlockModal] = useState(false); // State for unlock modal
     const [unlockPasscode, setUnlockPasscode] = useState('');
@@ -127,7 +128,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         try {
             // We'll update the PHP script to accept a string path
-            const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_image.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/update_section_image.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -166,7 +167,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?section_id=${sectionId}`);
                     if (!res.ok) {
                         throw new Error(`HTTP error! status: ${res.status}`);
                     }
@@ -193,7 +194,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const fetchLockStatus = async () => {
             try {
-                const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/get_attendance_lock_status.php', {
+                const response = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/get_attendance_lock_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -235,7 +236,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 const courseId = sectionInfo.course_id; // Get course_id from sectionInfo
                 console.log("DEBUG (fetchStudents): Fetching students for date:", dateStr, "course_id:", courseId);
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}` // <--- ADDED course_id HERE
+                    `http://localhost/ustp-student-attendance-system/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}` // <--- ADDED course_id HERE
                 );
 
                 if (!response.ok) {
@@ -253,6 +254,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     setPresentStudents(presentIds);
                     const lateIds = data.filter(student => student.status === 'Late').map(s => s.student_details_id);
                     setLateStudents(lateIds);
+                    const excusedIds = data.filter(student => student.status === 'Excused').map(s => s.student_details_id); // <-- Add this line
+                    setExcusedStudents(excusedIds);
                 } else {
                     console.error("DEBUG (fetchStudents): Backend did NOT return an array for students:", data);
                     setStudents([]); // Ensure students is always an array
@@ -286,6 +289,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const isPresent = presentStudents.includes(student.student_details_id);
         const isLate = lateStudents.includes(student.student_details_id);
+        
 
         let newPresent = presentStudents;
         let newLate = lateStudents;
@@ -321,7 +325,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         console.log("DEBUG (toggleAttendance): Final attendanceData payload:", attendanceData);
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -370,7 +374,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 }
                 const courseId = sectionInfo.course_id; // Get course_id from sectionInfo
 
-                const res = await fetch(`http://localhost/ustp-student-attendance/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`); // Added &course_id=${courseId}
+                const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`); // Added &course_id=${courseId}
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 setDropdownStudents(data);
@@ -429,7 +433,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         console.log("DEBUG (markAsLate): Final attendanceData payload (Late):", attendanceData);
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/save_attendance.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -467,7 +471,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/add_drop_request.php', {
+            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/add_drop_request.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData),
@@ -498,7 +502,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/unlock_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/unlock_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -567,7 +571,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 <div className="flex gap-2">
                                     <FaPalette
                                         ref={settingsButtonRef} // Keep this ref if needed for positioning
-                                        className="text-xl cursor-pointer shadow-sm"
+                                        className="text-xl cursor-pointer"
                                         onClick={() => {
                                             setShowColorModal(prev => !prev);
                                             setShowImageSelectModal(false); // Close image modal if color is opened
@@ -596,7 +600,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                 <button
                                                     onClick={async () => {
                                                         try {
-                                                            const res = await fetch('http://localhost/ustp-student-attendance/instructor_backend/update_section_color.php', {
+                                                            const res = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/update_section_color.php', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({
@@ -651,7 +655,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                         onClick={() => setSelectedVectorImage(imagePath)}
                                                     >
                                                         <img
-                                                            src={`http://localhost/ustp-student-attendance/public/assets/${imagePath}`}
+                                                            src={`http://localhost/ustp-student-attendance-system/public/assets/${imagePath}`}
                                                             alt={`Vector ${index + 1}`}
                                                             className="w-full h-auto object-contain"
                                                         />
@@ -727,7 +731,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                         onClick={async () => {
                                             if (window.confirm("Are you sure you want to lock attendance for this section and date? This cannot be undone.")) {
                                                 try {
-                                                    const response = await fetch('http://localhost/ustp-student-attendance/instructor_backend/lock_attendance.php', {
+                                                    const response = await fetch('http://localhost/ustp-student-attendance-system/instructor_backend/lock_attendance.php', {
                                                         method: 'POST',
                                                         headers: { 'Content-Type': 'application/json' },
                                                         body: JSON.stringify({
@@ -805,6 +809,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             : filteredStudents.map((student, index) => {
                                 const isPresent = presentStudents.includes(student.student_details_id);
                                 const isLate = lateStudents.includes(student.student_details_id);
+                                const isExcused = excusedStudents.includes(student.student_details_id);
 
                                 const firstName = student.firstname || '';
                                 const middleName = student.middlename && student.middlename !== '-' ? student.middlename : '';
@@ -816,21 +821,29 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 return (
                                     <div
                                         key={student.student_details_id} // Use a stable key, student_details_id is better than index
-                                        onClick={isAttendanceLocked ? null : () => toggleAttendance(student)}
-                                        onDoubleClick={isAttendanceLocked ? null : () => markAsLate(student)}
+                                        onClick={isAttendanceLocked || isExcused ? null : () => toggleAttendance(student)}
+                                        onDoubleClick={isAttendanceLocked || isExcused ? null : () => markAsLate(student)}
                                         className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
-                                             bg-white border-2 rounded-[20px] flex flex-col justify-between
-                                            ${isLate ? 'border-yellow-400 bg-yellow-100 opacity-100' : isPresent ? 'border-[#e4eae9] opacity-100' : 'border-[#e4eae9] opacity-60'}
-                                            ${isAttendanceLocked ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
-                                            ${isSearching ? 'student-card-exit' : 'student-card-enter'} // Add animation classes here
+                                            border-2 rounded-[20px] flex flex-col justify-between
+                                            ${isExcused
+                                                ? 'border-blue-500 bg-blue-100 opacity-100 cursor-not-allowed pointer-events-none' // Modified this line
+                                                : isLate
+                                                    ? 'cursor-pointer border-yellow-400 bg-yellow-100 opacity-100 hover:shadow-md hover:scale-[1.02]'
+                                                    : isPresent
+                                                        ? 'cursor-pointer border-[#e4eae9] bg-white opacity-100 hover:shadow-md hover:scale-[1.02]'
+                                                        : 'cursor-pointer border-[#e4eae9] bg-white opacity-60 hover:shadow-md hover:scale-[1.02]'
+                                            }
+                                            ${isAttendanceLocked && !isExcused ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+                                            ${isSearching ? 'student-card-exit' : 'student-card-enter'}
                                         `}
                                     >
                                         {isAttendanceLocked && (
                                             <div className="absolute top-2 right-2 bg-gray-700 text-white text-xs px-2 py-1 rounded-full z-10">LOCKED</div>
                                         )}
                                         <div className="overflow-hidden rounded-t-[20px] flex justify-center aspect-w-1 aspect-h-1 w-full">
+                                            {/* The background of the image container will now be controlled by the parent div's isExcused condition */}
                                             <img
-                                                src={`http://localhost/ustp-student-attendance/uploads/${student.image}?${new Date().getTime()}`}
+                                                src={`http://localhost/ustp-student-attendance-system/uploads/${student.image}?${new Date().getTime()}`}
                                                 className={`object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
                                                 alt={displayedName}
                                                 onError={(e) => {
@@ -844,14 +857,16 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                             <p
                                                 className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`}
                                                 style={{
-                                                    color: isLate
-                                                        ? '#b59b00'
-                                                        : isPresent
-                                                            ? (sectionInfo?.hexcode || '#0097b2')
-                                                            : '#737373'
+                                                    color: isExcused
+                                                        ? '#2563eb' // blue-600
+                                                        : isLate
+                                                            ? '#b59b00'
+                                                            : isPresent
+                                                                ? (sectionInfo?.hexcode || '#0097b2')
+                                                                : '#737373'
                                                 }}
                                             >
-                                                {isLate ? 'Late' : isPresent ? 'Present' : 'Absent'}
+                                                {isExcused ? 'Excused' : isLate ? 'Late' : isPresent ? 'Present' : 'Absent'}
                                             </p>
                                             <div className="flex items-center justify-between">
                                                 <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
