@@ -1,6 +1,72 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
+const ClassDropdown = ({ classes }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  if (!classes) {
+    return <span className="text-gray-500">N/A</span>;
+  }
+
+  const classList = classes.split(';').map(item => item.trim()).filter(item => item !== '');
+
+  if (classList.length === 0) {
+    return <span className="text-gray-500">None</span>;
+  }
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      <button
+        type="button"
+        className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-2 py-1 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500"
+        onClick={toggleDropdown}
+      >
+        View Classes
+        {/* Dropdown arrow icon */}
+        <svg className="-mr-1 ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="origin-top-right absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+          <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            {classList.map((cls, index) => (
+              <span
+                key={index}
+                className="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer"
+                role="menuitem"
+              >
+                <div className="rounded-md border border-gray-200 bg-gray-50 py-1 px-2">
+                  {cls}
+                </div>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function Admin_Students() {
   const [students, setStudents] = useState([]);
@@ -45,48 +111,31 @@ export default function Admin_Students() {
   };
 
   const confirmDelete = () => {
-    axios
-      .post(
-        "http://localhost/USTP-Student-Attendance-System/admin_backend/delete_student.php",
-        {
-          _method: "DELETE",
-          student_id: selectedStudent.student_id,
-        }
-      )
-      .then((res) => {
-        if (res.data.success) {
-          // Refresh or filter out the deleted student
-          setStudents(
-            students.filter((s) => s.student_id !== selectedStudent.student_id)
-          );
-        } else {
-          alert(res.data.message || "Failed to delete student.");
-        }
-      })
-      .catch(() => alert("An error occurred while deleting."))
-      .finally(() => {
-        setIsModalOpen(false);
-        setSelectedStudent(null);
-      });
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_student.php', {
+      _method: 'DELETE',
+      student_id: selectedStudent.student_id,
+    })
+    .then((res) => {
+      if (res.data.success) {
+        setStudents(students.filter(s => s.student_id !== selectedStudent.student_id));
+      } else {
+        alert(res.data.message || "Failed to delete student.");
+      }
+    })
+    .catch((err) => {
+      console.error("Delete error:", err); 
+      alert("An error occurred while deleting.");
+    })
+    .finally(() => {
+      setIsModalOpen(false);
+      setSelectedStudent(null);
+    });
   };
 
   const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
-    const enrolledClasses = (student.enrolled_classes || "").toLowerCase();
-    const studentId = student.student_id ? String(student.student_id).toLowerCase() : '';
-    const programName = (student.program_name || '').toLowerCase();
-    const contactNumber = (student.contact_number || '').toLowerCase();
-    const address = `${student.street || ''} ${student.city || ''} ${student.province || ''} ${student.zipcode || ''}`.toLowerCase();
-
-
-    return (
-      fullName.includes(searchTerm.toLowerCase()) ||
-      enrolledClasses.includes(searchTerm.toLowerCase()) ||
-      studentId.includes(searchTerm.toLowerCase()) ||
-      programName.includes(searchTerm.toLowerCase()) ||
-      contactNumber.includes(searchTerm.toLowerCase()) ||
-      address.includes(searchTerm.toLowerCase())
-    );
+    const enrolledClasses = (student.enrolled_classes || '').toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase()) || enrolledClasses.includes(searchTerm.toLowerCase());
   });
 
   return (
@@ -154,14 +203,14 @@ export default function Admin_Students() {
               <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-auto sm:table-fixed w-full">
                 <thead className="bg-blue-100 uppercase text-blue-700">
                   <tr>
-                    <th className="px-3 py-2 w-[80px] sm:w-[6%]">Stu. ID</th>
-                    <th className="px-3 py-2 w-[150px] sm:w-[18%]">Full Name</th>
-                    <th className="px-3 py-2 w-[180px] sm:w-[20%]">Enrolled Classes</th>
-                    <th className="px-3 py-2 w-[100px] sm:w-[10%]">Program</th>
-                    <th className="px-3 py-2 w-[120px] sm:w-[12%]">Birthdate</th>
-                    <th className="px-3 py-2 w-[140px] sm:w-[13%]">Contact Number</th>
-                    <th className="px-3 py-2 w-[180px] sm:w-[20%]">Address</th>
-                    <th className="px-3 py-2 w-[100px] sm:w-[10%] text-center">Action</th>
+                    <th className="px-3 py-2 w-[7%]">Stu. ID</th>
+                    <th className="px-3 py-2 w-[22%]">Full Name</th>
+                    <th className="px-3 py-2 w-[15%]">Enrolled Classes</th>
+                    <th className="px-3 py-2 w-[10%]">Program</th>
+                    <th className="px-3 py-2 w-[12%]">Birthdate</th>
+                    <th className="px-3 py-2 w-[13%]">Contact Number</th>
+                    <th className="px-3 py-2 w-[20%]">Address</th>
+                    <th className="px-3 py-2 w-[10%] text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,11 +230,14 @@ export default function Admin_Students() {
                         <td className="px-3 py-2 truncate">
                           {student.firstname} {student.middlename} {student.lastname}
                         </td>
-                        <td className="px-3 py-2 truncate">{student.enrolled_classes}</td>
-                        <td className="px-3 py-2 truncate">{student.program_name}</td>
-                        <td className="px-3 py-2 truncate">{student.date_of_birth}</td>
-                        <td className="px-3 py-2 truncate">{student.contact_number}</td>
-                        <td className="px-3 py-2 truncate">
+                        {/* Use the new ClassDropdown component here */}
+                        <td className="px-3 py-2 min-w-0">
+                          <ClassDropdown classes={student.enrolled_classes} />
+                        </td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.program_name}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.date_of_birth}</td>
+                        <td className="px-3 py-2 truncate min-w-0">{student.contact_number}</td>
+                        <td className="px-3 py-2 truncate min-w-0">
                           {student.street} {student.city} {student.province} {student.zipcode}
                         </td>
                         <td className="px-3 py-2">
