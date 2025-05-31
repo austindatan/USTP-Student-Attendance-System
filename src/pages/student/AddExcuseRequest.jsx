@@ -176,10 +176,11 @@ const AddExcuseRequest = ({ studentId }) => {
   };
 
   return (
+    <div className="font-dm-sans min-h-screen overflow-y-auto">
+      <section className="lg:w-[75%] xl:w-[76%] w-full pt-12 px-6 sm:px-6 md:px-12">
     <form
       onSubmit={handleSubmit}
       className="font-dm-sans p-8 text-left w-full max-w-xl mx-auto my-10 bg-white rounded-xl shadow-2xl transition-all duration-300 space-y-6"
-      style={{ transform: 'translateX(-150px)' }}
     >
       {/* Form Title */}
       <h2 className="text-3xl font-bold text-center text-blue-800 mb-6 border-b pb-4 border-blue-100">Excuse Request Form</h2>
@@ -278,6 +279,8 @@ const AddExcuseRequest = ({ studentId }) => {
         {loading ? "Submitting Request..." : "Submit Excuse Request"}
       </button>
     </form>
+    </section>
+    </div>
   );
 };
 
