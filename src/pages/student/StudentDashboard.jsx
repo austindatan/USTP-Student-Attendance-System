@@ -214,7 +214,7 @@ export default function StudentDashboard({ selectedDate }) { // Added selectedDa
 
         {/* My Classes Section */}
         <div className="mb-10 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
               [...Array(3)].map((_, i) => <SkeletonClassCard key={i} />)
             ) : error ? (

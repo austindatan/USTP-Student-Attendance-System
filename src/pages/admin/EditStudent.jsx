@@ -104,7 +104,7 @@ export default function EditStudent() {
                             const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
                             if (!newSectionsCache[cacheKey]) {
                                 try {
-                                    const res = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', {
+                                    const res = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', {
                                         params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
                                     });
                                     newSectionsCache[cacheKey] = res.data;

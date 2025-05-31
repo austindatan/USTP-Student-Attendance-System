@@ -12,7 +12,6 @@ export default function Admin_Sections() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Updated API endpoint to fetch sections with year level and semester details
         axios.get('http://localhost/ustp-student-attendance/admin_backend/section_with_details.php')
             .then(res => {
                 console.log("Fetched sections data:", res.data);
@@ -43,16 +42,13 @@ export default function Admin_Sections() {
         })
             .then((res) => {
                 if (res.data.success) {
-                    // Refresh or filter out the deleted section
                     setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
                 } else {
-                    // Using console.error for demonstration. In a real app, implement a custom modal/toast for messages.
                     console.error(res.data.message || "Failed to delete section.");
                 }
             })
             .catch((err) => {
                 console.error("An error occurred while deleting:", err);
-                // Using console.error for demonstration.
                 console.error("An error occurred while deleting.");
             })
             .finally(() => {
@@ -70,18 +66,21 @@ export default function Admin_Sections() {
     );
 
     return (
-        <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
+        <div
+            className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex"
+            style={{ overflowY: "auto" }}
+        >
             <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
                 <div
-                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflowhidden"
+                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={
                         !loading
                             ? {
-                                    backgroundImage: "url('assets/teacher_vector.png')",
-                                    backgroundRepeat: "no-repeat",
-                                    backgroundPosition: "right",
-                                    backgroundSize: "contain"
-                                }
+                                  backgroundImage: "url('assets/teacher_vector.png')",
+                                  backgroundRepeat: "no-repeat",
+                                  backgroundPosition: "right",
+                                  backgroundSize: "contain"
+                              }
                             : {}
                     }
                 >
@@ -96,7 +95,7 @@ export default function Admin_Sections() {
                         )}
                     </div>
                 </div>
-                <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
+                <div className="bg-white shadow-md rounded-lg p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <p className="text-blue-700 font-semibold whitespace-nowrap">
                             Total Sections: {filteredSections.length}
@@ -107,11 +106,11 @@ export default function Admin_Sections() {
                                 placeholder="Search sections..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring2 focus:ring-blue-500 w-full sm:w-[250px]"
+                                className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
                             />
                             <button
                                 onClick={() => navigate("/admin-sections/add")}
-                                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:wauto"
+                                className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
                             >
                                 + Add Section
                             </button>
@@ -122,21 +121,23 @@ export default function Admin_Sections() {
                     ) : error ? (
                         <p className="text-center text-red-500">{error}</p>
                     ) : (
-                        <div className="overflow-x-auto max-w-full">
-                            <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
+                        <div
+                            className="overflow-x-auto"
+                            style={{ WebkitOverflowScrolling: "touch" }}
+                        >
+                            <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
                                 <thead className="bg-blue-100 uppercase text-blue-700">
-                                    {/* Removed empty column and adjusted widths */}
                                     <tr>
-                                        <th className="px-3 py-2 w-[20%]">Section Name</th>
-                                        <th className="px-3 py-2 w-[20%]">Year Level</th>
-                                        <th className="px-3 py-2 w-[20%]">Semester</th>
-                                        <th className="px-3 py-2 w-[40%] text-center">Action</th>
+                                        <th className="px-4 py-2">Section Name</th>
+                                        <th className="px-4 py-2">Year Level</th>
+                                        <th className="px-4 py-2">Semester</th>
+                                        <th className="px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredSections.length === 0 ? (
                                         <tr>
-                                            <td colSpan="4" className="px-4 py-4 text-center text-gray-500">
+                                            <td colSpan="4" className="px-4 py-6 text-center text-gray-500">
                                                 No sections found.
                                             </td>
                                         </tr>
@@ -146,30 +147,34 @@ export default function Admin_Sections() {
                                                 key={section.section_id || index}
                                                 className="border-b border-blue-200 hover:bg-blue-50"
                                             >
-                                                <td className="px-3 py-2 truncate min-w-0">{section.section_name}</td>
-                                                <td className="px-3 py-2 truncate min-w-0">{section.year_level_name || 'N/A'}</td>
-                                                <td className="px-3 py-2 truncate min-w-0">{section.semester_name || 'N/A'}</td>
-                                                <td className="px-3 py-2">
-                                                    <div className="flex gap-1 justify-center flex-wrap">
-                                                        <button
-                                                            onClick={() => handleViewCourses(section.section_id)}
-                                                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap mb-1"
-                                                        >
-                                                            View Courses
-                                                        </button>
-                                                        <button
-                                                            onClick={() => navigate(`/admin-edit-section/${section.section_id}`)}
-                                                            className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap mb-1"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteClick(section)}
-                                                            className="bg-red-700 hover:bg-red-600 text-white px-2 py-1 rounded text-xs sm:text-sm mb-1"
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </div>
+                                                <td className="px-4 py-2 truncate max-w-[140px]">
+                                                    {section.section_name}
+                                                </td>
+                                                <td className="px-4 py-2 truncate max-w-[120px]">
+                                                    {section.year_level_name || 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-2 truncate max-w-[120px]">
+                                                    {section.semester_name || 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-2 whitespace-nowrap space-x-2">
+                                                    <button
+                                                        onClick={() => handleViewCourses(section.section_id)}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                                                    >
+                                                        View Courses
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/admin-edit-section/${section.section_id}`)}
+                                                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteClick(section)}
+                                                        className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                    >
+                                                        Delete
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))
@@ -182,8 +187,8 @@ export default function Admin_Sections() {
             </section>
             {/* Delete Confirmation Modal */}
             {isModalOpen && selectedSection && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">
                             Confirm Delete
                         </h2>
@@ -191,18 +196,18 @@ export default function Admin_Sections() {
                             Are you sure you want to delete{" "}
                             <span className="font-bold">{selectedSection.section_name}</span>?
                         </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
-                            >
-                                Cancel
-                            </button>
+                        <div className="flex justify-center gap-4 mt-4">
                             <button
                                 onClick={confirmDelete}
-                                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
                             >
-                                Delete
+                                Yes
+                            </button>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+                            >
+                                Cancel
                             </button>
                         </div>
                     </div>

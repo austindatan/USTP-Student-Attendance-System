@@ -39,7 +39,7 @@ const ExcuseRequestsPage = () => {
       return;
     }
 
-    fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
+    fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
@@ -90,7 +90,7 @@ const ExcuseRequestsPage = () => {
 
       try {
         const res = await fetch(
-          "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php",
+          "http://localhost/ustp-student-attendance/instructor_backend/update_excuse_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -213,7 +213,7 @@ const ExcuseRequestsPage = () => {
         </div>
 
         {showModal && selectedRequest && createPortal(
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
+          <div className="font-dm-sans fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-auto" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
                 <h3 className="text-2xl font-bold text-indigo-600">Excuse Request Details</h3>
@@ -234,7 +234,7 @@ const ExcuseRequestsPage = () => {
                   {selectedRequest.file_path ? (
                     <a
                       // !! MODIFIED LINE HERE !!
-                      href={`http://localhost/USTP-Student-Attendance-System/api/student_backend/${selectedRequest.file_path}`}
+                      href={`http://localhost/ustp-student-attendance/api/student_backend/${selectedRequest.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-4 py-2 bg-gray-100 text-indigo-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-base font-semibold border border-indigo-200"
@@ -264,7 +264,7 @@ const ExcuseRequestsPage = () => {
 
 
         {modal.show && createPortal(
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
+          <div className="font-dm-sans fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-indigo-600 text-center">Confirm Action</h2>
