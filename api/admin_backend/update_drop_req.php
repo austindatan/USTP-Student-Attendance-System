@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         $reason_for_request = $original_req_data['reason'];
 
         // 2. Update the status of the original `drop_request`
+        // This update is still necessary to mark the request as processed BEFORE potentially deleting it
         $stmt_update_original_req = $conn->prepare("UPDATE drop_request SET status = ? WHERE drop_request_id = ?");
         if (!$stmt_update_original_req) {
             throw new Exception("Failed to prepare statement for updating original drop request status: " . $conn->error);
@@ -99,13 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             if (!$stmt_insert_history) {
                 throw new Exception("Failed to prepare statement for inserting into drop_history: " . $conn->error);
             }
-            // Use 'Dropped' directly here, as this branch is only for 'Dropped' requests
             $history_record_status = 'Dropped'; 
             $stmt_insert_history->bind_param(
-                "ississsss", // i:drop_req_id, s:reason, s:status, i:sd_id_at_drop, i:student_id_at_drop, s:student_name, s:program_name, s:course_name, s:instructor_name
+                "ississsss",
                 $drop_req_id,
                 $reason_for_request,
-                $history_record_status, // Use the determined status for history
+                $history_record_status,
                 $student_details_id_affected,
                 $student_id_at_drop,
                 $student_name_snapshot,
@@ -129,15 +129,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
                 throw new Exception("Failed to delete student details: " . $stmt_delete_student_details->error);
             }
             $stmt_delete_student_details->close();
+
+            // NEW: Delete the request from the `drop_request` table
+            $stmt_delete_drop_request = $conn->prepare("DELETE FROM drop_request WHERE drop_request_id = ?");
+            if (!$stmt_delete_drop_request) {
+                throw new Exception("Failed to prepare statement for deleting drop request: " . $conn->error);
+            }
+            $stmt_delete_drop_request->bind_param("i", $drop_req_id);
+            if (!$stmt_delete_drop_request->execute()) {
+                throw new Exception("Failed to delete drop request: " . $stmt_delete_drop_request->error);
+            }
+            $stmt_delete_drop_request->close();
             
-            $message = "Drop request approved, student dropped, and history saved successfully.";
+            $message = "Drop request approved, student dropped, and history saved. Request removed from pending.";
 
         } elseif ($original_request_status === 'Rejected') {
             // This block runs if the request is being 'Rejected'
-            // No insertion into drop_history or deletion from student_details for 'Rejected'
-            // if you want 'Rejected' requests in history, you'd add similar insertion logic here
-            // but ensure the status for history is 'Rejected' and your drop_history ENUM supports it.
-            $message = "Drop request rejected successfully.";
+            
+            // Fetch current student, program, course, and instructor details for the snapshot
+            $stmt_fetch_details_snapshot = $conn->prepare("
+                SELECT
+                    s.student_id,
+                    CONCAT(s.firstname, ' ', s.middlename, ' ', s.lastname) AS student_name,
+                    p.program_name,
+                    c.course_name,
+                    CONCAT(i.firstname, ' ', i.middlename, ' ', i.lastname) AS instructor_name
+                FROM student_details sd
+                INNER JOIN student s ON s.student_id = sd.student_id
+                INNER JOIN program_details pd ON pd.program_details_id = sd.program_details_id
+                INNER JOIN program p ON p.program_id = pd.program_id
+                INNER JOIN section_courses sc ON sc.section_course_id = sd.section_course_id
+                INNER JOIN course c ON c.course_id = sc.course_id
+                INNER JOIN instructor i ON i.instructor_id = sc.instructor_id
+                WHERE sd.student_details_id = ?
+            ");
+            if (!$stmt_fetch_details_snapshot) {
+                throw new Exception("Failed to prepare statement for fetching student details snapshot for rejection: " . $conn->error);
+            }
+            $stmt_fetch_details_snapshot->bind_param("i", $student_details_id_affected);
+            $stmt_fetch_details_snapshot->execute();
+            $result_details_snapshot = $stmt_fetch_details_snapshot->get_result();
+            $details_snapshot_row = $result_details_snapshot->fetch_assoc();
+            $stmt_fetch_details_snapshot->close();
+
+            // Prepare snapshot data
+            $student_id_at_drop = $details_snapshot_row['student_id'] ?? NULL;
+            $student_name_snapshot = $details_snapshot_row['student_name'] ?? 'N/A';
+            $program_name_snapshot = $details_snapshot_row['program_name'] ?? 'N/A';
+            $course_name_snapshot = $details_snapshot_row['course_name'] ?? 'N/A';
+            $instructor_name_snapshot = $details_snapshot_row['instructor_name'] ?? 'N/A';
+
+            // Insert into `drop_history` table with the 'Rejected' status
+            $stmt_insert_history = $conn->prepare("
+                INSERT INTO drop_history
+                (drop_request_id, reason, status, student_details_id_at_drop, student_id_at_drop, student_name, program_name, course_name, instructor_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            if (!$stmt_insert_history) {
+                throw new Exception("Failed to prepare statement for inserting rejected request into drop_history: " . $conn->error);
+            }
+            $history_record_status = 'Rejected'; 
+            $stmt_insert_history->bind_param(
+                "ississsss",
+                $drop_req_id,
+                $reason_for_request,
+                $history_record_status,
+                $student_details_id_affected,
+                $student_id_at_drop,
+                $student_name_snapshot,
+                $program_name_snapshot,
+                $course_name_snapshot,
+                $instructor_name_snapshot
+            );
+            
+            if (!$stmt_insert_history->execute()) {
+                throw new Exception("Failed to insert rejected request into drop_history: " . $stmt_insert_history->error);
+            }
+            $stmt_insert_history->close();
+
+            // NEW: Delete the request from the `drop_request` table
+            $stmt_delete_drop_request = $conn->prepare("DELETE FROM drop_request WHERE drop_request_id = ?");
+            if (!$stmt_delete_drop_request) {
+                throw new Exception("Failed to prepare statement for deleting drop request: " . $conn->error);
+            }
+            $stmt_delete_drop_request->bind_param("i", $drop_req_id);
+            if (!$stmt_delete_drop_request->execute()) {
+                throw new Exception("Failed to delete drop request: " . $stmt_delete_drop_request->error);
+            }
+            $stmt_delete_drop_request->close();
+
+            $message = "Drop request rejected and history saved. Request removed from pending.";
         } else {
             throw new Exception("Invalid status provided for processing.");
         }
