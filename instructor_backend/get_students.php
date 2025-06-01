@@ -16,7 +16,7 @@ if (!$instructor_id || !$section_id || !$course_id) {
 }
 
 $query = "
-    SELECT DISTINCT -- ADDED DISTINCT HERE
+    SELECT DISTINCT
         sd.student_details_id,
         s.student_id,
         s.firstname,
@@ -48,7 +48,7 @@ $result = $stmt->get_result();
 
 $students = [];
 while ($row = $result->fetch_assoc()) {
-    $row['name'] = trim($row['firstname'] . ' ' . $row['middlename'] . ' ' . $row['lastname']);
+    // REMOVED: $row['name'] = trim($row['firstname'] . ' ' . $row['middlename'] . ' ' . $row['lastname']);
     $students[] = $row;
 }
 
