@@ -16,7 +16,7 @@ export default function DropRequests() {
     setError(null); // Clear previous errors when starting a new fetch
 
     // Construct the URL based on whether history view is active
-    const url = `http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php?view=${
+    const url = `http://localhost/USTP-Student-Attendance-System/admin_backend/get_drop_req.php?view=${
       isHistoryView ? "history" : "active"
     }`;
 
@@ -70,7 +70,7 @@ export default function DropRequests() {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/admin_backend/update_drop_req.php",
+          "http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

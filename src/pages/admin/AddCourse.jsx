@@ -34,7 +34,7 @@ export default function AddCourse() {
     setIsLoading(true);
     try {
       await axios.post(
-        'http://localhost/ustp-student-attendance/admin_backend/course_add.php',
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add.php',
         formData // formData now includes course_code
       );
       alert('Course added successfully!');
@@ -73,7 +73,7 @@ export default function AddCourse() {
         <div
           className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundImage: "url('/assets/classroom_vector.png')",
+            backgroundImage: "url('/assets/teacher_vector.png')",
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'right',
             backgroundSize: 'contain',

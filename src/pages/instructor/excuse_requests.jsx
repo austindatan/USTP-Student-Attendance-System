@@ -86,7 +86,7 @@ const ExcuseRequestsPage = () => {
       }
     };
 
-    fetch(`http://localhost/ustp-student-attendance/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
+    fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
@@ -132,13 +132,13 @@ const ExcuseRequestsPage = () => {
 
     if (modal.type === "approve" || modal.type === "reject") {
       const status = modal.type === "approve" ? "Approved" : "Rejected";
-      endpoint = "http://localhost/ustp-student-attendance/instructor_backend/update_excuse_req.php";
+      endpoint = "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php";
       method = "PUT";
       body = JSON.stringify({ excused_request_id: modal.id, status });
       successMessage = "Status updated successfully!";
       errorMessage = "Failed to update status.";
     } else if (modal.type === "delete") {
-      endpoint = "http://localhost/ustp-student-attendance/instructor_backend/delete_excuse_req.php";
+      endpoint = "http://localhost/USTP-Student-Attendance-System/instructor_backend/delete_excuse_req.php";
       method = "DELETE";
       body = JSON.stringify({ excused_request_id: modal.id });
       successMessage = "Request deleted successfully!";

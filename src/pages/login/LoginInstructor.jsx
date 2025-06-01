@@ -17,7 +17,7 @@ const LoginInstructor = () => {
   const handleLogin = async e => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost/ustp-student-attendance/api/auth/login-instructor.php", {
+      const res = await fetch("http://localhost/USTP-Student-Attendance-System/api/auth/login-instructor.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -62,7 +62,8 @@ const LoginInstructor = () => {
       >
         <div className="flex items-center mb-6">
           <img src="assets/ustp_logo.png" className="w-12 h-12 mr-3" alt="USTP Logo" />
-          <h2 className="text-xl sm:text-2xl font-bold">Instructor Portals</h2>
+            <img src="assets/SAMS.png" className="w-16 h-5  mr-3" alt="SAMSLogo" />
+          <h2 className="text-xl sm:text-2xl font-bold ">Instructor Portal</h2>
         </div>
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
