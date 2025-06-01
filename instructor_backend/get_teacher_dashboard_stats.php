@@ -83,10 +83,12 @@ $stmt2->close();
 $classes_result = 0;
 
 $stmt3 = $conn->prepare("
-    SELECT COUNT(DISTINCT section_course_id) AS total_classes 
-    FROM section_courses 
-    WHERE instructor_id = ?
+    SELECT COUNT(DISTINCT sc.section_course_id) AS total_classes
+    FROM section_courses sc
+    JOIN student_details sd ON sc.section_course_id = sd.section_course_id
+    WHERE sc.instructor_id = ?
 ");
+
 if ($stmt3 === false) {
     http_response_code(500);
     echo json_encode(["error" => "Failed to prepare statement 3: " . $conn->error]);
