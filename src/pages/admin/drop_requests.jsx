@@ -18,7 +18,7 @@ export default function DropRequests() {
     setLoading(true);
     setError(null);
 
-    let url = `http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php?view=`;
+    let url = `http://localhost/ustp-student-attendance/api/admin_backend/get_drop_req.php?view=`;
 
     // Only send 'history' or 'active' to the backend
     if (viewType === 'active') {
@@ -81,7 +81,7 @@ export default function DropRequests() {
 
       try {
         const res = await fetch(
-          "http://localhost/ustp-student-attendance/admin_backend/update_drop_req.php",
+          "http://localhost/ustp-student-attendance/api/admin_backend/update_drop_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
