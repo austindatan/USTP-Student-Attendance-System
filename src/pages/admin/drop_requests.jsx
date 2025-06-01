@@ -8,29 +8,23 @@ export default function DropRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState({ isOpen: false, type: null, id: null });
   const [selectedReason, setSelectedReason] = useState("");
-  // State to control viewing history (includes Dropped and Rejected)
-  const [showHistory, setShowHistory] = useState(false); // This state will now represent 'Dropped'
-  // State to control viewing explicitly rejected requests
-  const [showRejected, setShowRejected] = useState(false);
+  const [showHistory, setShowHistory] = useState(false); // Controls 'Dropped' view (fetches history)
+  const [showRejected, setShowRejected] = useState(false); // Controls 'Rejected' view (filters history)
 
-  // State for "Student Dropped Successfully" modal
   const [showDropSuccessModal, setShowDropSuccessModal] = useState(false);
-  // State for "Request Rejected Successfully" modal
   const [showRejectSuccessModal, setShowRejectSuccessModal] = useState(false);
 
-  // Modified fetchRequests to accept a parameter for the view type
-  const fetchRequests = (viewType) => { // Renamed from isHistoryView to viewType
+  const fetchRequests = (viewType) => {
     setLoading(true);
-    setError(null); // Clear previous errors when starting a new fetch
+    setError(null);
 
-    let url = `http://localhost/USTP-Student-Attendance-System/admin_backend/get_drop_req.php?view=`;
+    let url = `http://localhost/ustp-student-attendance/admin_backend/get_drop_req.php?view=`;
 
-    if (viewType === 'dropped') { // Changed 'history' to 'dropped' here
-      url += 'history'; // Fetches both 'Dropped' and 'Rejected' from history table
-    } else if (viewType === 'rejected') {
-      url += 'rejected'; // Will fetch explicitly 'Rejected' from history table or original table
-    } else { // 'active'
-      url += 'active'; // Fetches 'Pending' requests
+    // Only send 'history' or 'active' to the backend
+    if (viewType === 'active') {
+      url += 'active';
+    } else { // 'dropped' or 'rejected' view types will both request 'history' from backend
+      url += 'history';
     }
 
     fetch(url)
@@ -55,19 +49,19 @@ export default function DropRequests() {
       .catch((err) => {
         console.error("Error fetching drop requests:", err);
         setError(`Failed to load requests: ${err.message}`);
-        setRequests([]); // Clear requests on error
+        setRequests([]);
       })
       .finally(() => setLoading(false));
   };
 
-  // useEffect now depends on showHistory (now 'Dropped' view) and showRejected to re-fetch data
   useEffect(() => {
-    if (showHistory) { // This now means 'Dropped' view is active
-      fetchRequests('dropped'); // Fetch 'dropped' history
-    } else if (showRejected) {
-      fetchRequests('rejected'); // Fetch 'rejected' history
+    // Determine what to fetch based on current view states
+    if (showHistory || showRejected) {
+      // If either 'Dropped' or 'Rejected' view is active, fetch 'history'
+      fetchRequests('history');
     } else {
-      fetchRequests('active'); // Fetch active requests
+      // Otherwise, fetch 'active' requests
+      fetchRequests('active');
     }
   }, [showHistory, showRejected]); // Re-run effect when showHistory or showRejected changes
 
@@ -87,7 +81,7 @@ export default function DropRequests() {
 
       try {
         const res = await fetch(
-          "http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php",
+          "http://localhost/ustp-student-attendance/admin_backend/update_drop_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -104,7 +98,7 @@ export default function DropRequests() {
             setShowHistory(true); // Switch to 'Dropped' view
             setShowRejected(false); // Ensure Rejected view is off
           } else if (modal.type === "reject") {
-            setShowRejectSuccessModal(true); // Show reject success modal
+            setShowRejectSuccessModal(true);
             setShowRejected(true); // Switch to explicitly rejected view
             setShowHistory(false); // Ensure Dropped view is off
           }
@@ -119,12 +113,23 @@ export default function DropRequests() {
     }
   };
 
-  const filteredRequests = requests.filter(
-    (req) =>
+  // Filter requests based on search term AND current view (active, dropped, or rejected)
+  const filteredRequests = requests.filter((req) => {
+    const matchesSearchTerm =
       (req.student_name &&
         req.student_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (req.reason && req.reason.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+      (req.reason && req.reason.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    if (showHistory) {
+      return matchesSearchTerm && req.status === "Dropped";
+    } else if (showRejected) {
+      return matchesSearchTerm && req.status === "Rejected";
+    } else {
+      // For active view, filter out 'Dropped' and 'Archived' (as per your PHP)
+      return matchesSearchTerm && req.status !== "Dropped" && req.status !== "Archived" && req.status !== "Rejected";
+    }
+  });
+
 
   return (
     <div
@@ -182,8 +187,8 @@ export default function DropRequests() {
                     }}
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
                       !showHistory && !showRejected
-                        ? "bg-blue-600 text-white" // Active state
-                        : "bg-gray-200 text-gray-800 hover:bg-gray-300" // Inactive state
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                   >
                     Active Requests
@@ -195,13 +200,12 @@ export default function DropRequests() {
                     }}
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
                       showHistory && !showRejected
-                        ? "bg-blue-600 text-white" // Active state
-                        : "bg-gray-200 text-gray-800 hover:bg-gray-300" // Inactive state
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                   >
-                    Dropped {/* Renamed from History to Dropped */}
+                    Dropped
                   </button>
-                  {/* Rejected Button */}
                   <button
                     onClick={() => {
                       setShowRejected(true);
@@ -209,8 +213,8 @@ export default function DropRequests() {
                     }}
                     className={`px-4 py-2 rounded-md text-sm font-medium ${
                       showRejected
-                        ? "bg-blue-600 text-white" // Active state
-                        : "bg-gray-200 text-gray-800 hover:bg-gray-300" // Inactive state
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                     }`}
                   >
                     Rejected
@@ -232,7 +236,6 @@ export default function DropRequests() {
                 <table className="min-w-full text-sm text-left text-blue-900 border-collapse">
                   <thead className="bg-blue-100 uppercase text-blue-700">
                     <tr>
-                      {/* Conditionally display Student ID for active requests only */}
                       {!showHistory && !showRejected && <th className="px-4 py-2">Student ID</th>}
                       <th className="px-4 py-2">Student Name</th>
                       <th className="px-4 py-2">Program</th>
@@ -240,9 +243,7 @@ export default function DropRequests() {
                       <th className="px-4 py-2">Instructor</th>
                       <th className="px-4 py-2">Reason</th>
                       <th className="px-4 py-2">Status</th>
-                      {/* Display Processed At only for dropped/rejected view */}
                       {(showHistory || showRejected) && <th className="px-4 py-2">Processed At</th>}
-                      {/* Action column only for active requests */}
                       {!showHistory && !showRejected && <th className="px-4 py-2">Action</th>}
                     </tr>
                   </thead>
@@ -250,11 +251,11 @@ export default function DropRequests() {
                     {filteredRequests.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={!showHistory && !showRejected ? 8 : 7} // Adjust colspan based on view
+                          colSpan={!showHistory && !showRejected ? 8 : 7}
                           className="px-4 py-6 text-center text-gray-500"
                         >
                           {showHistory
-                            ? "No dropped students found." // Updated text
+                            ? "No dropped students found."
                             : showRejected
                             ? "No rejected requests found."
                             : "No active drop requests found."}
@@ -266,7 +267,6 @@ export default function DropRequests() {
                           key={req.drop_request_id}
                           className="border-b border-blue-200 hover:bg-blue-50"
                         >
-                          {/* Conditionally display Student ID for active requests */}
                           {!showHistory && !showRejected && (
                             <td className="px-4 py-2">{req.student_id}</td>
                           )}
@@ -294,18 +294,15 @@ export default function DropRequests() {
                             </div>
                           </td>
                           <td className="px-4 py-2">{req.status}</td>
-                          {/* Display Processed At only for dropped/rejected view */}
                           {(showHistory || showRejected) && (
                             <td className="px-4 py-2">
-                              {req.dropped_at // Assuming 'dropped_at' is used for both dropped and rejected timestamps in history
+                              {req.dropped_at
                                 ? new Date(req.dropped_at).toLocaleString()
                                 : "N/A"}
                             </td>
                           )}
-                          {/* Action buttons only for active requests */}
                           {!showHistory && !showRejected && (
                             <td className="px-4 py-2 space-x-2 whitespace-nowrap">
-                              {/* Only show 'Drop'/'Reject' buttons if status is 'Pending' */}
                               {req.status === "Pending" ? (
                                 <>
                                   <button
@@ -338,7 +335,7 @@ export default function DropRequests() {
 
         {modal.isOpen &&
           createPortal(
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+            <div className="font-dm-sans fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
               <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
                 {modal.type === "reason" ? (
                   <>
@@ -383,11 +380,10 @@ export default function DropRequests() {
             document.body
           )}
 
-        {/* Student Dropped Successfully Modal */}
         {showDropSuccessModal &&
           createPortal(
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+              className="font-dm-sans fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
               onClick={() => setShowDropSuccessModal(false)}
             >
               <div
@@ -415,11 +411,10 @@ export default function DropRequests() {
             document.body
           )}
 
-        {/* Request Rejected Successfully Modal */}
         {showRejectSuccessModal &&
           createPortal(
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+              className="font-dm-sans fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
               onClick={() => setShowRejectSuccessModal(false)}
             >
               <div
