@@ -30,6 +30,10 @@ const StudentLeftSidebar = ({ setBgImage }) => {
         navigate("/add-excuse-request");
     };
 
+    const View_Excuse_Request_Page = () => { 
+        navigate("/view-excuse-request");
+    };
+
     const dashboard_active = location.pathname === '/student-dashboard'; 
     const classes_active = ['/student-classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
         location.pathname.startsWith(path)
@@ -125,7 +129,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Add_Excuse_Request_Page}
+                        onClick={View_Excuse_Request_Page}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
                             excuse_requests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}

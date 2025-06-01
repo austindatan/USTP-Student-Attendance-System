@@ -24,6 +24,7 @@ import StudentEditProfile from './pages/student/StudentEditProfile';
 import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
 import AddExcuseRequest from './pages/student/AddExcuseRequest';
 import AttendanceSummary from './pages/student/AttendanceSummary'; 
+import ExcuseRequestTable from "./pages/student/requests_view";
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Admin_Students from './pages/admin/students';
@@ -236,6 +237,21 @@ function AppContent() {
                         <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
                             {studentId ? (
                                 <AddExcuseRequest studentId={studentId} />
+                            ) : (
+                                <div>Loading student data for excuse request...</div>
+                            )}
+                        </StudentLayout>
+                    </ProtectedStudentRoute>
+                }
+            />
+
+            <Route
+                path="/view-excuse-request"
+                element={
+                    <ProtectedStudentRoute studentId={studentId}>
+                        <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
+                            {studentId ? (
+                                <ExcuseRequestTable studentId={studentId} />
                             ) : (
                                 <div>Loading student data for excuse request...</div>
                             )}

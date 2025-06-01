@@ -939,7 +939,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md mx-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h2 className="text-xl font-bold mb-4" style={{ color: sectionInfo?.hexcode }}>Add Request</h2>
+                        <h2 className="text-xl font-bold mb-4" style={{ color: sectionInfo?.hexcode }}>Add Drop Request</h2>
 
                         {/* Student Dropdown */}
                         <div className="mb-4">
