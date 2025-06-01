@@ -32,7 +32,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
       try {
         const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
         const response = await fetch(
-          `http://localhost/ustp-student-attendance-system/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
+          `http://localhost/ustp-student-attendance-system/api/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
         );
         const data = await response.json();
         setTotalStudents(data.totalStudents);
@@ -55,7 +55,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const fetchSimplifiedNotifications = async () => {
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_recent_req_notif.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/get_recent_req_notif.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSimplifiedNotifications(data);
       } catch (err) {
@@ -74,7 +74,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const fetchWeeklyAttendance = async () => {
       if (!instructor?.instructor_id) return;
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setAttendanceData(data);
       } catch (err) {
@@ -90,7 +90,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const fetchSections = async () => {
       if (!instructor?.instructor_id) return;
       try {
-        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSections(data);
       } catch (err) {

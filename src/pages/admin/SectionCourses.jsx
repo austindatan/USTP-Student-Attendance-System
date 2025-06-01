@@ -49,7 +49,7 @@ function SectionCourses() {
 
     const fetchSectionCourses = async () => {
         try {
-            const response = await axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/section_courses.php?section_id=${sectionId}`);
+            const response = await axios.get(`http://localhost/ustp-student-attendance-system/api/admin_backend/section_courses.php?section_id=${sectionId}`);
             console.log("Fetched section courses data:", response.data);
             if (response.data.success) {
                 setSectionDetails(response.data.section);
@@ -83,7 +83,7 @@ function SectionCourses() {
         if (!courseToDelete) return;
 
         try {
-            const response = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_sectioncourse.php', {
+            const response = await axios.post('http://localhost/ustp-student-attendance-system/api/admin_backend/delete_sectioncourse.php', {
                 _method: 'DELETE',
                 section_course_id: courseToDelete.section_course_id,
             });

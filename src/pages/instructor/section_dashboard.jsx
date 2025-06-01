@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { format } from 'date-fns';
-import { FiSettings } from "react-icons/fi";
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FaPalette, FaImage } from "react-icons/fa6";
-import axios from 'axios';
+import { createPortal } from 'react-dom';
 
 export default function Teacher_Dashboard({ selectedDate }) {
     const navigate = useNavigate();
@@ -25,7 +24,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const colorModalRef = useRef(null);
     const settingsButtonRef = useRef(null);
 
-    // NEW STATE FOR IMAGE MODAL
     const [showImageSelectModal, setShowImageSelectModal] = useState(false);
     const [selectedVectorImage, setSelectedVectorImage] = useState(sectionInfo?.image || 'classes_vector_2.png');
 
@@ -41,12 +39,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
     ];
     const [lateStudents, setLateStudents] = useState([]);
     const [excusedStudents, setExcusedStudents] = useState([]);
-    const [isAttendanceLocked, setIsAttendanceLocked] = useState(false); // Attendance locked state
-    const [showUnlockModal, setShowUnlockModal] = useState(false); // State for unlock modal
+    const [isAttendanceLocked, setIsAttendanceLocked] = useState(false);
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [unlockPasscode, setUnlockPasscode] = useState('');
 
-    // NEW STATE FOR ANIMATION
     const [isSearching, setIsSearching] = useState(false);
+    const [showLockConfirmModal, setShowLockConfirmModal] = useState(false);
+    const [showUnlockSuccessModal, setShowUnlockSuccessModal] = useState(false);
+    const [showLockSuccessModal, setShowLockSuccessModal] = useState(false);
+    const [showValidationErrorModal, setShowValidationErrorModal] = useState(false);
+    const [validationErrorMessage, setValidationErrorMessage] = useState('');
+
+    // NEW: State for "Add Drop Request" success modal
+    const [showAddDropSuccessModal, setShowAddDropSuccessModal] = useState(false);
 
     const instructor = JSON.parse(localStorage.getItem('instructor'));
 
@@ -68,27 +73,25 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 throw new Error("Invalid time components");
             }
 
-            // We'll use a dummy date for the Date object as only the time is relevant
             const dummyDate = new Date(2000, 0, 1, parseInt(hours), parseInt(minutes), parseInt(seconds));
 
             const options = {
                 hour: 'numeric',
                 minute: '2-digit',
-                hour12: true // This is the key for 12-hour format with AM/PM
+                hour12: true
             };
 
-            // Using 'en-US' for consistent AM/PM formatting.
             return dummyDate.toLocaleTimeString('en-US', options);
         } catch (error) {
             console.error("Error formatting time string:", timeString24hr, error);
-            return timeString24hr; // Fallback to original string on error
+            return timeString24hr;
         }
     };
 
     // Helper to get day name from selectedDate
     const getDayName = (date) => {
         console.log("DEBUG: getDayName - selectedDate (inside helper):", date);
-        const dayName = format(date || new Date(), 'EEEE'); // e.g., "Monday"
+        const dayName = format(date || new Date(), 'EEEE');
         console.log("DEBUG: getDayName - Day Name (inside helper):", dayName);
         return dayName;
     };
@@ -116,7 +119,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         return result;
     };
 
-    const handleSaveImage = async () => { // It might have been called handleImageUpload before
+    const handleSaveImage = async () => {
         if (!sectionInfo?.section_course_id) {
             alert("Section information is missing. Cannot update image.");
             return;
@@ -127,24 +130,22 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
 
         try {
-            // We'll update the PHP script to accept a string path
-            const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/update_section_image.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/update_section_image.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     section_course_id: sectionInfo.section_course_id,
-                    image_path: selectedVectorImage, // Sending the selected path
+                    image_path: selectedVectorImage,
                 }),
             });
             const data = await response.json();
 
             if (data.success) {
-                // Update sectionInfo with the new image path from the backend (should be the same as selectedVectorImage)
                 setSectionInfo(prevInfo => ({
                     ...prevInfo,
-                    image: selectedVectorImage // The backend confirms the path
+                    image: selectedVectorImage
                 }));
-                setShowImageSelectModal(false); // Close modal on success
+                setShowImageSelectModal(false);
             } else {
                 alert("Image update failed: " + data.message);
             }
@@ -166,11 +167,11 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_section_info.php?section_id=${sectionId}`);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
+                    const response = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    const data = await res.json();
+                    const data = await response.json();
                     setSectionInfo(data);
                     console.log("DEBUG (fetchSectionInfo): Section info set:", data);
                 } catch (err) {
@@ -184,8 +185,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     // Fetch attendance lock status
     useEffect(() => {
         console.log("DEBUG (fetchLockStatus useEffect): Running. sectionInfo:", sectionInfo, "selectedDate:", selectedDate);
-        // Ensure sectionInfo, section_id, course_id, and selectedDate are available
-        if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) { // ADD sectionInfo.course_id check here
+        if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) {
             console.log("DEBUG (fetchLockStatus): Prerequisites not met. isAttendanceLocked set to false. sectionInfo:", sectionInfo);
             setIsAttendanceLocked(false);
             return;
@@ -193,12 +193,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const fetchLockStatus = async () => {
             try {
-                const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/get_attendance_lock_status.php', {
+                const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/get_attendance_lock_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         section_id: sectionInfo.section_id,
-                        course_id: sectionInfo.course_id, // ADD THIS LINE
+                        course_id: sectionInfo.course_id,
                         date: format(selectedDate, 'yyyy-MM-dd'),
                     }),
                 });
@@ -217,14 +217,13 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         fetchLockStatus();
-    }, [sectionInfo, selectedDate]); // Dependencies
+    }, [sectionInfo, selectedDate]);
 
     useEffect(() => {
         console.log("DEBUG (fetchStudents useEffect): Running. selectedDate:", selectedDate, "instructor:", instructor, "sectionId:", sectionId);
-        // Ensure sectionInfo is available and has course_id before fetching students
         if (!instructor?.instructor_id || !sectionId || !sectionInfo?.course_id) {
             console.log("DEBUG (fetchStudents): Prerequisites not met for fetching students. sectionInfo:", sectionInfo);
-            setIsLoading(false); // Make sure to stop loading if conditions aren't met
+            setIsLoading(false);
             return;
         }
 
@@ -232,10 +231,10 @@ export default function Teacher_Dashboard({ selectedDate }) {
             try {
                 setIsLoading(true);
                 const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
-                const courseId = sectionInfo.course_id; // Get course_id from sectionInfo
+                const courseId = sectionInfo.course_id;
                 console.log("DEBUG (fetchStudents): Fetching students for date:", dateStr, "course_id:", courseId);
                 const response = await fetch(
-                    `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}` // <--- ADDED course_id HERE
+                    `http://localhost/ustp-student-attendance-system/api/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}`
                 );
 
                 if (!response.ok) {
@@ -244,9 +243,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                 const data = await response.json();
 
-                // Crucial Check: Ensure the response is an array before setting state
                 if (Array.isArray(data)) {
-                    // Sort students by last name, then first name
                     const sortedData = [...data].sort((a, b) => {
                         const lastNameComparison = a.lastname.localeCompare(b.lastname);
                         if (lastNameComparison !== 0) {
@@ -254,7 +251,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                         }
                         return a.firstname.localeCompare(b.firstname);
                     });
-                    setStudents(sortedData); // Use sortedData here
+                    setStudents(sortedData);
                     console.log("DEBUG (fetchStudents): Students fetched and sorted:", sortedData);
 
                     const presentIds = sortedData.filter(student => student.status === 'Present').map(s => s.student_details_id);
@@ -265,19 +262,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
                     setExcusedStudents(excusedIds);
                 } else {
                     console.error("DEBUG (fetchStudents): Backend did NOT return an array for students:", data);
-                    setStudents([]); // Ensure students is always an array
+                    setStudents([]);
                     alert("Error: Student data could not be loaded correctly. Please check the backend response.");
                 }
-                setTimeout(() => setIsLoading(false), 1500); // Always stop loading, even on error
+                setTimeout(() => setIsLoading(false), 1500);
             } catch (error) {
                 console.error("Error fetching students:", error);
-                setStudents([]); // Ensure students is an array on error
+                setStudents([]);
                 setIsLoading(false);
             }
         };
 
         fetchStudents();
-    }, [selectedDate, instructor?.instructor_id, sectionId, sectionInfo]); // Add sectionInfo to dependencies
+    }, [selectedDate, instructor?.instructor_id, sectionId, sectionInfo]);
 
     const toggleAttendance = async (student) => {
         console.log("DEBUG: toggleAttendance function called for student:", student.student_details_id);
@@ -287,7 +284,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
             return;
         }
 
-        // Ensure sectionInfo is fully loaded before proceeding
         if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) {
             console.error("DEBUG (toggleAttendance): Missing section info or date. sectionInfo:", sectionInfo, "selectedDate:", selectedDate);
             alert("Error: Missing section or date information. Cannot save attendance.");
@@ -296,7 +292,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const isPresent = presentStudents.includes(student.student_details_id);
         const isLate = lateStudents.includes(student.student_details_id);
-        
+
 
         let newPresent = presentStudents;
         let newLate = lateStudents;
@@ -321,29 +317,29 @@ export default function Teacher_Dashboard({ selectedDate }) {
         const attendanceData = {
             student_details_id: student.student_details_id,
             section_id: sectionInfo.section_id,
-            course_id: sectionInfo.course_id, // ADDED: Send course_id
+            course_id: sectionInfo.course_id,
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
             status: newStatus,
         };
 
         console.log("DEBUG (toggleAttendance): sectionInfo object:", sectionInfo);
         console.log("DEBUG (toggleAttendance): sectionInfo.section_id value:", sectionInfo?.section_id);
-        console.log("DEBUG (toggleAttendance): sectionInfo.course_id value:", sectionInfo?.course_id); // Log course_id
+        console.log("DEBUG (toggleAttendance): sectionInfo.course_id value:", sectionInfo?.course_id);
         console.log("DEBUG (toggleAttendance): Final attendanceData payload:", attendanceData);
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
             });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
             }
 
-            const result = await res.json();
+            const result = await response.json();
             console.log('Attendance saved:', result);
             if (!result.success) {
                 alert("Failed to save attendance: " + result.message);
@@ -354,20 +350,17 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
     };
 
-    // Update the filteredStudents and add animation trigger
     const filteredStudents = students.filter(student => {
-        // Construct the full name in "Lastname, Firstname M.I." format for searching
         const middleInitial = student.middlename && student.middlename !== '-' ? student.middlename.charAt(0) + '.' : '';
         const fullNameForSearch = `${student.lastname}, ${student.firstname} ${middleInitial}`.trim();
         return fullNameForSearch.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
-    // Effect to trigger animation when searchTerm changes
     useEffect(() => {
         setIsSearching(true);
         const timer = setTimeout(() => {
             setIsSearching(false);
-        }, 300); // Duration of your CSS transition
+        }, 300);
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
@@ -375,19 +368,17 @@ export default function Teacher_Dashboard({ selectedDate }) {
     useEffect(() => {
         const fetchDropdownStudents = async () => {
             try {
-                // Ensure instructor, sectionId, and course_id are available
-                if (!instructor?.instructor_id || !sectionId || !sectionInfo?.course_id) { // Added sectionInfo?.course_id
+                if (!instructor?.instructor_id || !sectionId || !sectionInfo?.course_id) {
                     console.log("DEBUG (fetchDropdownStudents): Prerequisites not met.");
                     return;
                 }
-                const courseId = sectionInfo.course_id; // Get course_id from sectionInfo
+                const courseId = sectionInfo.course_id;
 
-                const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`); // Added &course_id=${courseId}
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                const data = await res.json();
-                // Sort dropdown students as well for consistency
+                const response = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
                 const sortedDropdownData = [...data].sort((a, b) => {
-                    const nameA = a.student_name.split(', ')[0]; // Assuming "Lastname, Firstname M.I." from backend for dropdown
+                    const nameA = a.student_name.split(', ')[0];
                     const nameB = b.student_name.split(', ')[0];
                     return nameA.localeCompare(nameB);
                 });
@@ -402,14 +393,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     useEffect(() => {
         function handleClickOutside(event) {
-            // Handle color modal
             if (colorModalRef.current && !colorModalRef.current.contains(event.target) &&
                 settingsButtonRef.current && !settingsButtonRef.current.contains(event.target)) {
                 setShowColorModal(false);
             }
-            // Handle image modal (ADD THIS BLOCK)
             if (imageModalRef.current && !imageModalRef.current.contains(event.target) &&
-                event.target !== document.querySelector('.FaImage')) { // Assuming .FaImage is a class your FaImage icon has, or you can use its ref if you assign one.
+                event.target !== document.querySelector('.FaImage')) {
                 setShowImageSelectModal(false);
             }
         }
@@ -426,7 +415,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
             return;
         }
 
-        // Ensure sectionInfo is fully loaded before proceeding
         if (!sectionInfo || !sectionInfo.section_id || !sectionInfo.course_id || !selectedDate) {
             console.error("DEBUG (markAsLate): Missing section info or date. sectionInfo:", sectionInfo, "selectedDate:", selectedDate);
             alert("Error: Missing section or date information. Cannot save attendance.");
@@ -436,29 +424,29 @@ export default function Teacher_Dashboard({ selectedDate }) {
         const attendanceData = {
             student_details_id: student.student_details_id,
             section_id: sectionInfo.section_id,
-            course_id: sectionInfo.course_id, // ADDED: Send course_id
+            course_id: sectionInfo.course_id,
             date: format(selectedDate || new Date(), 'yyyy-MM-dd'),
             status: 'Late',
         };
 
         console.log("DEBUG (markAsLate): sectionInfo object:", sectionInfo);
         console.log("DEBUG (markAsLate): sectionInfo.section_id value:", sectionInfo?.section_id);
-        console.log("DEBUG (markAsLate): sectionInfo.course_id value:", sectionInfo?.course_id); // Log course_id
+        console.log("DEBUG (markAsLate): sectionInfo.course_id value:", sectionInfo?.course_id);
         console.log("DEBUG (markAsLate): Final attendanceData payload (Late):", attendanceData);
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/save_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
             });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
             }
 
-            const result = await res.json();
+            const result = await response.json();
             console.log('Marked as Late:', result);
 
             if (result.success) {
@@ -475,8 +463,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const handleAddDropRequest = async () => {
         if (!selectedStudentForRequest || !requestReason.trim()) {
-            alert("Please select a student and enter a reason.");
-            return;
+            setValidationErrorMessage("Please select a student and enter a reason.");
+            setShowValidationErrorModal(true);
+            return; // Stop here, do not proceed with API call
         }
 
         const requestData = {
@@ -485,24 +474,27 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/add_drop_request.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/add_drop_request.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData),
             });
 
-            const result = await res.json();
+            const result = await response.json();
 
-            if (res.ok && result.success) {
+            if (response.ok && result.success) {
                 setShowRequestModal(false);
                 setSelectedStudentForRequest('');
                 setRequestReason('');
+                setShowAddDropSuccessModal(true); // Show the new success modal
             } else {
-                alert("Failed to submit: " + (result.error || "Unknown error"));
+                setValidationErrorMessage("Failed to submit: " + (result.error || "Unknown error"));
+                setShowValidationErrorModal(true);
             }
         } catch (error) {
             console.error("Submission error:", error);
-            alert("An error occurred while submitting the drop request.");
+            setValidationErrorMessage("An error occurred while submitting the drop request.");
+            setShowValidationErrorModal(true);
         }
     };
 
@@ -515,7 +507,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
 
         try {
-            const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/unlock_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/unlock_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -528,10 +520,10 @@ export default function Teacher_Dashboard({ selectedDate }) {
             });
             const data = await response.json();
             if (data.success) {
-                alert("Attendance unlocked successfully!");
-                setIsAttendanceLocked(false); // Unlock attendance in UI
-                setShowUnlockModal(false); // Close the modal
-                setUnlockPasscode(''); // Clear the passcode input
+                setShowUnlockSuccessModal(true); // Show the success modal instead of alert
+                setIsAttendanceLocked(false);
+                setShowUnlockModal(false);
+                setUnlockPasscode('');
             } else {
                 alert("Failed to unlock attendance: " + (data.message || "Invalid passcode."));
             }
@@ -541,16 +533,43 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
     };
 
+    // Function to handle locking attendance after confirmation
+    const handleLockAttendanceConfirm = async () => {
+        setShowLockConfirmModal(false); // Close the confirmation modal immediately
+
+        try {
+            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/lock_attendance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    section_id: sectionInfo.section_id,
+                    course_id: sectionInfo.course_id,
+                    date: format(selectedDate, 'yyyy-MM-dd'),
+                    lock_status: 1,
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                setShowLockSuccessModal(true); // Show the success modal instead of alert
+                setIsAttendanceLocked(true);
+            } else {
+                alert("Failed to lock attendance: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error locking attendance:", error);
+            alert("An error occurred while trying to lock attendance.");
+        }
+    };
+
     const [showNoClassContent, setShowNoClassContent] = useState(false);
 
     useEffect(() => {
-    const timer = setTimeout(() => setShowNoClassContent(true), 1500); // 1 second delay
-    return () => clearTimeout(timer);
+        const timer = setTimeout(() => setShowNoClassContent(true), 1500);
+        return () => clearTimeout(timer);
     }, []);
 
 
-
-    console.log("DEBUG (Render): filteredStudents:", filteredStudents); // New debug log for every render
+    console.log("DEBUG (Render): filteredStudents:", filteredStudents);
 
     return (
         <div className="min-h-screen flex hide-scrollbar overflow-scroll">
@@ -584,19 +603,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             <div className="relative">
                                 <div className="flex gap-2">
                                     <FaPalette
-                                        ref={settingsButtonRef} // Keep this ref if needed for positioning
+                                        ref={settingsButtonRef}
                                         className="text-xl cursor-pointer shadow-"
                                         onClick={() => {
                                             setShowColorModal(prev => !prev);
-                                            setShowImageSelectModal(false); // Close image modal if color is opened
+                                            setShowImageSelectModal(false);
                                         }}
                                     />
 
                                     <FaImage
                                         className="text-xl cursor-pointer"
                                         onClick={() => {
-                                            setShowImageSelectModal(prev => !prev); // Toggle the image selection modal
-                                            setShowColorModal(false); // Close color modal if image is opened
+                                            setShowImageSelectModal(prev => !prev);
+                                            setShowColorModal(false);
                                         }}
                                     />
 
@@ -614,7 +633,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                 <button
                                                     onClick={async () => {
                                                         try {
-                                                            const res = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/update_section_color.php', {
+                                                            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/update_section_color.php', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({
@@ -623,7 +642,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                                 }),
                                                             });
 
-                                                            const result = await res.json();
+                                                            const result = await response.json();
                                                             if (result.success) {
                                                                 setSectionInfo(prev => ({ ...prev, hexcode: selectedColor }));
                                                                 setShowColorModal(false);
@@ -651,47 +670,46 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
                                 </div>
 
-                                {/* NEW IMAGE UPLOAD MODAL - Place this block here, after the color modal */}
+                                {/* IMAGE UPLOAD MODAL */}
                                 {showImageSelectModal && (
-                                        <div
-                                            className="absolute right-0 mt-2 w-72 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200"
-                                            // You might need a ref here too if you want to implement click-outside-to-close
-                                            // For simplicity, for now, closing happens via buttons or if another modal opens.
-                                        >
-                                            <h2 className="text-xl font-bold mb-4" style={{ color: sectionInfo?.hexcode }}>Select Section Image</h2>
+                                    <div
+                                        className="absolute right-0 mt-2 w-72 bg-white p-4 rounded-lg shadow-xl z-50 text-center border border-gray-200"
+                                        ref={imageModalRef}
+                                    >
+                                        <h2 className="text-xl font-bold mb-4" style={{ color: sectionInfo?.hexcode }}>Select Section Image</h2>
 
-                                            <div className="grid grid-cols-3 gap-2 mb-4"> {/* Grid for image options */}
-                                                {availableVectorImages.map((imagePath, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className={`p-1 border rounded-md cursor-pointer ${selectedVectorImage === imagePath ? 'border-2 border-blue-500 shadow-md' : 'border-gray-200 hover:border-gray-400'}`}
-                                                        onClick={() => setSelectedVectorImage(imagePath)}
-                                                    >
-                                                        <img
-                                                            src={`http://localhost/USTP-Student-Attendance-System/public/assets/${imagePath}`}
-                                                            alt={`Vector ${index + 1}`}
-                                                            className="w-full h-auto object-contain"
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex justify-center gap-4">
-                                                <button
-                                                    onClick={() => setShowImageSelectModal(false)}
-                                                    className="bg-gray-300 px-4 py-2 text-xs rounded hover:bg-gray-400"
+                                        <div className="grid grid-cols-3 gap-2 mb-4">
+                                            {availableVectorImages.map((imagePath, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`p-1 border rounded-md cursor-pointer ${selectedVectorImage === imagePath ? 'border-2 border-blue-500 shadow-md' : 'border-gray-200 hover:border-gray-400'}`}
+                                                    onClick={() => setSelectedVectorImage(imagePath)}
                                                 >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    onClick={handleSaveImage}
-                                                    className="bg-blue-500 text-white text-xs px-4 py-2 rounded hover:bg-blue-600"
-                                                >
-                                                    Save Image
-                                                </button>
-                                            </div>
+                                                    <img
+                                                        src={`http://localhost/ustp-student-attendance-system/public/assets/${imagePath}`}
+                                                        alt={`Vector ${index + 1}`}
+                                                        className="w-full h-auto object-contain"
+                                                    />
+                                                </div>
+                                            ))}
                                         </div>
-                                    )}
+
+                                        <div className="flex justify-center gap-4">
+                                            <button
+                                                onClick={() => setShowImageSelectModal(false)}
+                                                className="bg-gray-300 px-4 py-2 text-xs rounded hover:bg-gray-400"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleSaveImage}
+                                                className="bg-blue-500 text-white text-xs px-4 py-2 rounded hover:bg-blue-600"
+                                            >
+                                                Save Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div>
@@ -735,67 +753,42 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="flex gap-2 items-end"> {/* Added items-end to align bottoms */}
+                        <div className="flex gap-2 items-end">
 
-                        {isClassDay() && (
-                            <div className="flex justify-end gap-2"> {/* Removed mb-4 */}
-                                {!isAttendanceLocked ? (
-                                    <button
-                                        onClick={async () => {
-                                            if (window.confirm("Are you sure you want to lock attendance for this section and date? This cannot be undone.")) {
-                                                try {
-                                                    const response = await fetch('http://localhost/USTP-Student-Attendance-System/instructor_backend/lock_attendance.php', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({
-                                                            section_id: sectionInfo.section_id,
-                                                            course_id: sectionInfo.course_id,
-                                                            date: format(selectedDate, 'yyyy-MM-dd'),
-                                                            lock_status: 1,
-                                                        }),
-                                                    });
-                                                    const data = await response.json();
-                                                    if (data.success) {
-                                                        alert(data.message);
-                                                        setIsAttendanceLocked(true);
-                                                    } else {
-                                                        alert("Failed to lock attendance: " + data.message);
-                                                    }
-                                                } catch (error) {
-                                                    console.error("Error locking attendance:", error);
-                                                    alert("An error occurred while trying to lock attendance.");
-                                                }
-                                            }
-                                        }}
-                                        className="px-4 py-2 h-10 rounded-md bg-red-600 text-white hover:bg-red-700 transition duration-200" // Added h-10
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                        </svg>
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => setShowUnlockModal(true)} // Show unlock modal
-                                        className="px-4 py-2 h-10 rounded-md bg-green-600 text-white hover:bg-green-700 transition duration-200" // Added h-10
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                        </svg>
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                            {isClassDay() && (
+                                <div className="flex justify-end gap-2">
+                                    {!isAttendanceLocked ? (
+                                        <button
+                                            onClick={() => setShowLockConfirmModal(true)} // Open confirmation modal
+                                            className="px-4 py-2 h-10 rounded-md bg-red-600 text-white hover:bg-red-700 transition duration-200"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                            </svg>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowUnlockModal(true)}
+                                            className="px-4 py-2 h-10 rounded-md bg-green-600 text-white hover:bg-green-700 transition duration-200"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+                            )}
 
-                        <button
-                            onClick={() => setShowRequestModal(true)}
-                            className="font-poppins px-4 py-2 text-sm rounded-lg border-2 bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2] h-10" // Added h-10
-                            style={{ borderColor: sectionInfo?.hexcode || '#0097b2', color: sectionInfo?.hexcode || '#0097b2' }}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                        </button>
-                    </div>
+                            <button
+                                onClick={() => setShowRequestModal(true)}
+                                className="font-poppins px-4 py-2 text-sm rounded-lg border-2 bg-white text-[#0097b2] hover:bg-[#e4eae9] hover:border-[#007b8e] hover:text-[#007b8e] focus:outline-none focus:ring-2 focus:ring-2 focus:ring-offset-2 focus:ring-[#0097b2] h-10"
+                                style={{ borderColor: sectionInfo?.hexcode || '#0097b2', color: sectionInfo?.hexcode || '#0097b2' }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -825,19 +818,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                 const isExcused = excusedStudents.includes(student.student_details_id);
 
                                 const firstName = student.firstname || '';
-                                const middleInitial = student.middlename && student.middlename !== '-' 
-                                ? student.middlename 
-                                : '';
-                                const lastName = student.lastname && student.lastname !== '-' 
-                                ? student.lastname 
-                                : '';
+                                const middleInitial = student.middlename && student.middlename !== '-'
+                                    ? student.middlename
+                                    : '';
+                                const lastName = student.lastname && student.lastname !== '-'
+                                    ? student.lastname
+                                    : '';
 
                                 const fullName = `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`;
                                 const isLongName = fullName.length > 5;
 
                                 return (
                                     <div
-                                        key={student.student_details_id} // Use a stable key, student_details_id is better than index
+                                        key={student.student_details_id}
                                         onClick={isAttendanceLocked || isExcused ? null : () => toggleAttendance(student)}
                                         onDoubleClick={isAttendanceLocked || isExcused ? null : () => markAsLate(student)}
                                         className={`cursor-pointer transition duration-300 ease-in-out hover:shadow-md hover:scale-[1.02]
@@ -858,9 +851,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                             <div className="absolute top-2 right-2 bg-gray-700 text-white text-xs px-2 py-1 rounded-full z-10">LOCKED</div>
                                         )}
                                         <div className="overflow-hidden rounded-t-[20px] flex justify-center aspect-w-1 aspect-h-1 w-full">
-                                            {/* The background of the image container will now be controlled by the parent div's isExcused condition */}
                                             <img
-                                                src={`http://localhost/USTP-Student-Attendance-System/uploads/${student.image}?${new Date().getTime()}`}
+                                                src={`http://localhost/ustp-student-attendance-system/uploads/${student.image}?${new Date().getTime()}`}
                                                 className={`object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
                                                 onError={(e) => {
                                                     e.target.onerror = null;
@@ -873,7 +865,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                 className={`font-[Barlow] text-xs font-poppins font-bold ml-[5px]`}
                                                 style={{
                                                     color: isExcused
-                                                        ? '#2563eb' // blue-600
+                                                        ? '#2563eb'
                                                         : isLate
                                                             ? '#b59b00'
                                                             : isPresent
@@ -887,9 +879,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                 <p className="font-[Barlow] text-sm text-[#737373] ml-[5px] leading-[1.2]">
                                                     {isLongName ? (
                                                         <>
-                                                        {firstName} <br />
-                                                        {middleInitial && middleInitial + ' '}
-                                                        {lastName}
+                                                            {firstName} <br />
+                                                            {middleInitial && middleInitial + ' '}
+                                                            {lastName}
                                                         </>
                                                     ) : (
                                                         `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`
@@ -907,19 +899,19 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             <div className="w-full h-[400px] rounded-lg bg-gradient-to-r from-white via-gray-200 to-white animate-pulse" />
                         ) : (
                             <>
-                            <div className="w-48 h-48 mb-6 animate-fade-in">
-                                <img
-                                src={`${process.env.PUBLIC_URL}/assets/no_schedule_illustration.png`}
-                                alt="No Class"
-                                className="w-full h-full object-contain opacity-80"
-                                />
-                            </div>
-                            <h2 className="text-xl font-semibold text-gray-600 font-poppins animate-fade-in">
-                                No class schedule today
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-1 font-[Barlow] animate-fade-in">
-                                Please check your schedule or contact our administrator.
-                            </p>
+                                <div className="w-48 h-48 mb-6 animate-fade-in">
+                                    <img
+                                        src={`${process.env.PUBLIC_URL}/assets/no_schedule_illustration.png`}
+                                        alt="No Class"
+                                        className="w-full h-full object-contain opacity-80"
+                                    />
+                                </div>
+                                <h2 className="text-xl font-semibold text-gray-600 font-poppins animate-fade-in">
+                                    No class schedule today
+                                </h2>
+                                <p className="text-sm text-gray-500 mt-1 font-[Barlow] animate-fade-in">
+                                    Please check your schedule or contact our administrator.
+                                </p>
                             </>
                         )}
                     </div>
@@ -927,7 +919,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             </section>
 
             {/* Request Modal */}
-            {showRequestModal && (
+            {showRequestModal && createPortal(
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
                     onClick={() => setShowRequestModal(false)}
@@ -983,7 +975,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </button>
                             <button
                                 onClick={handleAddDropRequest}
-                                // *** FIX IS HERE: style prop moved outside className ***
                                 className="px-4 py-2 text-white rounded-md hover:bg-[#007b8e]"
                                 style={{ backgroundColor: sectionInfo?.hexcode }}
                             >
@@ -991,11 +982,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Unlock Attendance Modal */}
-            {showUnlockModal && (
+            {showUnlockModal && createPortal(
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
                     onClick={() => setShowUnlockModal(false)}
@@ -1035,7 +1027,159 @@ export default function Teacher_Dashboard({ selectedDate }) {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Lock Confirmation Modal */}
+            {showLockConfirmModal && createPortal(
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+                    onClick={() => setShowLockConfirmModal(false)}
+                >
+                    <div
+                        className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                            <h2 className="text-xl sm:text-2xl font-bold text-red-700 text-center">Confirm Lock Attendance</h2>
+                        </div>
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
+                            Are you sure you want to <strong>lock</strong> attendance for this section and date? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end space-x-2 sm:space-x-3">
+                            <button
+                                onClick={() => setShowLockConfirmModal(false)}
+                                className="px-3 py-1 sm:px-4 sm:py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleLockAttendanceConfirm}
+                                className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors duration-200 text-sm sm:text-base"
+                            >
+                                Lock Attendance
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Unlock Success Modal */}
+            {showUnlockSuccessModal && createPortal(
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+                    onClick={() => setShowUnlockSuccessModal(false)}
+                >
+                    <div
+                        className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                            <h2 className="text-xl sm:text-2xl font-bold text-green-700 text-center">Success!</h2>
+                        </div>
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
+                            Attendance unlocked successfully!
+                        </p>
+                        <div className="flex justify-end space-x-2 sm:space-x-3">
+                            <button
+                                onClick={() => setShowUnlockSuccessModal(false)}
+                                className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 text-sm sm:text-base"
+                            >
+                                Okay
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Lock Success Modal */}
+            {showLockSuccessModal && createPortal(
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+                    onClick={() => setShowLockSuccessModal(false)}
+                >
+                    <div
+                        className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                            <h2 className="text-xl sm:text-2xl font-bold text-green-700 text-center">Success!</h2>
+                        </div>
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
+                            Attendance locked successfully!
+                        </p>
+                        <div className="flex justify-end space-x-2 sm:space-x-3">
+                            <button
+                                onClick={() => setShowLockSuccessModal(false)}
+                                className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 text-sm sm:text-base"
+                            >
+                                Okay
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Validation Error Modal for Add Drop Request */}
+            {showValidationErrorModal && createPortal(
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+                    onClick={() => setShowValidationErrorModal(false)}
+                >
+                    <div
+                        className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                              <h2 className="text-xl sm:text-2xl font-bold text-indigo-600 text-center">Input Error</h2>
+                        </div>
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
+                            {validationErrorMessage}
+                        </p>
+                        <div className="flex justify-end space-x-2 sm:space-x-3">
+                            <button
+                                onClick={() => setShowValidationErrorModal(false)}
+                                 className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 text-sm sm:text-base"
+                            >
+                                Okay
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* NEW: Add Drop Request Success Modal */}
+            {showAddDropSuccessModal && createPortal(
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 font-poppins"
+                    onClick={() => setShowAddDropSuccessModal(false)} // Close on overlay click
+                >
+                    <div
+                        className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto"
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                    >
+                        <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                            <h2 className="text-xl sm:text-2xl font-bold text-green-700 text-center">Request Sent!</h2>
+                        </div>
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
+                            Your drop request has been submitted successfully.
+                        </p>
+                        <div className="flex justify-end space-x-2 sm:space-x-3">
+                            <button
+                                onClick={() => setShowAddDropSuccessModal(false)}
+                                className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 text-sm sm:text-base"
+                            >
+                                Okay
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
             )}
         </div>
     );
