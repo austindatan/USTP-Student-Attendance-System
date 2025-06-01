@@ -1,29 +1,33 @@
-import React, { useEffect, useState, useCallback } from 'react'; 
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import MessageModal from '../../components/MessageModal'; 
+import MessageModal from '../../components/MessageModal';
 
 export default function Admin_Courses() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // 
+    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false); 
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const navigate = useNavigate();
 
-    // Message Modal states
+    // Message Modal states (for blocking modals)
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [messageModalTitle, setMessageModalTitle] = useState('');
     const [messageModalMessage, setMessageModalMessage] = useState('');
     const [messageModalType, setMessageModalType] = useState('info');
+
+    // NEW: States for the floating message
+    const [floatingMessage, setFloatingMessage] = useState("");
+    const [isFloatingMessageError, setIsFloatingMessageError] = useState(false);
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
         setMessageModalTitle(title);
         setMessageModalMessage(message);
         setMessageModalType(type);
         setIsMessageModalOpen(true);
-    }, []); 
+    }, []);
 
     const closeMessageModal = () => {
         setIsMessageModalOpen(false);
@@ -32,30 +36,54 @@ export default function Admin_Courses() {
         setMessageModalType('info');
     };
 
+    // NEW: Helper function to show floating message
+    const showFloatingMessage = useCallback((msg, isError) => {
+        setFloatingMessage(msg);
+        setIsFloatingMessageError(isError);
+        const timer = setTimeout(() => {
+            setFloatingMessage("");
+            setIsFloatingMessageError(false);
+        }, 3000); // Message disappears after 3 seconds
+        return () => clearTimeout(timer); // Cleanup the timer if component unmounts
+    }, []);
+
+
     useEffect(() => {
         axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
             .then(res => {
                 if (Array.isArray(res.data)) {
                     setCourses(res.data);
+                    if (res.data.length > 0) {
+                        showFloatingMessage("Courses loaded successfully!", false);
+                    } else {
+                        showFloatingMessage("No courses found.", false);
+                    }
                 } else if (Array.isArray(res.data.courses)) {
                     setCourses(res.data.courses);
+                     if (res.data.courses.length > 0) {
+                        showFloatingMessage("Courses loaded successfully!", false);
+                    } else {
+                        showFloatingMessage("No courses found.", false);
+                    }
                 } else {
                     console.error("Unexpected data format from get_course.php:", res.data);
                     setCourses([]);
-                    showMessageModal('Data Error', 'Received unexpected data format for courses. Displaying no courses.', 'error');
+                    // UPDATED: Use floating message for data format errors
+                    showFloatingMessage('Received unexpected data format for courses. Cannot display courses.', true);
                 }
             })
             .catch((err) => {
                 console.error("Error fetching courses:", err);
-                setError("Failed to fetch courses. Please check the server."); 
-                showMessageModal('Fetch Error', 'Failed to fetch courses from the server. Please try again later.', 'error');
+                setError("Failed to fetch courses. Please check the server.");
+                // UPDATED: Use floating message for fetch errors
+                showFloatingMessage('Failed to fetch courses from the server. Please try again later.', true);
             })
             .finally(() => setLoading(false));
-    }, [showMessageModal]);
+    }, [showFloatingMessage]); // Dependency added for showFloatingMessage
 
     const handleDeleteClick = (course) => {
         setSelectedCourse(course);
-        setIsModalOpen(true); 
+        setIsModalOpen(true);
     };
 
     const confirmDelete = () => {
@@ -66,17 +94,20 @@ export default function Admin_Courses() {
             .then((res) => {
                 if (res.data.success) {
                     setCourses(courses.filter(c => c.course_id !== selectedCourse.course_id));
-                    showMessageModal('Success!', 'Course deleted successfully.', 'success'); 
+                    // UPDATED: Use floating message for success
+                    showFloatingMessage('Course deleted successfully!', false);
                 } else {
-                    showMessageModal('Deletion Failed', res.data.message || "Failed to delete course.", 'error'); 
+                    // UPDATED: Use floating message for deletion failure
+                    showFloatingMessage(res.data.message || "Failed to delete course.", true);
                 }
             })
             .catch((err) => {
                 console.error("Error deleting course:", err);
-                showMessageModal('Error', "An error occurred while deleting the course. Please try again.", 'error');
+                // UPDATED: Use floating message for deletion error
+                showFloatingMessage("An error occurred while deleting the course. Please try again.", true);
             })
             .finally(() => {
-                setIsModalOpen(false); 
+                setIsModalOpen(false);
                 setSelectedCourse(null);
             });
     };
@@ -88,14 +119,20 @@ export default function Admin_Courses() {
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
-            <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
+            {/* NEW: Floating message display */}
+            {floatingMessage && (
+                <div className={`fixed top-4 right-4 p-3 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isFloatingMessageError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    {floatingMessage}
+                </div>
+            )}
 
+            <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
                 <div
                     className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={
                         !loading
                             ? {
-                                backgroundImage: "url('assets/teacher_vector.png')",
+                                backgroundImage: "url('/assets/teacher_vector.png')",
                                 backgroundRepeat: "no-repeat",
                                 backgroundPosition: "right",
                                 backgroundSize: "contain"

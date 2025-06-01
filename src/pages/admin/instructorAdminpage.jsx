@@ -1,41 +1,20 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import MessageModal from '../../components/MessageModal'; // Assuming MessageModal is in this path
 
 export default function InstructorAdminPage() {
     const [instructors, setInstructors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    // Note: The ConfirmationModal is implicitly used here for `isModalOpen` and `selectedInstructor` for delete
-    const [isModalOpen, setIsModalOpen] = useState(false); // For delete confirmation
+    const [isModalOpen, setIsModalOpen] = useState(false); 
     const [selectedInstructor, setSelectedInstructor] = useState(null);
+
+    const [message, setMessage] = useState("");
+    const [isMessageError, setIsMessageError] = useState(false);
 
     const navigate = useNavigate();
 
-    // Message Modal states
-    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [messageModalTitle, setMessageModalTitle] = useState('');
-    const [messageModalMessage, setMessageModalMessage] = useState('');
-    const [messageModalType, setMessageModalType] = useState('info');
-
-    // Function to show the MessageModal, wrapped in useCallback for stability
-    const showMessageModal = useCallback((title, message, type = 'info') => {
-        setMessageModalTitle(title);
-        setMessageModalMessage(message);
-        setMessageModalType(type);
-        setIsMessageModalOpen(true);
-    }, []);
-
-    const closeMessageModal = () => {
-        setIsMessageModalOpen(false);
-        setMessageModalTitle('');
-        setMessageModalMessage('');
-        setMessageModalType('info');
-    };
-
-    // THIS IS THE CRUCIAL CHANGE: Define fetchInstructors BEFORE the useEffect that calls it.
     const fetchInstructors = useCallback(() => {
         setLoading(true);
         axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php')
@@ -45,24 +24,27 @@ export default function InstructorAdminPage() {
                 } else {
                     console.error(res.data.error);
                     setInstructors([]);
-                    showMessageModal('Fetch Error', res.data.error || 'Failed to load instructors due to data error.', 'error');
+                    setMessage(res.data.error || 'Failed to load instructors due to data error.');
+                    setIsMessageError(true);
+                    setTimeout(() => setMessage(""), 3000); // Auto-hide after 3 seconds
                 }
             })
             .catch(() => {
-                setError("Failed to fetch instructors."); // This is for inline error display
-                showMessageModal('Network Error', 'Failed to fetch instructors. Please check your network connection or server.', 'error');
+                setError("Failed to fetch instructors.");
+                setMessage('Failed to fetch instructors. Please check your network connection or server.');
+                setIsMessageError(true);
+                setTimeout(() => setMessage(""), 3000); // Auto-hide after 3 seconds
             })
             .finally(() => setLoading(false));
-    }, [showMessageModal]); // showMessageModal is a dependency here
+    }, []); 
 
-    // Now, useEffect can safely call fetchInstructors because it's already defined
     useEffect(() => {
         fetchInstructors();
-    }, [fetchInstructors]); // fetchInstructors is a dependency here
+    }, [fetchInstructors]);
 
     const handleDeleteClick = (instructor) => {
         setSelectedInstructor(instructor);
-        setIsModalOpen(true); // Open the delete confirmation modal
+        setIsModalOpen(true);
     };
 
     const confirmDelete = () => {
@@ -73,17 +55,27 @@ export default function InstructorAdminPage() {
             .then((res) => {
                 if (res.data.success) {
                     setInstructors(instructors.filter(i => i.instructor_id !== selectedInstructor.instructor_id));
-                    showMessageModal('Success!', 'Instructor deleted successfully.', 'success');
+                    // UPDATED: Use floating message for success
+                    setMessage("Instructor deleted successfully!");
+                    setIsMessageError(false);
                 } else {
-                    showMessageModal('Deletion Failed', res.data.message || "Failed to delete instructor.", 'error');
+                    // UPDATED: Use floating message for deletion failure
+                    setMessage(res.data.message || "Failed to delete instructor.");
+                    setIsMessageError(true);
                 }
             })
             .catch(() => {
-                showMessageModal('Error', "An error occurred while deleting the instructor. Please try again.", 'error');
+                // UPDATED: Use floating message for delete error
+                setMessage("An error occurred while deleting the instructor. Please try again.");
+                setIsMessageError(true);
             })
             .finally(() => {
-                setIsModalOpen(false); // Close confirmation modal
+                setIsModalOpen(false);
                 setSelectedInstructor(null);
+                setTimeout(() => { // Auto-hide the message after 3 seconds
+                    setMessage("");
+                    setIsMessageError(false);
+                }, 3000);
             });
     };
 
@@ -94,17 +86,24 @@ export default function InstructorAdminPage() {
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex flex-col overflow-y-auto">
+            {/* ADDED: Floating message display */}
+            {message && (
+                <div className={`fixed top-4 right-4 p-3 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isMessageError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    {message}
+                </div>
+            )}
+
             <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
                 <div
                     className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={
                         !loading
                             ? {
-                                backgroundImage: "url('assets/teacher_vector.png')",
-                                backgroundRepeat: "no-repeat",
-                                backgroundPosition: "right",
-                                backgroundSize: "contain"
-                            }
+                                  backgroundImage: "url('assets/teacher_vector.png')",
+                                  backgroundRepeat: "no-repeat",
+                                  backgroundPosition: "right",
+                                  backgroundSize: "contain"
+                              }
                             : {}
                     }
                 >
@@ -199,7 +198,7 @@ export default function InstructorAdminPage() {
                 </div>
             </section>
 
-            {/* Delete Confirmation Modal (still needed as it's a confirmation, not just a message) */}
+            {/* Delete Confirmation Modal (remains the same) */}
             {isModalOpen && selectedInstructor && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
@@ -227,15 +226,6 @@ export default function InstructorAdminPage() {
                     </div>
                 </div>
             )}
-
-            {/* MessageModal Component */}
-            <MessageModal
-                isOpen={isMessageModalOpen}
-                onClose={closeMessageModal}
-                title={messageModalTitle}
-                message={messageModalMessage}
-                type={messageModalType}
-            />
         </div>
     );
 }

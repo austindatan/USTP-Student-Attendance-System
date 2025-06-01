@@ -416,11 +416,11 @@ export default function Admin_Students() {
               Confirm Delete
             </h2>
             <p className="text-gray-700 mb-6">
-              Are you sure you want to delete{" "}
+              Are you sure you want to delete the student {" "}
               <span className="font-bold">
                 {selectedStudent.firstname} {selectedStudent.lastname}{" "}
               </span>
-              ? This action cannot be undone.
+              ?
             </p>
             <div className="flex justify-end gap-3">
               <button
