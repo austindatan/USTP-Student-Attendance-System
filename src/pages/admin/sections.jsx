@@ -44,6 +44,7 @@ export default function Admin_Sections() {
         })
             .then((res) => {
                 if (res.data.success) {
+                    setIsModalOpen(false); 
                     setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
                 } else {
                     console.error(res.data.message || "Failed to delete section.");
@@ -179,29 +180,30 @@ export default function Admin_Sections() {
                     )}
                 </div>
             </section>
-            {/* Delete Confirmation Modal */}
+
+            {/* Delete Confirmation Modal (Section) */}
             {isModalOpen && selectedSection && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> 
                     <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">
                             Confirm Delete
                         </h2>
-                        <p className="text-gray-700 mb-6 text-center">
-                            Are you sure you want to delete{" "}
+                        <p className="text-gray-700 mb-6"> 
+                            Are you sure you want to delete the section {" "}
                             <span className="font-bold">{selectedSection.section_name}</span>?
                         </p>
-                        <div className="flex justify-center gap-4 mt-4">
-                            <button
-                                onClick={confirmDelete}
-                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-                            >
-                                Yes
-                            </button>
+                        <div className="flex justify-end gap-3"> 
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+                                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
                             >
                                 Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>

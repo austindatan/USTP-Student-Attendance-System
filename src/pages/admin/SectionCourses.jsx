@@ -161,7 +161,7 @@ function SectionCourses() {
                                                 <div className="flex gap-1 justify-center items-center">
                                                     <button
                                                         onClick={() => navigate(`/sections/${sectionId}/courses/${course.section_course_id}/edit`)}
-                                                        className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
                                                     >
                                                         Edit
                                                     </button>

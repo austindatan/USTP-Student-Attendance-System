@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConfirmationModal from '../../components/confirmationmodal';
+import MessageModal from '../../components/MessageModal'; 
 
 export default function EditStudent() {
     const { student_id } = useParams();
@@ -41,16 +42,36 @@ export default function EditStudent() {
 
     const [isEditStudentModalOpen, setIsEditStudentModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+    const [messageModalTitle, setMessageModalTitle] = useState('');
+    const [messageModalMessage, setMessageModalMessage] = useState('');
+    const [messageModalType, setMessageModalType] = useState('info'); 
+
     const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
+
+    const showMessageModal = useCallback((title, message, type = 'info') => {
+        setMessageModalTitle(title);
+        setMessageModalMessage(message);
+        setMessageModalType(type);
+        setIsMessageModalOpen(true);
+    }, []); 
+
+    const closeMessageModal = () => {
+        setIsMessageModalOpen(false);
+        setMessageModalTitle('');
+        setMessageModalMessage('');
+        setMessageModalType('info');
+    };
 
     const fetchSections = useCallback(async (yearLevelId, semesterId) => {
         if (!yearLevelId || !semesterId) {
-            return []; 
+            return [];
         }
         const cacheKey = `${yearLevelId}-${semesterId}`;
 
         if (cachedSections[cacheKey]) {
-            return cachedSections[cacheKey]; 
+            return cachedSections[cacheKey];
         }
 
         try {
@@ -61,9 +82,10 @@ export default function EditStudent() {
             return fetchedSections;
         } catch (error) {
             console.error(`Error fetching sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
+            showMessageModal('Error', `Failed to fetch sections for academic details. Please try again.`, 'error');
             return [];
         }
-    }, []); 
+    }, [showMessageModal]); 
 
     useEffect(() => {
         const fetchData = async () => {
@@ -89,7 +111,7 @@ export default function EditStudent() {
                     date_of_birth: studentData.date_of_birth || '',
                     contact_number: studentData.contact_number || '',
                     email: studentData.email || '',
-                    password: '',
+                    password: '', 
                     street: studentData.street || '',
                     city: studentData.city || '',
                     province: studentData.province || '',
@@ -116,7 +138,7 @@ export default function EditStudent() {
                         }
                         return {
                             ...enrollment,
-                            isNew: false, 
+                            isNew: false,
                             year_level_id: enrollment.year_level_id || '',
                             semester_id: enrollment.semester_id || '',
                             section_course_id: enrollment.section_course_id || '',
@@ -124,7 +146,7 @@ export default function EditStudent() {
                     })
                 );
 
-                setCachedSections(newSectionsCache); 
+                setCachedSections(newSectionsCache);
                 setEnrollments(initialEnrollments);
 
                 if (initialEnrollments.length > 0) {
@@ -140,7 +162,7 @@ export default function EditStudent() {
 
             } catch (err) {
                 console.error('Failed to fetch data:', err);
-                alert('Failed to load student or dropdown data.');
+                showMessageModal('Error', 'Failed to load student or dropdown data. Please try again later.', 'error');
                 navigate('/admin-students');
             } finally {
                 setIsLoadingInitialData(false);
@@ -148,7 +170,7 @@ export default function EditStudent() {
         };
 
         fetchData();
-    }, [student_id, navigate]);
+    }, [student_id, navigate, showMessageModal]); 
 
     useEffect(() => {
         const { year_level_id, semester_id } = studentAcademicDetails;
@@ -174,7 +196,7 @@ export default function EditStudent() {
             currentEnrollment[field] = value;
 
             if (
-                currentEnrollment.student_details_id && 
+                currentEnrollment.student_details_id &&
                 field === 'section_course_id'
             ) {
                 currentEnrollment.isNew = true;
@@ -184,7 +206,7 @@ export default function EditStudent() {
             updatedEnrollments[index] = currentEnrollment;
             return updatedEnrollments;
         });
-    }, []); 
+    }, []);
 
     const handleStudentAcademicDetailsChange = (e) => {
         const { name, value } = e.target;
@@ -202,12 +224,16 @@ export default function EditStudent() {
             !studentAcademicDetails.year_level_id ||
             !studentAcademicDetails.semester_id
         ) {
-            alert('Please select Program, Year Level, and Semester in the "Student\'s Academic Details" section first.');
+            showMessageModal(
+                'Missing Details',
+                'Please select Program, Year Level, and Semester in the "Student\'s Academic Details" section first.',
+                'error'
+            );
             return;
         }
 
         if (!newEnrollmentSectionCourseId) {
-            alert('Please select a Class Section to add.');
+            showMessageModal('Missing Selection', 'Please select a Class Section to add.', 'error');
             return;
         }
 
@@ -216,7 +242,7 @@ export default function EditStudent() {
             year_level_id: studentAcademicDetails.year_level_id,
             semester_id: studentAcademicDetails.semester_id,
             section_course_id: newEnrollmentSectionCourseId,
-            isNew: true, 
+            isNew: true,
         };
         const isDuplicate = enrollments.some(existing =>
             String(existing.section_course_id) === String(newFullEnrollment.section_course_id) &&
@@ -225,12 +251,16 @@ export default function EditStudent() {
             String(existing.semester_id) === String(newFullEnrollment.semester_id)
         );
         if (isDuplicate) {
-            alert('This class (combination of program, year, semester, and section) has already been added.');
+            showMessageModal(
+                'Duplicate Class',
+                'This class (combination of program, year, semester, and section) has already been added.',
+                'error'
+            );
             return;
         }
 
         setEnrollments(prevEnrollments => [...prevEnrollments, newFullEnrollment]);
-        setNewEnrollmentSectionCourseId(''); 
+        setNewEnrollmentSectionCourseId('');
     };
 
     const removeEnrollment = (index) => {
@@ -250,12 +280,16 @@ export default function EditStudent() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!formData.firstname || !formData.lastname || !formData.email || !formData.date_of_birth || !formData.contact_number) {
-            alert('Please fill in all required personal information fields: First Name, Last Name, Email, Date of Birth, and Contact Number.');
+            showMessageModal(
+                'Missing Information',
+                'Please fill in all required personal information fields: First Name, Last Name, Email, Date of Birth, and Contact Number.',
+                'info'
+            );
             return;
         }
 
         if (enrollments.length === 0) {
-            alert('A student must be enrolled in at least one class.');
+            showMessageModal('Missing Enrollment', 'A student must be enrolled in at least one class.', 'error');
             return;
         }
 
@@ -263,12 +297,16 @@ export default function EditStudent() {
             return !enrollment.section_course_id;
         });
         if (hasInvalidEnrollment) {
-            alert('Please ensure all existing enrollment fields (Class Section) are selected for every enrollment.');
+            showMessageModal(
+                'Invalid Enrollment',
+                'Please ensure all existing enrollment fields (Class Section) are selected for every enrollment.',
+                'info'
+            );
             return;
         }
 
 
-        setIsEditStudentModalOpen(true);
+        setIsEditStudentModalOpen(true); 
     };
 
     const handleConfirmUpdate = async () => {
@@ -284,7 +322,7 @@ export default function EditStudent() {
                 submissionData.append('image', imageFile);
             }
         } else {
-            submissionData.append('clear_image', 'true');
+             submissionData.append('clear_image', 'true');
         }
 
         const enrollmentsToSend = enrollments.map(enrollment => ({
@@ -309,14 +347,19 @@ export default function EditStudent() {
             );
             if (res.data.success) {
                 setIsEditStudentModalOpen(false);
+                showMessageModal('Success', 'Student details updated successfully!', 'success');
                 navigate('/admin-students');
             } else {
-                alert(res.data.message || 'Update failed.');
+                showMessageModal('Update Failed', res.data.message || 'Update failed.', 'error');
                 setIsEditStudentModalOpen(false);
             }
         } catch (error) {
             console.error('Failed to update student:', error.response?.data || error.message);
-            alert(`Error updating student: ${error.response?.data?.message || 'Please check the console for details.'}`);
+            showMessageModal(
+                'Error',
+                `Error updating student: ${error.response?.data?.message || 'Please check the console for details.'}`,
+                'error'
+            );
             setIsEditStudentModalOpen(false);
         } finally {
             setIsSaving(false);
@@ -493,7 +536,7 @@ export default function EditStudent() {
 
                             return (
                                 <div key={enrollment.student_details_id || `new-${index}`} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-blue-50 mt-6">
-                    
+
                                     {/* Section (Read-Only) */}
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700">Section</label>
@@ -591,6 +634,7 @@ export default function EditStudent() {
                 </form>
             </section>
 
+            {/* Confirmation Modal */}
             <ConfirmationModal
                 isOpen={isEditStudentModalOpen}
                 onClose={handleCloseEditStudentModal}
@@ -599,6 +643,15 @@ export default function EditStudent() {
                 message={`Are you sure you want to update the details and enrollments for "${studentFullName}"?`}
                 confirmText="Update Student"
                 loading={isSaving}
+            />
+
+            {/* Message Modal */}
+            <MessageModal
+                isOpen={isMessageModalOpen}
+                onClose={closeMessageModal}
+                title={messageModalTitle}
+                message={messageModalMessage}
+                type={messageModalType}
             />
         </div>
     );
