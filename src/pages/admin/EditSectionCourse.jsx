@@ -25,13 +25,13 @@ function EditSectionCourse() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/courses_list.php');
+                const coursesRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/courses_list.php');
                 if (coursesRes.data.success) setAllCourses(coursesRes.data.courses);
 
-                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_all_instructors.php');
+                const instructorsRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
-                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
+                const sectionCourseRes = await axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
                 if (sectionCourseRes.data.success) {
                     const { course_id, schedule_day, start_time, end_time, course_name, instructor_id } = sectionCourseRes.data.sectionCourse;
                     setFormData({ course_id, schedule_day, start_time, end_time, instructor_id: instructor_id || '' });
@@ -63,7 +63,7 @@ function EditSectionCourse() {
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/edit_section_course.php', {
+            const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/edit_section_course.php', {
                 ...formData,
                 section_course_id: sectionCourseId
             });
@@ -184,7 +184,7 @@ function EditSectionCourse() {
                                 type="submit"
                                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
                             >
-                                Save Changes
+                                Update Section Course
                             </button>
                         </div>
                     </form>
@@ -195,9 +195,9 @@ function EditSectionCourse() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onConfirm={handleConfirmUpdate}
-                title="Confirm Update"
-                message="Are you sure you want to update this section course?"
-                confirmText="Update Course"
+                title="Confirm Edit"
+                message={`Are you sure you want to update the course "${currentCourseName}" for this section?`}
+                confirmText="Update Section Course"
                 loading={isSaving}
                 confirmButtonClass="bg-blue-700 hover:bg-blue-800"
             />

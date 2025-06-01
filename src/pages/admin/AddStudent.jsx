@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import ConfirmationModal from '../../components/confirmationmodal';
+import MessageModal from '../../components/MessageModal'; 
 
 export default function AddStudent() {
     const navigate = useNavigate();
@@ -43,32 +44,52 @@ export default function AddStudent() {
     const [cachedSections, setCachedSections] = useState({});
 
     const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false);
 
     const [loadingDropdowns, setLoadingDropdowns] = useState(true);
     const [errorDropdowns, setErrorDropdowns] = useState(null);
 
-    // This function will now be responsible for fetching and caching sections
+    // Message Modal states
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+    const [messageModalTitle, setMessageModalTitle] = useState('');
+    const [messageModalMessage, setMessageModalMessage] = useState('');
+    const [messageModalType, setMessageModalType] = useState('info'); 
+
+    const showMessageModal = useCallback((title, message, type = 'info') => {
+        setMessageModalTitle(title);
+        setMessageModalMessage(message);
+        setMessageModalType(type);
+        setIsMessageModalOpen(true);
+    }, []); 
+
+    const closeMessageModal = () => {
+        setIsMessageModalOpen(false);
+        setMessageModalTitle('');
+        setMessageModalMessage('');
+        setMessageModalType('info');
+    };
+
     const fetchSections = useCallback(async (yearLevelId, semesterId) => {
         if (!yearLevelId || !semesterId) {
-            return []; 
+            return [];
         }
         const cacheKey = `${yearLevelId}-${semesterId}`;
         if (cachedSections[cacheKey]) {
-            return cachedSections[cacheKey]; 
+            return cachedSections[cacheKey];
         }
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
         } catch (error) {
             console.error(`Error fetching sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
+            showMessageModal('Error', `Failed to fetch classes for the selected academic period. Please try again.`, 'error');
             return [];
         }
-    }, [cachedSections]);
+    }, [showMessageModal]); 
 
     useEffect(() => {
         const fetchData = async () => {
@@ -76,9 +97,9 @@ export default function AddStudent() {
             setErrorDropdowns(null);
             try {
                 const [progRes, yearRes, semRes] = await Promise.all([
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/pd_dropdown.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php'),
+                    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php'),
                 ]);
 
                 setProgramDetails(progRes.data);
@@ -142,12 +163,12 @@ export default function AddStudent() {
             !studentAcademicDetails.year_level_id ||
             !studentAcademicDetails.semester_id
         ) {
-            alert('Please select Program, Year Level, and Semester for the student first.');
+            showMessageModal('Missing Academic Details', 'Please select Program, Year Level, and Semester for the student first.', 'error');
             return;
         }
 
         if (!newEnrollmentSectionCourseId) {
-            alert('Please select a Class Section to add.');
+            showMessageModal('Missing Class Section', 'Please select a Class Section to add.', 'error');
             return;
         }
 
@@ -165,7 +186,7 @@ export default function AddStudent() {
             String(existing.semester_id) === String(newFullEnrollment.semester_id)
         );
         if (isDuplicate) {
-            alert('This class (combination of program, year, semester, and section) has already been added.');
+            showMessageModal('Duplicate Class', 'This class (combination of program, year, semester, and section) has already been added.', 'error');
             return;
         }
 
@@ -225,7 +246,7 @@ export default function AddStudent() {
             !formData.email ||
             !formData.password
         ) {
-            alert('Please fill in all required student personal information fields.');
+            showMessageModal('Missing Information', 'Please fill in all required student personal information fields.', 'error');
             return;
         }
 
@@ -235,13 +256,13 @@ export default function AddStudent() {
             !studentAcademicDetails.year_level_id ||
             !studentAcademicDetails.semester_id
         ) {
-            alert('Please select the student\'s Program, Year Level, and Semester.');
+            showMessageModal('Missing Academic Details', 'Please select the student\'s Program, Year Level, and Semester.', 'error');
             return;
         }
 
         // Validate at least one enrollment is added
         if (enrollments.length === 0) {
-            alert('A student must be enrolled in at least one class.');
+            showMessageModal('Missing Enrollments', 'A student must be enrolled in at least one class.', 'error');
             return;
         }
 
@@ -249,7 +270,7 @@ export default function AddStudent() {
     };
 
     const handleConfirmAddStudent = async () => {
-        setIsLoading(true); 
+        setIsLoading(true);
         const submissionData = new FormData();
         // Append all formData fields
         Object.entries(formData).forEach(([key, value]) => {
@@ -265,23 +286,23 @@ export default function AddStudent() {
         submissionData.append('enrollments', JSON.stringify(enrollments));
         try {
             const res = await axios.post(
-                'http://localhost/ustp-student-attendance/admin_backend/student_add_api.php',
+                'http://localhost/USTP-Student-Attendance-System/admin_backend/student_add_api.php',
                 submissionData,
                 {
                     headers: {
-                        'Content-Type': 'multipart/form-data' 
+                        'Content-Type': 'multipart/form-data'
                     }
                 }
             );
-            alert(res.data.message || 'Student added successfully!');
             setIsAddStudentModalOpen(false);
-            handleResetForm(); 
+            handleResetForm();
+            showMessageModal('Success!', 'Student added successfully!', 'success'); 
             navigate('/admin-students');
         } catch (error) {
             console.error('Failed to add student:', error.response?.data || error.message);
-            alert(`Error adding student: ${error.response?.data?.message || 'Please check the console for details.'}`);
+            showMessageModal('Error Adding Student', `Failed to add student: ${error.response?.data?.message || 'Please check the console for details.'}`, 'error');
         } finally {
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -306,12 +327,15 @@ export default function AddStudent() {
 
     // Determine if the "Add Class" section should be enabled
     const isAcademicDetailsSelected = studentAcademicDetails.program_details_id &&
-                                     studentAcademicDetails.year_level_id &&
-                                     studentAcademicDetails.semester_id;
+                                       studentAcademicDetails.year_level_id &&
+                                       studentAcademicDetails.semester_id;
 
     const currentSectionsForNewEnrollment = isAcademicDetailsSelected
         ? (cachedSections[`${studentAcademicDetails.year_level_id}-${studentAcademicDetails.semester_id}`] || [])
         : [];
+
+
+    const studentFullName = `${formData.firstname} ${formData.middlename ? formData.middlename + ' ' : ''}${formData.lastname}`.trim();
 
     return (
         <div
@@ -551,7 +575,7 @@ export default function AddStudent() {
                             type="submit"
                             className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
                         >
-                            Save Student
+                            Add Student
                         </button>
                     </div>
                 </form>
@@ -563,10 +587,19 @@ export default function AddStudent() {
                 onClose={handleCloseAddStudentModal}
                 onConfirm={handleConfirmAddStudent}
                 title="Confirm Student Addition"
-                message="Are you sure you want to add this student with the specified enrollments?"
-                confirmText="Yes, Add Student"
-                cancelText="No, Cancel"
+                message={`Are you sure you want to add student "${studentFullName}" with the specified enrollments?`}
+                confirmText="Add Student"
+                cancelText="Cancel"
                 loading={isLoading}
+            />
+
+            {/* Message Modal */}
+            <MessageModal
+                isOpen={isMessageModalOpen}
+                onClose={closeMessageModal}
+                title={messageModalTitle}
+                message={messageModalMessage}
+                type={messageModalType}
             />
         </div>
     );
