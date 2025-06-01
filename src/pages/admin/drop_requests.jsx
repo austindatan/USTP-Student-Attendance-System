@@ -23,7 +23,7 @@ export default function DropRequests() {
     setLoading(true);
     setError(null); // Clear previous errors when starting a new fetch
 
-    let url = `http://localhost/USTP-Student-Attendance-System/admin_backend/get_drop_req.php?view=`;
+    let url = `http://localhost/ustp-student-attendance-system/api/admin_backend/get_drop_req.php?view=`;
 
     if (viewType === 'dropped') { // Changed 'history' to 'dropped' here
       url += 'history'; // Fetches both 'Dropped' and 'Rejected' from history table
@@ -87,7 +87,7 @@ export default function DropRequests() {
 
       try {
         const res = await fetch(
-          "http://localhost/USTP-Student-Attendance-System/admin_backend/update_drop_req.php",
+          "http://localhost/ustp-student-attendance-system/api/admin_backend/update_drop_req.php",
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

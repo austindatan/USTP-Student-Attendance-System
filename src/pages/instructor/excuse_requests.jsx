@@ -88,7 +88,7 @@ const ExcuseRequestsPage = () => {
       }
     };
 
-    fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
+    fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/get_excused_req.php?instructor_id=${currentInstructorId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
@@ -140,13 +140,13 @@ const ExcuseRequestsPage = () => {
 
     if (modal.type === "approve" || modal.type === "reject") {
       const status = modal.type === "approve" ? "Approved" : "Rejected";
-      endpoint = "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php";
+      endpoint = "http://localhost/ustp-student-attendance-system/api/instructor_backend/update_excuse_req.php";
       method = "PUT";
       body = JSON.stringify({ excused_request_id: modal.id, status });
       successMessage = `Request ${status.toLowerCase()} successfully!`; // Dynamic message
       errorMessage = "Failed to update status.";
     } else if (modal.type === "delete") {
-      endpoint = "http://localhost/USTP-Student-Attendance-System/instructor_backend/delete_excuse_req.php";
+      endpoint = "http://localhost/ustp-student-attendance-system/api/instructor_backend/delete_excuse_req.php";
       method = "DELETE";
       body = JSON.stringify({ excused_request_id: modal.id });
       successMessage = "Request deleted successfully!";
@@ -359,7 +359,7 @@ const ExcuseRequestsPage = () => {
                   <p className="font-bold mb-1 sm:mb-2 text-[#737373] text-sm sm:text-base">Attachment:</p>
                   {selectedRequest.file_path ? (
                     <a
-                      href={`http://localhost/USTP-Student-Attendance-System/api/student_backend/${selectedRequest.file_path}`}
+                      href={`http://localhost/ustp-student-attendance-system/api/student_backend/${selectedRequest.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 bg-gray-100 text-indigo-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-sm sm:text-base font-semibold border border-indigo-200"

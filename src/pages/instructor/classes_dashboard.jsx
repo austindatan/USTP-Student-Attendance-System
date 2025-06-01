@@ -22,7 +22,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     try {
       console.log('Fetching sections...');
       const response = await fetch(
-        `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
+        `http://localhost/ustp-student-attendance-system/api/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
