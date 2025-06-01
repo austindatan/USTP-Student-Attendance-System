@@ -7,7 +7,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-include __DIR__ . '/../src/conn.php'; 
+include __DIR__ . '/../../src/conn.php'; 
 
 $monthlyCounts = array_fill(1, 12, 0);
 

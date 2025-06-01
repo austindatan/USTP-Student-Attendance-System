@@ -21,10 +21,10 @@ function AddSectionCourse() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin_backend/courses_list.php');
+                const coursesRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/courses_list.php');
                 if (coursesRes.data.success) setAllCourses(coursesRes.data.courses);
 
-                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin_backend/get_all_instructors.php');
+                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
             } catch (err) {
@@ -47,7 +47,7 @@ function AddSectionCourse() {
         setError(null);
         setMessage('');
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin_backend/add_sectioncourse.php', {
+            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin_backend/add_sectioncourse.php', {
                 ...formData,
                 section_id: sectionId
             });

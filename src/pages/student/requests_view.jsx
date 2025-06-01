@@ -32,7 +32,7 @@ const StudentExcuseRequestsTable = ({ studentId }) => {
 
     try {
       const res = await axios.get(
-        `http://localhost/ustp-student-attendance-system/api/student_backend/get_student_excuse_requests.php?student_id=${studentId}`
+        `http://localhost/ustp-student-attendance/api/student_backend/get_student_excuse_requests.php?student_id=${studentId}`
       );
 
       const data = res.data;
@@ -237,7 +237,7 @@ const StudentExcuseRequestsTable = ({ studentId }) => {
                   <p className="font-bold mb-1 sm:mb-2 text-[#737373] text-sm sm:text-base">Attachment:</p>
                   {selectedRequest.file_path ? (
                     <a
-                      href={`http://localhost/ustp-student-attendance-system/api/student_backend/${selectedRequest.file_path}`}
+                      href={`http://localhost/ustp-student-attendance/api/student_backend/${selectedRequest.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 bg-gray-100 text-blue-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-sm sm:text-base font-semibold border border-blue-200"

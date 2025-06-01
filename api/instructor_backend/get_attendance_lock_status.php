@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-require_once('../src/conn.php'); // Ensure this path is correct relative to get_attendance_lock_status.php
+include __DIR__ . '/../../src/conn.php'; 
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

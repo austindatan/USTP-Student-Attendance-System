@@ -22,7 +22,7 @@ if (!($method === 'POST' && $override === 'DELETE')) {
     exit();
 }
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 $instructor_id = $data['instructor_id'] ?? null;
 

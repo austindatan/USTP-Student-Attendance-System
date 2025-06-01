@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($conn->connect_error) {
     http_response_code(500);

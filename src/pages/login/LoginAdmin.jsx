@@ -22,7 +22,7 @@ const LoginAdmin = () => {
 
     try {
       const response = await fetch(
-        "http://localhost/ustp-student-attendance-system/api/auth/login-admin.php",
+        "http://localhost/ustp-student-attendance/api/auth/login-admin.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

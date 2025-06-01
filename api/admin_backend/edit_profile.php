@@ -8,7 +8,7 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-require_once(__DIR__ . "/../src/conn.php"); // Ensure conn.php path is correct relative to this file
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed."]);
@@ -24,8 +24,9 @@ function deleteOldImage($conn, $instructor_id, $uploadDir) {
     if ($row = $result->fetch_assoc()) {
         $oldImage = $row["image"];
         // Check if oldImage exists and delete it from the correct path
-        if ($oldImage && file_exists($uploadDir . $oldImage)) {
-            unlink($uploadDir . $oldImage);
+        // Ensure DIRECTORY_SEPARATOR is used for consistency
+        if ($oldImage && file_exists($uploadDir . DIRECTORY_SEPARATOR . $oldImage)) {
+            unlink($uploadDir . DIRECTORY_SEPARATOR . $oldImage);
         }
     }
     $stmt->close(); // Close the statement
@@ -51,12 +52,18 @@ if (empty($instructor_id)) { // Use the $instructor_id variable directly
 }
 
 $imageName = null;
-$uploadDir = __DIR__ . '/../api/uploads/'; // Corrected upload directory
+// MODIFIED: Set upload directory to ustp-student-attendance/api/uploads
+// Assuming this script is in `your_project/api/instructor/`
+// `__DIR__` is `/your_project/api/instructor/`
+// `__DIR__ . DIRECTORY_SEPARATOR . '..'` is `/your_project/api/`
+// Then append 'uploads'
+$uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
 if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     $imageTmp = $_FILES["image"]["tmp_name"];
     $imageName = uniqid("instructor_") . "_" . basename($_FILES["image"]["name"]);
-    $uploadPath = $uploadDir . $imageName;
+    // Ensure correct path concatenation
+    $uploadPath = $uploadDir . $imageName; 
 
     if (!is_dir($uploadDir)) {
         // Create directory recursively with permissions

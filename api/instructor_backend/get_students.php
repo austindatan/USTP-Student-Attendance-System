@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-require_once('../src/conn.php');
+include __DIR__ . '/../../src/conn.php'; 
 
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $instructor_id = isset($_GET['instructor_id']) ? (int)$_GET['instructor_id'] : 0;

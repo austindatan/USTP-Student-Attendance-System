@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-require_once("../src/conn.php");
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
@@ -32,11 +32,12 @@ function deleteOldImage($conn, $student_id) {
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
         $oldImage = $row["image"];
-        $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+        // MODIFIED: Set upload directory to ustp-student-attendance/uploads
+        $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads';
 
-        if ($oldImage && file_exists($uploadDir . $oldImage)) {
-            if (!unlink($uploadDir . $oldImage)) {
-                error_log("Failed to delete old image: " . $uploadDir . $oldImage);
+        if ($oldImage && file_exists($uploadDir . DIRECTORY_SEPARATOR . $oldImage)) {
+            if (!unlink($uploadDir . DIRECTORY_SEPARATOR . $oldImage)) {
+                error_log("Failed to delete old image: " . $uploadDir . DIRECTORY_SEPARATOR . $oldImage);
             }
         }
     }
@@ -79,13 +80,15 @@ try {
     $imagePath = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         deleteOldImage($conn, $student_id); // Delete old image before uploading new one
-        $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+        // MODIFIED: Set upload directory to ustp-student-attendance/uploads
+        $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads';
+        
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
         $filename = uniqid() . "_" . basename($_FILES['image']['name']);
-        $targetFile = $uploadDir . $filename;
+        $targetFile = $uploadDir . DIRECTORY_SEPARATOR . $filename; // Ensure correct path concatenation
 
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
             $imagePath = $filename;
@@ -165,13 +168,8 @@ try {
     foreach ($currentEnrollments as $dbId => $dbEnrollment) {
         $foundInSubmitted = false;
         foreach ($submittedEnrollments as $subEnrollment) {
-            // Check if this existing enrollment is still present in the submitted list
-            // We use student_details_id for comparison
             if (isset($subEnrollment['student_details_id']) && $subEnrollment['student_details_id'] == $dbId) {
                 $foundInSubmitted = true;
-                // If found, check if any critical fields have changed (though frontend disables editing existing)
-                // For now, we assume if student_details_id matches, it's the same enrollment.
-                // If you allow editing existing enrollments' details, you'd add update logic here.
                 break;
             }
         }
@@ -182,8 +180,7 @@ try {
 
     // Identify new enrollments to insert
     foreach ($submittedEnrollments as $subEnrollment) {
-        // If it's a new enrollment (no student_details_id or isNew flag is true)
-        if (!isset($subEnrollment['student_details_id']) || ($subEnrollment['isNew'] ?? false) === true) { // Added ?? false for robustness
+        if (!isset($subEnrollment['student_details_id']) || ($subEnrollment['isNew'] ?? false) === true) {
             $enrollmentsToInsert[] = $subEnrollment;
         }
     }
@@ -205,7 +202,6 @@ try {
 
     // Perform insertions
     if (!empty($enrollmentsToInsert)) {
-        // --- CORRECTED LINE BELOW ---
         $stmt_insert_enrollment = $conn->prepare("INSERT INTO student_details (student_id, section_course_id, program_details_id) VALUES (?, ?, ?)");
         if ($stmt_insert_enrollment === false) {
             throw new Exception("Failed to prepare insert enrollment statement: " . $conn->error);
@@ -215,10 +211,8 @@ try {
             $program_details_id = $enrollment['program_details_id'] ?? null;
 
             if (empty($section_course_id) || empty($program_details_id)) {
-                // It's crucial that these IDs are valid and present for new enrollments
                 throw new Exception("Missing data for new enrollment (section_course_id, or program_details_id). Submitted enrollment: " . json_encode($enrollment));
             }
-            // --- CORRECTED LINE BELOW ---
             $stmt_insert_enrollment->bind_param("iii", $student_id, $section_course_id, $program_details_id);
             if (!$stmt_insert_enrollment->execute()) {
                 throw new Exception("Failed to insert new enrollment: " . $stmt_insert_enrollment->error);

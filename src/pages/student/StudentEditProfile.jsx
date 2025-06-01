@@ -52,7 +52,7 @@ const StudentEditProfile = () => {
 
     // Fetch student data from the API
     fetch(
-      `http://localhost/ustp-student-attendance-system/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/ustp-student-attendance/api/get_student.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
@@ -76,7 +76,7 @@ const StudentEditProfile = () => {
           // Resolve and set the image preview URL
           const image = data.student.image;
           const resolvedURL = image
-            ? `http://localhost/ustp-student-attendance-system/uploads/${image.replace(
+            ? `http://localhost/ustp-student-attendance/uploads/${image.replace(
                 "uploads/",
                 ""
               )}`
@@ -135,7 +135,7 @@ const StudentEditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/ustp-student-attendance-system/api/edit_student_profile.php",
+        "http://localhost/ustp-student-attendance/api/edit_student_profile.php",
         {
           method: "POST",
           body: formPayload,

@@ -3,8 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 header("Content-Type: application/json");
 
-// Include the database connection file
-require_once('../src/conn.php');
+include __DIR__ . '/../../src/conn.php'; 
 
 // Enable error reporting for debugging purposes.
 // In a production environment, these should be disabled or logged to a file.

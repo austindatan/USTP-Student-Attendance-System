@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 

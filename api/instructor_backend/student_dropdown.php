@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($conn->connect_error) {
     http_response_code(500);

@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 header('Content-Type: application/json');
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "error" => "Database connection failed", "details" => $conn->connect_error]);

@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_once('../src/conn.php');
+include __DIR__ . '/../../src/conn.php'; 
 
 $response = array();
 

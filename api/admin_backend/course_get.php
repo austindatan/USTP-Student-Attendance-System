@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
-include __DIR__ . '/../src/conn.php'; 
+include __DIR__ . '/../../src/conn.php'; 
 
 $course_id = $_GET['id'] ?? null;
 

@@ -17,7 +17,7 @@ const LoginInstructor = () => {
   const handleLogin = async e => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost/ustp-student-attendance-system/api/auth/login-instructor.php", {
+      const res = await fetch("http://localhost/ustp-student-attendance/api/auth/login-instructor.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })

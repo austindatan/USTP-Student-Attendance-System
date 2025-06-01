@@ -1,7 +1,8 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
-include '../src/conn.php'; // Ensure this path is correct relative to get_section_info.php
+
+include __DIR__ . '/../../src/conn.php'; 
 
 if (isset($_GET['section_id'])) {
     $section_id = $_GET['section_id'];

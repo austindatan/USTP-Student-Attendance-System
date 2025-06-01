@@ -13,9 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Include the database connection file
-// Adjust the path if your conn.php is located differently relative to admin_backend
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 // Get the posted data (for DELETE requests, often sent as POST with _method: 'DELETE')
 $data = json_decode(file_get_contents("php://input"), true);

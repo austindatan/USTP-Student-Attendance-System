@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include __DIR__ . '/../src/conn.php'; // Path to your database connection
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->begin_transaction(); // Start a transaction for atomicity
@@ -35,13 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Handle image upload
         $imagePath = '';
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../uploads/';
+            // MODIFIED LINE: Set upload directory to ustp-student-attendance/uploads
+            $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads';
+            
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
 
             $filename = uniqid() . "_" . basename($_FILES['image']['name']);
-            $targetFile = $uploadDir . $filename;
+            // Ensure correct path concatenation
+            $targetFile = $uploadDir . DIRECTORY_SEPARATOR . $filename; 
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
                 $imagePath = $filename;

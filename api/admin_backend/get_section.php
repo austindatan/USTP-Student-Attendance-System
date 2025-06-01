@@ -5,7 +5,7 @@ header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $query = "

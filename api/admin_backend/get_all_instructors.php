@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $sql = "SELECT instructor_id, email, firstname, middlename, lastname, date_of_birth, contact_number, street, city, province, zipcode, country, image FROM instructor";

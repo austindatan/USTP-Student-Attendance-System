@@ -46,7 +46,7 @@ const EditSection = () => {
         const fetchData = async () => {
             try {
                 // Fetch single section data
-                const sectionRes = await axios.get(`http://localhost/ustp-student-attendance-system/api/admin_backend/get_single_section.php?section_id=${id}`);
+                const sectionRes = await axios.get(`http://localhost/ustp-student-attendance/api/admin_backend/get_single_section.php?section_id=${id}`);
                 if (sectionRes.data.success && sectionRes.data.section) {
                     setFormData({
                         section_id: id,
@@ -61,7 +61,7 @@ const EditSection = () => {
                 }
 
                 // Fetch semesters data
-                const semestersRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin_backend/get_semesters.php');
+                const semestersRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/get_semesters.php');
                 if (semestersRes.data.success) {
                     setSemesters(semestersRes.data.semesters);
                 } else {
@@ -70,7 +70,7 @@ const EditSection = () => {
                 }
 
                 // Fetch year levels data
-                const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin_backend/get_year_levels.php');
+                const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/get_year_levels.php');
                 if (yearLevelsRes.data.success) {
                     setYearLevels(yearLevelsRes.data.year_levels);
                 } else {
@@ -109,7 +109,7 @@ const EditSection = () => {
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin_backend/update_section.php', formData);
+            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin_backend/update_section.php', formData);
             if (res.data.success) {
                 setIsEditSectionModalOpen(false);
                 showMessageModal('Success!', 'Section updated successfully!', 'success'); 

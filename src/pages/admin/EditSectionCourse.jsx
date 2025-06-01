@@ -28,13 +28,13 @@ function EditSectionCourse() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin_backend/courses_list.php');
+                const coursesRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/courses_list.php');
                 if (coursesRes.data.success) setAllCourses(coursesRes.data.courses);
 
-                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin_backend/get_all_instructors.php');
+                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
-                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance-system/api/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
+                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance/api/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
                 if (sectionCourseRes.data.success) {
                     const { course_id, schedule_day, start_time, end_time, course_name, instructor_id } = sectionCourseRes.data.sectionCourse;
                     const fetchedData = { // Create a temporary object for the fetched data
@@ -88,7 +88,7 @@ function EditSectionCourse() {
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin_backend/edit_section_course.php', {
+            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin_backend/edit_section_course.php', {
                 ...formData,
                 section_course_id: sectionCourseId
             });

@@ -1,7 +1,8 @@
 <?php
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-include __DIR__ . '/../src/conn.php'; // Corrected include path
+
+include __DIR__ . '/../../src/conn.php'; 
 
 $instructorId = isset($_GET['instructor_id']) ? $_GET['instructor_id'] : null;
 

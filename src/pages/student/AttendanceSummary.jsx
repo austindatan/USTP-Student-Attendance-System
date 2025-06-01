@@ -33,7 +33,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
   // Helper function to fetch attendance data
   const fetchAttendanceData = useCallback(async (status) => {
-    const url = `http://localhost/ustp-student-attendance-system/api/student_backend/get_class_${status}.php?student_id=${studentId}&course_code=${course_code}`;
+    const url = `http://localhost/ustp-student-attendance/api/student_backend/get_class_${status}.php?student_id=${studentId}&course_code=${course_code}`;
 
     try {
       const res = await fetch(url);
@@ -62,7 +62,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
   useEffect(() => {
     if (studentId && course_code) {
       // --- Fetch Course Name, Image, and Hexcode ---
-      const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance-system/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchCourseInfoUrl)
         .then((res) => {

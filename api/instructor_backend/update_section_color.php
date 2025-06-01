@@ -7,7 +7,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 header("Access-Control-Allow-Headers: *");
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 $data = json_decode(file_get_contents('php://input'), true);
 $section_course_id = $data['section_course_id'] ?? null; // Changed to section_course_id

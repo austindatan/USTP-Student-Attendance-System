@@ -1,7 +1,8 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
-include '../src/conn.php';
+
+include __DIR__ . '/../../src/conn.php'; 
 
 // Check for database connection error at the beginning
 if ($conn->connect_error) {

@@ -4,7 +4,7 @@ header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-include __DIR__ . '/../src/conn.php'; // Adjust path as necessary
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $query = "SELECT section_id, section_name FROM section ORDER BY section_name";

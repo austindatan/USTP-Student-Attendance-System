@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-require_once("../src/conn.php");
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($conn->connect_error) {
 echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);

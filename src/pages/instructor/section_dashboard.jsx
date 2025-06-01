@@ -130,7 +130,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/update_section_image.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/update_section_image.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -167,7 +167,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         if (!sectionInfo && sectionId) {
             async function fetchSectionInfo() {
                 try {
-                    const response = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/get_section_info.php?section_id=${sectionId}`);
+                    const response = await fetch(`http://localhost/ustp-student-attendance/api/instructor_backend/get_section_info.php?section_id=${sectionId}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -193,7 +193,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
         const fetchLockStatus = async () => {
             try {
-                const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/get_attendance_lock_status.php', {
+                const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/get_attendance_lock_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -234,7 +234,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 const courseId = sectionInfo.course_id;
                 console.log("DEBUG (fetchStudents): Fetching students for date:", dateStr, "course_id:", courseId);
                 const response = await fetch(
-                    `http://localhost/ustp-student-attendance-system/api/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}`
+                    `http://localhost/ustp-student-attendance/api/instructor_backend/get_students.php?date=${dateStr}&instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}&_t=${new Date().getTime()}`
                 );
 
                 if (!response.ok) {
@@ -328,7 +328,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         console.log("DEBUG (toggleAttendance): Final attendanceData payload:", attendanceData);
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/save_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -374,7 +374,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 }
                 const courseId = sectionInfo.course_id;
 
-                const response = await fetch(`http://localhost/ustp-student-attendance-system/api/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`);
+                const response = await fetch(`http://localhost/ustp-student-attendance/api/instructor_backend/student_dropdown.php?instructor_id=${instructor.instructor_id}&section_id=${sectionId}&course_id=${courseId}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 const sortedDropdownData = [...data].sort((a, b) => {
@@ -435,7 +435,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         console.log("DEBUG (markAsLate): Final attendanceData payload (Late):", attendanceData);
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/save_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/save_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(attendanceData)
@@ -474,7 +474,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/add_drop_request.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/add_drop_request.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData),
@@ -507,7 +507,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/unlock_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/unlock_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -538,7 +538,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         setShowLockConfirmModal(false); // Close the confirmation modal immediately
 
         try {
-            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/lock_attendance.php', {
+            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/lock_attendance.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -633,7 +633,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                 <button
                                                     onClick={async () => {
                                                         try {
-                                                            const response = await fetch('http://localhost/ustp-student-attendance-system/api/instructor_backend/update_section_color.php', {
+                                                            const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/update_section_color.php', {
                                                                 method: 'POST',
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({
@@ -686,7 +686,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                                     onClick={() => setSelectedVectorImage(imagePath)}
                                                 >
                                                     <img
-                                                        src={`http://localhost/ustp-student-attendance-system/public/assets/${imagePath}`}
+                                                        src={`http://localhost/ustp-student-attendance/public/assets/${imagePath}`}
                                                         alt={`Vector ${index + 1}`}
                                                         className="w-full h-auto object-contain"
                                                     />
@@ -852,7 +852,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
                                         )}
                                         <div className="overflow-hidden rounded-t-[20px] flex justify-center aspect-w-1 aspect-h-1 w-full">
                                             <img
-                                                src={`http://localhost/ustp-student-attendance-system/uploads/${student.image}?${new Date().getTime()}`}
+                                                src={`http://localhost/ustp-student-attendance/uploads/${student.image}?${new Date().getTime()}`}
                                                 className={`object-cover ${isPresent || isLate ? '' : 'grayscale'}`}
                                                 onError={(e) => {
                                                     e.target.onerror = null;

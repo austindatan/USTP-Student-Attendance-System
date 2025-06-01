@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include __DIR__ . '/../src/conn.php'; 
+include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $sql = "SELECT course_id, course_code, course_name, description FROM course ORDER BY course_code ASC"; // Assuming your table is 'course'

@@ -30,7 +30,7 @@ const LoginStudent = () => {
         setError(""); 
 
         try {
-            const response = await fetch("http://localhost/ustp-student-attendance-system/api/auth/login-student.php", {
+            const response = await fetch("http://localhost/ustp-student-attendance/api/auth/login-student.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,8 +80,8 @@ const LoginStudent = () => {
                 className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl shadow-md w-[90%] sm:w-full max-w-md"
             >
                 <img src="assets/ustp_logo.png" className="w-24 h-24 block mx-auto mb-2" alt="USTP Logo" />
-                <img src="assets/SAMS.png" className="w-50 h-10 block mx-auto mb-2" alt="SAMS Logo" />
-                      <h6 className="text-lg sm:text-sm font-bold text-center text-gray-600">Login to your account.</h6>
+                <img src="assets/SAMS.png" className="w-16 h-5 block mx-auto mb-2" alt="SAMS Logo" />
+                      <h6 className="text-lg sm:text-sm font-bold text-center text-gray-600 mb-4">Login to your account.</h6>
 
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 

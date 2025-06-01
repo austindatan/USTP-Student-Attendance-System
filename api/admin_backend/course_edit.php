@@ -4,7 +4,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET"); // Allow GET for fetching data
 header("Access-Control-Allow-Headers: Content-Type");
 
-include __DIR__ . '/../src/conn.php';
+include __DIR__ . '/../../src/conn.php'; 
 
 // Handle GET request to fetch course details
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
