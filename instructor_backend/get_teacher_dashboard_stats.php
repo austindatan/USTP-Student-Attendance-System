@@ -1,11 +1,11 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
-include '../src/conn.php'; 
+include '../src/conn.php';
 
-// Check for database connection error at the beginning
+
 if ($conn->connect_error) {
-    http_response_code(500); // Internal Server Error
+    http_response_code(500); 
     echo json_encode(["error" => "Database connection failed: " . $conn->connect_error]);
     exit;
 }
@@ -14,7 +14,7 @@ $instructor_id = isset($_GET['instructor_id']) ? intval($_GET['instructor_id']) 
 $date = isset($_GET['date']) ? $_GET['date'] : null;
 
 if (!$instructor_id || !$date) {
-    http_response_code(400); // Bad Request
+    http_response_code(400); 
     echo json_encode([
         "error" => "Missing instructor_id or date"
     ]);
@@ -22,8 +22,7 @@ if (!$instructor_id || !$date) {
 }
 
 $students_result = 0;
-// Corrected Query 1: Get total unique students associated with this instructor's sections
-// Students are linked to sections via student_details, and sections are linked to instructors via section_courses.
+
 $stmt1 = $conn->prepare("
     SELECT COUNT(DISTINCT sd.student_id) AS total_students 
     FROM student_details sd
@@ -51,8 +50,7 @@ if ($row1 = $res1->fetch_assoc()) {
 $stmt1->close();
 
 $present_result = 0;
-// Corrected Query 2: Get students present today for this instructor's sections
-// Attendance records are for student_details_id, which links to section_courses for instructor_id.
+
 $stmt2 = $conn->prepare("
     SELECT COUNT(DISTINCT a.student_details_id) AS present_today
     FROM attendance a
@@ -83,8 +81,7 @@ if ($row2 = $res2->fetch_assoc()) {
 $stmt2->close();
 
 $classes_result = 0;
-// Corrected Query 3: Get total classes (sections/courses) assigned to this instructor
-// This information is directly available in the 'section_courses' table.
+
 $stmt3 = $conn->prepare("
     SELECT COUNT(DISTINCT section_course_id) AS total_classes 
     FROM section_courses 
@@ -110,28 +107,35 @@ if ($row3 = $res3->fetch_assoc()) {
 }
 $stmt3->close();
 
-$events_result = 0;
-// Query 4: Upcoming events (attendance records with future dates) - this query seems correct
-// as it doesn't filter by instructor and is a general count.
-$events_query = "SELECT COUNT(*) AS upcoming_events FROM attendance WHERE date > CURDATE()";
-$res4 = $conn->query($events_query);
-if ($res4 === false) {
+$excuse_requests_result = 0; 
+
+$stmt4 = $conn->prepare("SELECT COUNT(*) AS pending_excuse_requests FROM excused_request WHERE status = 'pending'");
+if ($stmt4 === false) {
     http_response_code(500);
-    echo json_encode(["error" => "Failed to execute events query: " . $conn->error]);
+    echo json_encode(["error" => "Failed to prepare statement 4: " . $conn->error]);
     $conn->close();
     exit;
 }
-if ($row4 = $res4->fetch_assoc()) {
-    $events_result = intval($row4['upcoming_events']);
+if (!$stmt4->execute()) {
+    http_response_code(500);
+    echo json_encode(["error" => "Failed to execute statement 4: " . $stmt4->error]);
+    $stmt4->close();
+    $conn->close();
+    exit;
 }
+$res4 = $stmt4->get_result();
+if ($row4 = $res4->fetch_assoc()) {
+    $excuse_requests_result = intval($row4['pending_excuse_requests']);
+}
+$stmt4->close();
 
-// Set HTTP status code to 200 OK for successful response
+
 http_response_code(200); 
 echo json_encode([
     "totalStudents" => $students_result,
     "studentsPresentToday" => $present_result,
     "totalClasses" => $classes_result,
-    "upcomingEvents" => $events_result
+    "excuseRequests" => $excuse_requests_result
 ]);
 
 $conn->close();
