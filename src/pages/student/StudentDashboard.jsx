@@ -206,7 +206,7 @@ export default function StudentDashboard({ selectedDate }) { // Added selectedDa
                 <DashboardCard icon={<FiCheckCircle size={28} />} label="Present" count={present} />
                 <DashboardCard icon={<FiXCircle size={28} />} label="Absent" count={absent} />
                 <DashboardCard icon={<FiCalendar size={28} />} label="Excused" count={excused} />
-                <DashboardCard icon={<FiBookOpen size={28} />} label="Missed" count={missed} />
+                <DashboardCard icon={<FiBookOpen size={28} />} label="Lates" count={missed} />
               </>
             )}
           </div>
