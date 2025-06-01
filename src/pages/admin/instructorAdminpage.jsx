@@ -18,7 +18,7 @@ export default function InstructorAdminPage() {
 
   const fetchInstructors = () => {
     setLoading(true);
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_instructor_info.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_instructor_info.php')
       .then((res) => {
         if (!res.data.error) {
           setInstructors(res.data);
@@ -37,7 +37,7 @@ export default function InstructorAdminPage() {
   };
 
   const confirmDelete = () => {
-    axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_instructor.php', {
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_instructor.php', {
       _method: 'DELETE',
       instructor_id: selectedInstructor.instructor_id,
     })

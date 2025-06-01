@@ -22,7 +22,7 @@ const LoginAdmin = () => {
 
     try {
       const response = await fetch(
-        "http://localhost/ustp-student-attendance/api/auth/login-admin.php",
+        "http://localhost/USTP-Student-Attendance-System/api/auth/login-admin.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -52,6 +52,7 @@ const LoginAdmin = () => {
       <div
         className="absolute inset-0 bg-cover bg-center z-[-1]"
         style={{ backgroundImage: "url('assets/ustp-cdo-2.jpg')" }}
+        
       ></div>
 
       <div className="relative bg-white p-6 sm:p-8 rounded-3xl shadow-md w-full max-w-xs sm:max-w-md mx-4 sm:mx-0 z-10">
@@ -66,6 +67,7 @@ const LoginAdmin = () => {
               className="w-10 h-10 sm:w-12 sm:h-12 mr-3"
               alt="USTP Logo"
             />
+              <img src="assets/SAMS.png" className="w-16 h-5  mr-3" alt="SAMSLogo" />
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold">
               Admin Portal
             </h2>

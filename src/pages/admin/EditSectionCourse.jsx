@@ -25,13 +25,13 @@ function EditSectionCourse() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/courses_list.php');
+                const coursesRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/courses_list.php');
                 if (coursesRes.data.success) setAllCourses(coursesRes.data.courses);
 
-                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_all_instructors.php');
+                const instructorsRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
-                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
+                const sectionCourseRes = await axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
                 if (sectionCourseRes.data.success) {
                     const { course_id, schedule_day, start_time, end_time, course_name, instructor_id } = sectionCourseRes.data.sectionCourse;
                     setFormData({ course_id, schedule_day, start_time, end_time, instructor_id: instructor_id || '' });
@@ -63,7 +63,7 @@ function EditSectionCourse() {
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/edit_section_course.php', {
+            const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/edit_section_course.php', {
                 ...formData,
                 section_course_id: sectionCourseId
             });
@@ -89,7 +89,7 @@ function EditSectionCourse() {
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
                 <div className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={{
-                        backgroundImage: "url('assets/teacher_vector.png')",
+                        backgroundImage: "url('/assets/teacher_vector.png')",
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'right',
                         backgroundSize: 'contain'

@@ -17,7 +17,7 @@
       : "Tony Stark";
     const email = student?.email || "tonytark@gmail.com";
     const imagePath = student?.image
-      ? `http://localhost/ustp-student-attendance/uploads/${student.image.replace("uploads/", "")}`
+      ? `http://localhost/USTP-Student-Attendance-System/uploads/${student.image.replace("uploads/", "")}`
       : "/assets/cloud-avatar.png";
 
     useEffect(() => {

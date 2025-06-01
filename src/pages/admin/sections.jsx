@@ -12,7 +12,7 @@ export default function Admin_Sections() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://localhost/ustp-student-attendance/admin_backend/section_with_details.php')
+        axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_with_details.php')
             .then(res => {
                 console.log("Fetched sections data:", res.data);
                 if (res.data && res.data.success && Array.isArray(res.data.sections)) {
@@ -38,7 +38,7 @@ export default function Admin_Sections() {
     };
 
     const confirmDelete = () => {
-        axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_section.php', {
+        axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_section.php', {
             _method: 'DELETE',
             section_id: selectedSection.section_id,
         })

@@ -12,7 +12,7 @@ export default function Admin_Courses() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost/ustp-student-attendance/admin_backend/get_course.php')
+    axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_course.php')
       .then(res => {
         if (Array.isArray(res.data)) {
           setCourses(res.data);
@@ -36,7 +36,7 @@ export default function Admin_Courses() {
   };
 
   const confirmDelete = () => {
-    axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_course.php', {
+    axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_course.php', {
       _method: 'DELETE',
       course_id: selectedCourse.course_id,
     })
