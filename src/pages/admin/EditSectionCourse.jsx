@@ -1,5 +1,5 @@
 // Refactored EditSectionCourse.jsx to match EditSection.jsx frontend
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // <--- Added useRef
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ConfirmationModal from '../../components/confirmationmodal';
@@ -22,6 +22,9 @@ function EditSectionCourse() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
+    // useRef to store the initial fetched data for comparison
+    const initialFormData = useRef(null); // <--- New useRef declaration
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -34,8 +37,17 @@ function EditSectionCourse() {
                 const sectionCourseRes = await axios.get(`http://localhost/USTP-Student-Attendance-System/admin_backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
                 if (sectionCourseRes.data.success) {
                     const { course_id, schedule_day, start_time, end_time, course_name, instructor_id } = sectionCourseRes.data.sectionCourse;
-                    setFormData({ course_id, schedule_day, start_time, end_time, instructor_id: instructor_id || '' });
+                    const fetchedData = { // Create a temporary object for the fetched data
+                        course_id,
+                        schedule_day,
+                        start_time,
+                        end_time,
+                        instructor_id: instructor_id || ''
+                    };
+                    setFormData(fetchedData);
                     setCurrentCourseName(course_name);
+                    // Store the initial fetched data in the ref for comparison
+                    initialFormData.current = fetchedData; // <--- Store initial data here
                 } else {
                     setError(sectionCourseRes.data.message || 'Failed to load section course data.');
                 }
@@ -48,7 +60,7 @@ function EditSectionCourse() {
         };
 
         fetchData();
-    }, [sectionCourseId]);
+    }, [sectionCourseId]); // Dependency array is correct
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -57,6 +69,19 @@ function EditSectionCourse() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Compare current formData with the initial data stored in the ref
+        // A simple way to compare objects with primitive values is to stringify them.
+        const currentDataString = JSON.stringify(formData);
+        const initialDataString = JSON.stringify(initialFormData.current);
+
+        if (currentDataString === initialDataString) {
+            // No changes detected, redirect back to the section courses page
+            navigate(`/sections/${sectionId}/courses`);
+            return; // Exit the function to prevent opening the modal
+        }
+
+        // If there are changes, proceed to open the confirmation modal
         setIsModalOpen(true);
     };
 
@@ -77,7 +102,7 @@ function EditSectionCourse() {
             setError(err.message);
         } finally {
             setIsSaving(false);
-            setIsModalOpen(false);
+            setIsModalOpen(false); // Always close the modal after confirmation attempt
         }
     };
 
