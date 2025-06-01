@@ -77,22 +77,22 @@ export default function StudentDashboard({ selectedDate }) {
 
     const attendanceEndpoints = [
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_present_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_absent_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_excused_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
         setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_late_count.php",
+        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
         setter: setMissed,
         key: "total_late",
       },
@@ -124,7 +124,7 @@ export default function StudentDashboard({ selectedDate }) {
 
     // New API call for classes, using GET and query parameter
     const fetchClassesData = fetch(
-      `http://localhost/ustp-student-attendance-system/api/student_backend/get_sections.php?student_id=${student.id}`
+      `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_sections.php?student_id=${student.id}`
     )
       .then(async (res) => {
         if (!res.ok) {

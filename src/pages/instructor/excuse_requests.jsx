@@ -9,6 +9,8 @@ const ExcuseRequestsPage = () => {
   const [modal, setModal] = useState({ show: false, id: null, type: '' }); // For confirmation modal (approve/reject/delete)
   const [instructorId, setInstructorId] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Added isLoading state
+  const [showActionSuccessModal, setShowActionSuccessModal] = useState(false); // NEW: State for action success modal
+  const [actionSuccessMessage, setActionSuccessMessage] = useState(''); // NEW: State for success message
 
   useEffect(() => {
     const storedInstructor = localStorage.getItem("instructor");
@@ -123,6 +125,12 @@ const ExcuseRequestsPage = () => {
     setSelectedRequest(null);
   };
 
+  // NEW: Function to close the action success modal
+  const closeActionSuccessModal = () => {
+    setShowActionSuccessModal(false);
+    setActionSuccessMessage('');
+  };
+
   const confirmAction = async () => {
     let endpoint = "";
     let method = "";
@@ -135,7 +143,7 @@ const ExcuseRequestsPage = () => {
       endpoint = "http://localhost/USTP-Student-Attendance-System/instructor_backend/update_excuse_req.php";
       method = "PUT";
       body = JSON.stringify({ excused_request_id: modal.id, status });
-      successMessage = "Status updated successfully!";
+      successMessage = `Request ${status.toLowerCase()} successfully!`; // Dynamic message
       errorMessage = "Failed to update status.";
     } else if (modal.type === "delete") {
       endpoint = "http://localhost/USTP-Student-Attendance-System/instructor_backend/delete_excuse_req.php";
@@ -159,7 +167,9 @@ const ExcuseRequestsPage = () => {
 
       const result = await res.json();
       if (result.success) { // Assuming your PHP scripts return { success: true } on success
-        alert(successMessage);
+        // REPLACE alert with modal
+        setActionSuccessMessage(successMessage);
+        setShowActionSuccessModal(true);
         // After a button press, re-fetch without showing the skeleton
         fetchRequests(instructorId, false);
       } else {
@@ -349,7 +359,7 @@ const ExcuseRequestsPage = () => {
                   <p className="font-bold mb-1 sm:mb-2 text-[#737373] text-sm sm:text-base">Attachment:</p>
                   {selectedRequest.file_path ? (
                     <a
-                      href={`http://localhost/ustp-student-attendance/api/student_backend/${selectedRequest.file_path}`}
+                      href={`http://localhost/USTP-Student-Attendance-System/api/student_backend/${selectedRequest.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 bg-gray-100 text-indigo-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-sm sm:text-base font-semibold border border-indigo-200"
@@ -398,6 +408,29 @@ const ExcuseRequestsPage = () => {
                   className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 text-sm sm:text-base"
                 >
                   Confirm
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* NEW: Action Success Modal */}
+        {showActionSuccessModal && createPortal(
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
+            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-xl max-w-sm w-full mx-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-center items-center mb-4 pb-4 border-b border-gray-200">
+                <h2 className="text-xl sm:text-2xl font-bold text-green-600 text-center">Success!</h2>
+              </div>
+              <p className="text-gray-700 mb-4 sm:mb-6 text-center text-sm sm:text-base">
+                {actionSuccessMessage}
+              </p>
+              <div className="flex justify-end space-x-2 sm:space-x-3">
+                <button
+                  onClick={closeActionSuccessModal}
+                  className="px-3 py-1 sm:px-4 sm:py-2 rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 text-sm sm:text-base"
+                >
+                  Okay
                 </button>
               </div>
             </div>
