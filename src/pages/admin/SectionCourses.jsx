@@ -12,6 +12,19 @@ function SectionCourses() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [courseToDelete, setCourseToDelete] = useState(null);
 
+    const [message, setMessage] = useState("");
+    const [isMessageError, setIsMessageError] = useState(false);
+
+    // Helper function to show floating message
+    const showFloatingMessage = (msg, isError) => {
+        setMessage(msg);
+        setIsMessageError(isError);
+        setTimeout(() => {
+            setMessage("");
+            setIsMessageError(false);
+        }, 3000); // Message disappears after 3 seconds
+    };
+
     const handleNavigate = (path) => {
         navigate(path);
     };
@@ -41,12 +54,17 @@ function SectionCourses() {
             if (response.data.success) {
                 setSectionDetails(response.data.section);
                 setCourses(response.data.courses);
+                if (response.data.courses.length > 0) {
+                    showFloatingMessage("Section courses loaded successfully!", false);
+                }
             } else {
                 setError(response.data.message || 'Failed to fetch section courses.');
+                showFloatingMessage(response.data.message || 'Failed to fetch section courses.', true);
             }
         } catch (err) {
             console.error("Error fetching section courses:", err);
             setError(err.message);
+            showFloatingMessage("Failed to fetch section courses. Please check your network or server.", true);
         } finally {
             setLoading(false);
         }
@@ -54,7 +72,7 @@ function SectionCourses() {
 
     useEffect(() => {
         fetchSectionCourses();
-    }, [sectionId]);
+    }, [sectionId]); // fetchSectionCourses is implicitly stable due to no external dependencies other than sectionId which is in dependency array
 
     const handleDeleteClick = (course) => {
         setCourseToDelete(course);
@@ -65,21 +83,21 @@ function SectionCourses() {
         if (!courseToDelete) return;
 
         try {
-            const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_sectioncourse.php', {
+            const response = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/delete_sectioncourse.php', {
                 _method: 'DELETE',
                 section_course_id: courseToDelete.section_course_id,
             });
 
             if (response.data.success) {
                 setCourses(courses.filter(course => course.section_course_id !== courseToDelete.section_course_id));
-                console.log(response.data.message);
+                showFloatingMessage("Course successfully removed from section!", false);
             } else {
                 console.error(response.data.message || "Failed to delete section course.");
-                setError(response.data.message || "Failed to delete section course.");
+                showFloatingMessage(response.data.message || "Failed to delete section course.", true);
             }
         } catch (err) {
             console.error("An error occurred while deleting the course:", err);
-            setError("An error occurred while deleting the course. Please try again.");
+            showFloatingMessage("An error occurred while deleting the course. Please try again.", true);
         } finally {
             setIsDeleteModalOpen(false);
             setCourseToDelete(null);
@@ -88,6 +106,12 @@ function SectionCourses() {
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
+            {message && (
+                <div className={`fixed top-4 right-4 p-3 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isMessageError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    {message}
+                </div>
+            )}
+
             <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
                 <div
                     className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"

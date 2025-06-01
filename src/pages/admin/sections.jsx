@@ -11,6 +11,18 @@ export default function Admin_Sections() {
     const [selectedSection, setSelectedSection] = useState(null);
     const navigate = useNavigate();
 
+    const [message, setMessage] = useState("");
+    const [isMessageError, setIsMessageError] = useState(false);
+
+    const showFloatingMessage = (msg, isError) => {
+        setMessage(msg);
+        setIsMessageError(isError);
+        setTimeout(() => {
+            setMessage("");
+            setIsMessageError(false);
+        }, 3000); // Message disappears after 3 seconds
+    };
+
     useEffect(() => {
         axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/section_with_details.php')
             .then(res => {
@@ -22,12 +34,14 @@ export default function Admin_Sections() {
                     setSections([]);
                     console.warn("Unexpected data format or no sections found:", res.data);
                     setError(res.data ? (res.data.message || 'No sections found or unexpected data format.') : 'Failed to fetch data from server.');
+                    showFloatingMessage(res.data ? (res.data.message || 'No sections found or unexpected data format.') : 'Failed to fetch data from server.', true);
                 }
             })
             .catch((err) => {
                 console.error("Error fetching sections:", err);
                 setSections([]);
                 setError("Failed to fetch sections. Please check your network or server.");
+                showFloatingMessage("Failed to fetch sections. Please check your network or server.", true);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -44,14 +58,21 @@ export default function Admin_Sections() {
         })
             .then((res) => {
                 if (res.data.success) {
-                    setIsModalOpen(false); 
+                    setIsModalOpen(false);
                     setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
+                    showFloatingMessage("Section deleted successfully!", false);
                 } else {
                     console.error(res.data.message || "Failed to delete section.");
+                    showFloatingMessage(res.data.message || "Failed to delete section.", true);
                 }
             })
             .catch((err) => {
                 console.error("An error occurred while deleting:", err);
+                showFloatingMessage("An error occurred while deleting the section. Please try again.", true);
+            })
+            .finally(() => {
+                setIsModalOpen(false); 
+                setSelectedSection(null);
             });
     };
 
@@ -70,17 +91,23 @@ export default function Admin_Sections() {
             className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex"
             style={{ overflowY: "auto" }}
         >
+            {message && (
+                <div className={`fixed top-4 right-4 p-3 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isMessageError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    {message}
+                </div>
+            )}
+
             <section className="w-full pt-12 px-4 sm:px-6 md:px-12 mb-12">
                 <div
                     className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={
                         !loading
                             ? {
-                                backgroundImage: "url('assets/teacher_vector.png')",
-                                backgroundRepeat: "no-repeat",
-                                backgroundPosition: "right",
-                                backgroundSize: "contain"
-                            }
+                                  backgroundImage: "url('assets/teacher_vector.png')",
+                                  backgroundRepeat: "no-repeat",
+                                  backgroundPosition: "right",
+                                  backgroundSize: "contain"
+                              }
                             : {}
                     }
                 >
@@ -126,7 +153,6 @@ export default function Admin_Sections() {
                                 <thead className="bg-blue-100 uppercase text-blue-700">
                                     <tr>
                                         <th className="px-2 py-2 w-1/3 sm:w-1/4 md:w-[20%]">Section Name</th>
-                                        {/* Reduced width slightly for Year Level and Semester to introduce space */}
                                         <th className="px-2 py-2 w-[18%] sm:w-[23%] md:w-[20%]">Year Level</th>
                                         <th className="px-2 py-2 w-[18%] sm:w-[23%] md:w-[20%]">Semester</th>
                                         <th className="px-1 py-2 w-[20%] sm:w-[20%] md:w-[20%] text-center">Action</th>
@@ -146,7 +172,6 @@ export default function Admin_Sections() {
                                                 className="border-b border-blue-200 hover:bg-blue-50"
                                             >
                                                 <td className="px-2 py-2 truncate max-w-[100px] sm:max-w-none">{section.section_name}</td>
-                                                {/* Consistent width for td elements */}
                                                 <td className="px-2 py-2 truncate max-w-[100px] sm:max-w-none">{section.year_level_name || 'N/A'}</td>
                                                 <td className="px-2 py-2 truncate max-w-[100px] sm:max-w-none">{section.semester_name || 'N/A'}</td>
                                                 <td className="px-1 py-2">
@@ -183,16 +208,16 @@ export default function Admin_Sections() {
 
             {/* Delete Confirmation Modal (Section) */}
             {isModalOpen && selectedSection && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> 
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">
                             Confirm Delete
                         </h2>
-                        <p className="text-gray-700 mb-6"> 
+                        <p className="text-gray-700 mb-6">
                             Are you sure you want to delete the section {" "}
                             <span className="font-bold">{selectedSection.section_name}</span>?
                         </p>
-                        <div className="flex justify-end gap-3"> 
+                        <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setIsModalOpen(false)}
                                 className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
