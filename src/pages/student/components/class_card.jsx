@@ -1,4 +1,4 @@
-function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, bgColor = "bg-[#0097b2]"}) {
+function class_card({ isLoading, onClick, code, title, room, schedule, bgImage, bgColor = "bg-[#0097b2]"}) {
 
     // Helper function to format 24-hour time to 12-hour AM/PM
     const formatTime = (timeString24hr) => {
@@ -121,4 +121,4 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
     );
 }
 
-export default ClassCard;
+export default class_card;

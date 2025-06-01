@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'; 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import MessageModal from '../../components/MessageModal'; 
 
 const AddSection = () => {
@@ -21,9 +21,9 @@ const AddSection = () => {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [messageModalTitle, setMessageModalTitle] = useState('');
-    const [messageModalMessage, setMessageModalMessage] = useState('');
-    const [messageModalType, setMessageModalType] = useState('info'); 
+    const [MessageModalTitle, setMessageModalTitle] = useState('');
+    const [MessageModalMessage, setMessageModalMessage] = useState('');
+    const [MessageModalType, setMessageModalType] = useState('info'); 
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
         setMessageModalTitle(title);
@@ -43,7 +43,7 @@ const AddSection = () => {
         const fetchData = async () => {
             try {
                 // Fetch semesters data
-                const semestersRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_semesters.php');
+                const semestersRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetSemesters.php');
                 if (semestersRes.data.success) {
                     setSemesters(semestersRes.data.semesters);
                 } else {
@@ -52,7 +52,7 @@ const AddSection = () => {
                 }
 
                 // Fetch year levels data
-                const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_year_levels.php');
+                const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetYearLevels.php');
                 if (yearLevelsRes.data.success) {
                     setYearLevels(yearLevelsRes.data.year_levels);
                 } else {
@@ -91,11 +91,11 @@ const AddSection = () => {
     const handleConfirmAdd = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/section_add.php', formData);
+            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/SectionAdd.php', formData);
             if (res.data.success) {
                 setIsAddSectionModalOpen(false);
                 showMessageModal('Success!', 'Section added successfully!', 'success');
-                navigate('/admin-sections'); 
+                navigate('/admin-Sections'); 
             } else {
                 showMessageModal('Failed to Add Section', res.data.message || 'Failed to add section.', 'error');
                 setIsAddSectionModalOpen(false);
@@ -186,7 +186,7 @@ const AddSection = () => {
                         <div className="md:col-span-2 flex justify-end items-center gap-3">
                             <button
                                 type="button"
-                                onClick={() => navigate('/admin-sections')}
+                                onClick={() => navigate('/admin-Sections')}
                                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
                             >
                                 Cancel
@@ -217,9 +217,9 @@ const AddSection = () => {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={messageModalTitle}
-                message={messageModalMessage}
-                type={messageModalType}
+                title={MessageModalTitle}
+                message={MessageModalMessage}
+                type={MessageModalType}
             />
         </div>
     );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'; 
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import MessageModal from '../../components/MessageModal'; 
 
 export default function EditInstructor() {
@@ -29,9 +29,9 @@ export default function EditInstructor() {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [messageModalTitle, setMessageModalTitle] = useState('');
-    const [messageModalMessage, setMessageModalMessage] = useState('');
-    const [messageModalType, setMessageModalType] = useState('info'); 
+    const [MessageModalTitle, setMessageModalTitle] = useState('');
+    const [MessageModalMessage, setMessageModalMessage] = useState('');
+    const [MessageModalType, setMessageModalType] = useState('info'); 
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
         setMessageModalTitle(title);
@@ -49,7 +49,7 @@ export default function EditInstructor() {
 
     useEffect(() => {
         axios
-            .get(`http://localhost/ustp-student-attendance/api/admin-backend/get_instructor_info.php?instructor_id=${instructor_id}`)
+            .get(`http://localhost/ustp-student-attendance-system/api/admin-backend/GetInstructorInfo.php?instructor_id=${instructor_id}`)
             .then(res => {
                 const instructor = res.data;
                 if (instructor && instructor.instructor_id) {
@@ -122,7 +122,7 @@ export default function EditInstructor() {
 
         try {
             const res = await axios.post(
-                'http://localhost/ustp-student-attendance/api/admin-backend/edit_profile.php',
+                'http://localhost/ustp-student-attendance-system/api/admin-backend/EditProfile.php',
                 data,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
@@ -244,9 +244,9 @@ export default function EditInstructor() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={messageModalTitle}
-                message={messageModalMessage}
-                type={messageModalType}
+                title={MessageModalTitle}
+                message={MessageModalMessage}
+                type={MessageModalType}
             />
         </div>
     );

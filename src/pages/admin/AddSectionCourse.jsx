@@ -21,10 +21,10 @@ function AddSectionCourse() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/courses_list.php');
-                if (coursesRes.data.success) setAllCourses(coursesRes.data.courses);
+                const CoursesRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/CoursesList.php');
+                if (CoursesRes.data.success) setAllCourses(CoursesRes.data.Courses);
 
-                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_all_instructors.php');
+                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
             } catch (err) {
@@ -47,13 +47,13 @@ function AddSectionCourse() {
         setError(null);
         setMessage('');
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/add_sectioncourse.php', {
+            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/AddSectionCourse.php', {
                 ...formData,
                 section_id: sectionId
             });
             if (res.data.success) {
                 setMessage(res.data.message);
-                setTimeout(() => navigate(`/sections/${sectionId}/courses`), 2000);
+                setTimeout(() => navigate(`/Sections/${sectionId}/Courses`), 2000);
             } else {
                 setError(res.data.message || 'Failed to add course.');
             }
@@ -171,7 +171,7 @@ function AddSectionCourse() {
                         <div className="md:col-span-2 flex justify-end items-center gap-3">
                             <button
                                 type="button"
-                                onClick={() => navigate(`/sections/${sectionId}/courses`)}
+                                onClick={() => navigate(`/Sections/${sectionId}/Courses`)}
                                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
                             >
                                 Cancel

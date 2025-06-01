@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom"; // Assuming react-router-dom is 
  *
  * @param {object} props - The component props.
  * @param {string} props.classes - A semicolon-separated string of class names.
- * @param {boolean} props.isLastEight - Indicates if this dropdown is for one of the last 8 students.
+ * @param {boolean} props.isLastEight - Indicates if this dropdown is for one of the last 8 Students.
  */
 const ClassDropdown = ({ classes, isLastEight }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +47,7 @@ const ClassDropdown = ({ classes, isLastEight }) => {
   // This needs to be done before the useEffect that depends on classList.length
   // NOTE: The .filter(item => item !== '') removes any empty strings
   // that might result from trailing semicolons or double semicolons in the input string.
-  // This is a common reason why "added courses" might not match "displayed courses"
+  // This is a common reason why "added Courses" might not match "displayed Courses"
   // if the input string format creates empty entries.
   const classList = classes ? classes.split(';').map(item => item.trim()).filter(item => item !== '') : [];
 
@@ -142,11 +142,11 @@ const ClassDropdown = ({ classes, isLastEight }) => {
 
 /**
  * Admin_Students Component
- * Displays a list of students, allows searching, adding, editing, and deleting students.
+ * Displays a list of Students, allows searching, adding, editing, and deleting Students.
  * Includes a confirmation modal for deletion and a message display for feedback.
  */
 export default function Admin_Students() {
-  const [students, setStudents] = useState([]);
+  const [Students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -164,30 +164,30 @@ export default function Admin_Students() {
     setError(null); // Clear any previous errors
     try {
       const res = await axios.get(
-        "http://localhost/ustp-student-attendance/api/admin-backend/student_api.php"
+        "http://localhost/ustp-student-attendance-system/api/admin-backend/StudentApi.php"
       );
 
       let data = [];
-      // Check if the response data is an array or contains a 'students' array
+      // Check if the response data is an array or contains a 'Students' array
       if (Array.isArray(res.data)) {
         data = res.data;
-      } else if (Array.isArray(res.data.students)) {
-        data = res.data.students;
+      } else if (Array.isArray(res.data.Students)) {
+        data = res.data.Students;
       }
 
-      // Sort students by student_id
+      // Sort Students by student_id
       data.sort((a, b) => a.student_id - b.student_id);
-      setStudents(data); // Update students state
+      setStudents(data); // Update Students state
     } catch (err) {
-      console.error("Failed to fetch students:", err); // Log the error
-      setError("Failed to fetch students. Please try again."); // Set user-friendly error message
+      console.error("Failed to fetch Students:", err); // Log the error
+      setError("Failed to fetch Students. Please try again."); // Set user-friendly error message
     } finally {
       setLoading(false); // Set loading state to false
     }
   };
 
   /**
-   * Effect to fetch students when the component mounts.
+   * Effect to fetch Students when the component mounts.
    */
   useEffect(() => {
     fetchStudents();
@@ -211,7 +211,7 @@ export default function Admin_Students() {
 
     try {
       const res = await axios.post(
-        'http://localhost/ustp-student-attendance/api/admin-backend/delete_student.php',
+        'http://localhost/ustp-student-attendance-system/api/admin-backend/DeleteStudent.php',
         {
           _method: 'DELETE', // Laravel/PHP common method override for DELETE requests
           student_id: selectedStudent.student_id,
@@ -220,7 +220,7 @@ export default function Admin_Students() {
 
       if (res.data.success) {
         // Filter out the deleted student from the current list
-        setStudents(students.filter(s => s.student_id !== selectedStudent.student_id));
+        setStudents(Students.filter(s => s.student_id !== selectedStudent.student_id));
         setMessage("Student deleted successfully!"); // Set success message
         setIsMessageError(false); // Indicate success message
       } else {
@@ -243,9 +243,9 @@ export default function Admin_Students() {
   };
 
   /**
-   * Filters the students based on the search term.
+   * Filters the Students based on the search term.
    */
-  const filteredStudents = students.filter((student) => {
+  const filteredStudents = Students.filter((student) => {
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
     const enrolledClasses = (student.enrolled_classes || '').toLowerCase(); // Handle null/undefined classes
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -308,14 +308,14 @@ export default function Admin_Students() {
               {/* Search input field */}
               <input
                 type="text"
-                placeholder="Search students..."
+                placeholder="Search Students..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
               />
               {/* Add Student button */}
               <button
-                onClick={() => navigate("/admin-students/add")}
+                onClick={() => navigate("/admin-Students/add")}
                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
               >
                 + Add Student
@@ -325,7 +325,7 @@ export default function Admin_Students() {
 
           {loading ? (
             // Loading message for table
-            <p className="text-center text-gray-500">Loading students...</p>
+            <p className="text-center text-gray-500">Loading Students...</p>
           ) : error ? (
             // Error message for table
             <p className="text-center text-red-500">{error}</p>
@@ -347,14 +347,14 @@ export default function Admin_Students() {
                 </thead>
                 <tbody>
                   {filteredStudents.length === 0 ? (
-                    // Message when no students are found after filtering
+                    // Message when no Students are found after filtering
                     <tr>
                       <td colSpan={8} className="px-3 py-4 text-center text-gray-500">
-                        No students found.
+                        No Students found.
                       </td>
                     </tr>
                   ) : (
-                    // Map through filtered students and display each row
+                    // Map through filtered Students and display each row
                     filteredStudents.map((student, index) => {
                       // Determine if the current student is among the last 8
                       const isLastEight = index >= filteredStudents.length - 8;
@@ -382,7 +382,7 @@ export default function Admin_Students() {
                               {/* Edit button */}
                               <button
                                 onClick={() =>
-                                  navigate(`/admin-students/edit/${student.student_id}`)
+                                  navigate(`/admin-Students/edit/${student.student_id}`)
                                 }
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
                               >

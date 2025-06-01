@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import MessageModal from '../../components/MessageModal'; 
 
 export default function EditStudent() {
@@ -44,9 +44,9 @@ export default function EditStudent() {
     const [isSaving, setIsSaving] = useState(false);
 
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [messageModalTitle, setMessageModalTitle] = useState('');
-    const [messageModalMessage, setMessageModalMessage] = useState('');
-    const [messageModalType, setMessageModalType] = useState('info'); 
+    const [MessageModalTitle, setMessageModalTitle] = useState('');
+    const [MessageModalMessage, setMessageModalMessage] = useState('');
+    const [MessageModalType, setMessageModalType] = useState('info'); 
 
     const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
 
@@ -76,13 +76,13 @@ export default function EditStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/SectionDropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
         } catch (error) {
-            console.error(`Error fetching sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
-            showMessageModal('Error', `Failed to fetch sections for academic details. Please try again.`, 'error');
+            console.error(`Error fetching Sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
+            showMessageModal('Error', `Failed to fetch Sections for academic details. Please try again.`, 'error');
             return [];
         }
     }, [showMessageModal]); 
@@ -92,10 +92,10 @@ export default function EditStudent() {
             setIsLoadingInitialData(true);
             try {
                 const [progRes, yearRes, semRes, studentRes] = await Promise.all([
-                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/pd_dropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_year_levels.php'),
-                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_semesters.php'),
-                    axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/student_get_api.php?student_id=${student_id}`),
+                    axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/PdDropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetYearLevels.php'),
+                    axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetSemesters.php'),
+                    axios.get(`http://localhost/ustp-student-attendance-system/api/admin-backend/StudentGetApi.php?student_id=${student_id}`),
                 ]);
 
                 setProgramDetails(progRes.data);
@@ -126,12 +126,12 @@ export default function EditStudent() {
                             const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
                             if (!newSectionsCache[cacheKey]) {
                                 try {
-                                    const res = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/section_dropdown.php', {
+                                    const res = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/SectionDropdown.php', {
                                         params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
                                     });
                                     newSectionsCache[cacheKey] = res.data;
                                 } catch (error) {
-                                    console.error(`Error fetching sections for Year ${enrollment.year_level_id}, Semester ${enrollment.semester_id}:`, error);
+                                    console.error(`Error fetching Sections for Year ${enrollment.year_level_id}, Semester ${enrollment.semester_id}:`, error);
                                     newSectionsCache[cacheKey] = [];
                                 }
                             }
@@ -163,7 +163,7 @@ export default function EditStudent() {
             } catch (err) {
                 console.error('Failed to fetch data:', err);
                 showMessageModal('Error', 'Failed to load student or dropdown data. Please try again later.', 'error');
-                navigate('/admin-students');
+                navigate('/admin-Students');
             } finally {
                 setIsLoadingInitialData(false);
             }
@@ -337,7 +337,7 @@ export default function EditStudent() {
 
         try {
             const res = await axios.post(
-                `http://localhost/ustp-student-attendance/api/admin-backend/student_update_api.php?student_id=${student_id}`,
+                `http://localhost/ustp-student-attendance-system/api/admin-backend/StudentUpdateApi.php?student_id=${student_id}`,
                 submissionData,
                 {
                     headers: {
@@ -348,7 +348,7 @@ export default function EditStudent() {
             if (res.data.success) {
                 setIsEditStudentModalOpen(false);
                 showMessageModal('Success', 'Student details updated successfully!', 'success');
-                navigate('/admin-students');
+                navigate('/admin-Students');
             } else {
                 showMessageModal('Update Failed', res.data.message || 'Update failed.', 'error');
                 setIsEditStudentModalOpen(false);
@@ -597,7 +597,7 @@ export default function EditStudent() {
                                         ))
                                     ) : (
                                         <option value="" disabled>
-                                            {isAcademicDetailsSelectedForNew ? "No sections found" : "Select Year & Semester above"}
+                                            {isAcademicDetailsSelectedForNew ? "No Sections found" : "Select Year & Semester above"}
                                         </option>
                                     )}
                                 </select>
@@ -618,7 +618,7 @@ export default function EditStudent() {
                     <div className="md:col-span-2 flex justify-end gap-4 mt-6">
                         <button
                             type="button"
-                            onClick={() => navigate('/admin-students')}
+                            onClick={() => navigate('/admin-Students')}
                             className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
                         >
                             Cancel
@@ -649,9 +649,9 @@ export default function EditStudent() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={messageModalTitle}
-                message={messageModalMessage}
-                type={messageModalType}
+                title={MessageModalTitle}
+                message={MessageModalMessage}
+                type={MessageModalType}
             />
         </div>
     );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function ClassCard({ code, title, room, schedule, bgImage, bgColor = "#0097b2" }) {
+function class_card({ code, title, room, schedule, bgImage, bgColor = "#0097b2" }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -41,4 +41,4 @@ function ClassCard({ code, title, room, schedule, bgImage, bgColor = "#0097b2" }
   );
 }
 
-export default ClassCard;
+export default class_card;

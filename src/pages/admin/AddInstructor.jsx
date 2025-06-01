@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'; 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import MessageModal from '../../components/MessageModal'; 
 
 export default function AddInstructor() {
@@ -27,9 +27,9 @@ export default function AddInstructor() {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [messageModalTitle, setMessageModalTitle] = useState('');
-    const [messageModalMessage, setMessageModalMessage] = useState('');
-    const [messageModalType, setMessageModalType] = useState('info'); 
+    const [MessageModalTitle, setMessageModalTitle] = useState('');
+    const [MessageModalMessage, setMessageModalMessage] = useState('');
+    const [MessageModalType, setMessageModalType] = useState('info'); 
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
         setMessageModalTitle(title);
@@ -107,7 +107,7 @@ export default function AddInstructor() {
 
         try {
             await axios.post(
-                'http://localhost/ustp-student-attendance/api/admin-backend/AddInstructor.php',
+                'http://localhost/ustp-student-attendance-system/api/admin-backend/AddInstructor.php',
                 data,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
@@ -229,9 +229,9 @@ export default function AddInstructor() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={messageModalTitle}
-                message={messageModalMessage}
-                type={messageModalType}
+                title={MessageModalTitle}
+                message={MessageModalMessage}
+                type={MessageModalType}
             />
         </div>
     );

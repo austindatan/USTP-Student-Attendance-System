@@ -83,12 +83,12 @@ html, body {
 }
 
 
-/* Animation for entering students (when search term changes and new students appear) */
+/* Animation for entering Students (when search term changes and new Students appear) */
 .student-card-enter {
   animation: fadeInScale 0.3s ease-out forwards;
 }
 
-/* Animation for exiting students (when students are filtered out by search) */
+/* Animation for exiting Students (when Students are filtered out by search) */
 .student-card-exit {
   animation: fadeOutScale 0.3s ease-in forwards;
 }

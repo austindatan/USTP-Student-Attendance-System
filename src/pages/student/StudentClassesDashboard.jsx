@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css'; // Ensure this CSS file is correctly imported and defines global styles
-import ClassCard from './components/class_card';
+import class_card from './components/class_card';
 import { format } from 'date-fns';
 
-export default function Classes_Dashboard({ selectedDate }) {
-  const [sections, setSections] = useState([]);
+export default function ClassesDashboard({ selectedDate }) {
+  const [Sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost/ustp-student-attendance/api/student_backend/get_sections.php?student_id=${student.id}`
+        `http://localhost/ustp-student-attendance-system/api/student-backend/GetSections.php?student_id=${student.id}`
       );
 
       if (!response.ok) {
@@ -35,7 +35,7 @@ export default function Classes_Dashboard({ selectedDate }) {
       const data = await response.json();
       setSections(data);
     } catch (error) {
-      console.error('Error fetching sections:', error);
+      console.error('Error fetching Sections:', error);
       setSections([]);
     } finally {
       setTimeout(() => setIsLoading(false), 1000);
@@ -48,7 +48,7 @@ export default function Classes_Dashboard({ selectedDate }) {
     }
   }, [student?.id]);
 
-  const filteredSections = sections.filter((section) =>
+  const filteredSections = Sections.filter((section) =>
     section.section_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     section.course_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -94,7 +94,7 @@ export default function Classes_Dashboard({ selectedDate }) {
             : `${section.section_id}-${section.course_id}`;
 
           return (
-            <ClassCard
+            <class_card
               key={key}
               isLoading={isLoading}
               code={!isLoading ? section.course_code : ''}

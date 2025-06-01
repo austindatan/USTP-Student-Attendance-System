@@ -24,7 +24,7 @@ const NotFound = () => {
       }}
     >
       <img
-        src="/notfound.png"
+        src="/NotFound.png"
         alt="404 Illustration"
         style={{ width: '400px', maxWidth: '90%', marginBottom: '1em' }}
       />

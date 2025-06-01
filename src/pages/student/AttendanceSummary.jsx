@@ -33,7 +33,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
   // Helper function to fetch attendance data
   const fetchAttendanceData = useCallback(async (status) => {
-    const url = `http://localhost/ustp-student-attendance/api/student_backend/get_class_${status}.php?student_id=${studentId}&course_code=${course_code}`;
+    const url = `http://localhost/ustp-student-attendance-system/api/student-backend/get_class_${status}.php?student_id=${studentId}&course_code=${course_code}`;
 
     try {
       const res = await fetch(url);
@@ -62,7 +62,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
   useEffect(() => {
     if (studentId && course_code) {
       // --- Fetch Course Name, Image, and Hexcode ---
-      const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
+      const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance-system/api/student-backend/GetCoursename.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchCourseInfoUrl)
         .then((res) => {
@@ -265,7 +265,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
           }}
         >
           <div className="leading-snug max-w-xl">
-            <button onClick={() => navigate("/student-dashboard")}>
+            <button onClick={() => navigate("/student-Dashboard")}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />

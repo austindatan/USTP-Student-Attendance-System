@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const StudentLeftSidebar = ({ setBgImage }) => {
+const StudentLeftSideBar = ({ setBgImage }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
@@ -14,16 +14,16 @@ const StudentLeftSidebar = ({ setBgImage }) => {
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 1500);
 
-        console.log("Student ID from localStorage in StudentLeftSidebar:", studentDetailsId);
+        console.log("Student ID from localStorage in StudentLeftSideBar:", studentDetailsId);
         return () => clearTimeout(timer);
     }, [studentDetailsId]); 
 
-    const Classes_Dashboard = () => {
-        navigate("/student-classes-dashboard");
+    const ClassesDashboard = () => {
+        navigate("/student-classes-Dashboard");
     };
 
     const Student_Dashboard = () => { 
-        navigate("/student-dashboard");
+        navigate("/student-Dashboard");
     };
 
     const Add_Excuse_Request_Page = () => { 
@@ -34,11 +34,11 @@ const StudentLeftSidebar = ({ setBgImage }) => {
         navigate("/view-excuse-request");
     };
 
-    const dashboard_active = location.pathname === '/student-dashboard'; 
-    const classes_active = ['/student-classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
+    const Dashboard_active = location.pathname === '/student-Dashboard'; 
+    const classes_active = ['/student-classes-Dashboard', '/section-Dashboard/:sectionId'].some(path =>
         location.pathname.startsWith(path)
     );
-    const excuse_requests_active = location.pathname === '/add-excuse-request'; 
+    const ExcuseRequests_active = location.pathname === '/add-excuse-request'; 
 
     return (
         <>
@@ -101,7 +101,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                         type="button"
                         onClick={Student_Dashboard} 
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-                            dashboard_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
+                            Dashboard_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
                     >
                         {loading ? (
@@ -109,14 +109,14 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                         ) : (
                             <>
                                 <img
-                                    src={`${process.env.PUBLIC_URL}/assets/dashboard.png`}
+                                    src={`${process.env.PUBLIC_URL}/assets/Dashboard.png`}
                                     alt="Dashboard"
-                                    className={`w-8 h-8 mb-1 block ${dashboard_active ? 'hidden' : 'group-hover:hidden'}`}
+                                    className={`w-8 h-8 mb-1 block ${Dashboard_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
-                                    src={`${process.env.PUBLIC_URL}/assets/dashboard-active.png`}
+                                    src={`${process.env.PUBLIC_URL}/assets/Dashboard-active.png`}
                                     alt="Dashboard Active"
-                                    className={`w-8 h-8 mb-1 ${dashboard_active ? 'block' : 'hidden group-hover:block'}`}
+                                    className={`w-8 h-8 mb-1 ${Dashboard_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
                             </>
                         )}
@@ -131,7 +131,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                         type="button"
                         onClick={View_Excuse_Request_Page}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-                            excuse_requests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
+                            ExcuseRequests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
                     >
                         {loading ? (
@@ -141,12 +141,12 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                                 <img
                                     src={`${process.env.PUBLIC_URL}/assets/excuse-2.png`}
                                     alt="Requests"
-                                    className={`w-6 h-8 mb-1 block ${excuse_requests_active ? 'hidden' : 'group-hover:hidden'}`}
+                                    className={`w-6 h-8 mb-1 block ${ExcuseRequests_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
                                     src={`${process.env.PUBLIC_URL}/assets/excuse-active-2.png`}
                                     alt="Requests Active"
-                                    className={`w-6 h-8 mb-1 ${excuse_requests_active ? 'block' : 'hidden group-hover:block'}`}
+                                    className={`w-6 h-8 mb-1 ${ExcuseRequests_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
                             </>
                         )}
@@ -239,4 +239,4 @@ const StudentLeftSidebar = ({ setBgImage }) => {
     );
 };
 
-export default StudentLeftSidebar;
+export default StudentLeftSideBar;

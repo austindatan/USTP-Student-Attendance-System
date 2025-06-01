@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react'; // <--- Added useRef
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 function EditSectionCourse() {
     const { sectionId, sectionCourseId } = useParams();
@@ -28,13 +28,13 @@ function EditSectionCourse() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const coursesRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/courses_list.php');
-                if (coursesRes.data.success) setAllCourses(coursesRes.data.courses);
+                const CoursesRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/CoursesList.php');
+                if (CoursesRes.data.success) setAllCourses(CoursesRes.data.Courses);
 
-                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_all_instructors.php');
+                const instructorsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/get_all_instructors.php');
                 if (instructorsRes.data.success) setAllInstructors(instructorsRes.data.instructors);
 
-                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/edit_section_course.php?section_course_id=${sectionCourseId}`);
+                const sectionCourseRes = await axios.get(`http://localhost/ustp-student-attendance-system/api/admin-backend/EditSectionCourse.php?section_course_id=${sectionCourseId}`);
                 if (sectionCourseRes.data.success) {
                     const { course_id, schedule_day, start_time, end_time, course_name, instructor_id } = sectionCourseRes.data.sectionCourse;
                     const fetchedData = { // Create a temporary object for the fetched data
@@ -76,8 +76,8 @@ function EditSectionCourse() {
         const initialDataString = JSON.stringify(initialFormData.current);
 
         if (currentDataString === initialDataString) {
-            // No changes detected, redirect back to the section courses page
-            navigate(`/sections/${sectionId}/courses`);
+            // No changes detected, redirect back to the section Courses page
+            navigate(`/Sections/${sectionId}/Courses`);
             return; // Exit the function to prevent opening the modal
         }
 
@@ -88,12 +88,12 @@ function EditSectionCourse() {
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/edit_section_course.php', {
+            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/EditSectionCourse.php', {
                 ...formData,
                 section_course_id: sectionCourseId
             });
             if (res.data.success) {
-                navigate(`/sections/${sectionId}/courses`);
+                navigate(`/Sections/${sectionId}/Courses`);
             } else {
                 setError(res.data.message || 'Failed to update section course.');
             }
@@ -200,7 +200,7 @@ function EditSectionCourse() {
                         <div className="md:col-span-2 flex justify-end items-center gap-3">
                             <button
                                 type="button"
-                                onClick={() => navigate(`/sections/${sectionId}/courses`)}
+                                onClick={() => navigate(`/Sections/${sectionId}/Courses`)}
                                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
                             >
                                 Cancel

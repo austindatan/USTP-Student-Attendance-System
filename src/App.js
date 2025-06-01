@@ -3,9 +3,9 @@ import './App.css';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom"; 
 
 import EditProfile from "./pages/instructor/EditProfile";
-import LeftSidebar from './components/leftsidebar';
+import LeftSidebar from './components/LeftSidebar';
 import AdminLeftSidebar from './components/AdminLeftSidebar';
-import RightSidebar from './components/rightsidebar';
+import RightSidebar from './components/RightSidebar';
 import StudentLeftSideBar from './components/StudentLeftSideBar';
 
 import LoginStudent from "./pages/login/LoginStudent";
@@ -13,27 +13,27 @@ import LoginAdmin from "./pages/login/LoginAdmin";
 import LoginInstructor from "./pages/login/LoginInstructor";
 import RegisterInstructor from "./pages/login/RegisterInstructor";
 
-import TeacherDashboard from "./pages/instructor/teacher_dashboard";
-import Classes_Dashboard from "./pages/instructor/classes_dashboard";
-import SectionDashboard from "./pages/instructor/section_dashboard";
-import ExcuseRequestsPage from "./pages/instructor/excuse_requests";
+import TeacherDashboard from "./pages/instructor/TeacherDashboard";
+import ClassesDashboard from "./pages/instructor/ClassesDashboard";
+import SectionDashboard from "./pages/instructor/SectionDashboard";
+import ExcuseRequestsPage from "./pages/instructor/ExcuseRequests";
 
 import StudentDashboard from './pages/student/StudentDashboard';
-import StudentRightSidebar from './components/student_rightsidebar';
+import StudentRightSidebar from './components/StudentRightSidebar';
 import StudentEditProfile from './pages/student/StudentEditProfile';
 import StudentClassesDashboard from './pages/student/StudentClassesDashboard';
 import AddExcuseRequest from './pages/student/AddExcuseRequest';
 import AttendanceSummary from './pages/student/AttendanceSummary'; 
-import ExcuseRequestTable from "./pages/student/requests_view";
+import ExcuseRequestTable from "./pages/student/RequestsView";
 
 import AdminDashboard from './pages/admin/AdminDashboard';
-import Admin_Students from './pages/admin/students';
-import DropRequests from './pages/admin/drop_requests';
-import InstructorAdminPage from './pages/admin/instructorAdminpage';
+import Admin_Students from './pages/admin/Students';
+import DropRequests from './pages/admin/DropRequests';
+import InstructorAdminPage from './pages/admin/InstructorAdminPage';
 import AddStudent from './pages/admin/AddStudent';
 import EditStudent from './pages/admin/EditStudent';
-import Sections from './pages/admin/sections';
-import Courses from './pages/admin/courses';
+import Sections from './pages/admin/Sections';
+import Courses from './pages/admin/Courses';
 import AddInstructor from './pages/admin/AddInstructor';
 import EditInstructor from './pages/admin/EditInstructor';
 import AddCourse from './pages/admin/AddCourse';
@@ -75,7 +75,7 @@ const ProtectedStudentRoute = ({ studentId, children }) => {
         console.log("ProtectedStudentRoute useEffect: studentId=", studentId, "userRole=", userRole);
         if (!studentId || userRole !== 'student') {
             console.log("ProtectedStudentRoute: Unauthorized access, redirecting to login.");
-            navigate('/login-student', { replace: true });
+            navigate('/LoginStudent', { replace: true });
         }
     }, [studentId, userRole, navigate]); 
 
@@ -89,8 +89,8 @@ const ProtectedStudentRoute = ({ studentId, children }) => {
 
 function DashboardLayout({ children, selectedDate, setSelectedDate, bgImage, setBgImage }) {
     const location = useLocation();
-    const isStudentDashboard = location.pathname === "/student-dashboard"; 
-    const showRightSidebar = location.pathname !== "/drop_requests";
+    const isStudentDashboard = location.pathname === "/student-Dashboard"; 
+    const showRightSidebar = location.pathname !== "/DropRequests";
 
     return (
         <div className="flex h-screen w-full">
@@ -171,7 +171,7 @@ function AppContent() {
         localStorage.removeItem('userRole');
         localStorage.removeItem('student'); 
         setStudentId(null); 
-        navigate("/login-student", { replace: true });
+        navigate("/LoginStudent", { replace: true });
         console.log("User logged out. studentId state set to null.");
     };
 
@@ -179,14 +179,14 @@ function AppContent() {
         <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LoginStudent />} />
-            <Route path="/login-student" element={<LoginStudent />} />
-            <Route path="/login-admin" element={<LoginAdmin />} />
-            <Route path="/login-instructor" element={<LoginInstructor />} />
-            <Route path="/register-instructor" element={<RegisterInstructor />} />
+            <Route path="/LoginStudent" element={<LoginStudent />} />
+            <Route path="/LoginAdmin" element={<LoginAdmin />} />
+            <Route path="/LoginInstructor" element={<LoginInstructor />} />
+            <Route path="/LoginInstructor" element={<RegisterInstructor />} />
 
             {/* Student Protected Routes */}
             <Route
-                path="/student-dashboard"
+                path="/student-Dashboard"
                 element={
                     <ProtectedStudentRoute studentId={studentId}>
                         <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
@@ -209,7 +209,7 @@ function AppContent() {
             } />
 
             <Route
-                path="/student-classes-dashboard"
+                path="/student-classes-Dashboard"
                 element={
                     <ProtectedStudentRoute studentId={studentId}>
                         <StudentLayout bgImage={bgImage} setBgImage={setBgImage}>
@@ -263,9 +263,9 @@ function AppContent() {
 
             {/* Instructor Protected Routes */}
             <Route
-                path="/teacher-dashboard"
+                path="/teacher-Dashboard"
                 element={
-                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
+                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/LoginInstructor">
                         <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                             <TeacherDashboard selectedDate={selectedDate} />
                         </DashboardLayout>
@@ -274,9 +274,9 @@ function AppContent() {
             />
 
             <Route
-                path="/section-dashboard/:sectionId"
+                path="/section-Dashboard/:sectionId"
                 element={
-                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
+                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/LoginInstructor">
                         <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                             <SectionDashboard selectedDate={selectedDate} />
                         </DashboardLayout>
@@ -285,11 +285,11 @@ function AppContent() {
             />
 
             <Route
-                path="/classes-dashboard"
+                path="/classes-Dashboard"
                 element={
-                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
+                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/LoginInstructor">
                         <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
-                            <Classes_Dashboard selectedDate={selectedDate} />
+                            <ClassesDashboard selectedDate={selectedDate} />
                         </DashboardLayout>
                     </ProtectedRoute>
                 }
@@ -298,7 +298,7 @@ function AppContent() {
             <Route
                 path="/edit-profile"
                 element={
-                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
+                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/LoginInstructor">
                         <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                             <EditProfile />
                         </DashboardLayout>
@@ -309,7 +309,7 @@ function AppContent() {
             <Route
                 path="/excuse-requests"
                 element={
-                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/login-instructor">
+                    <ProtectedRoute allowedRoles={['instructor']} redirectPath="/LoginInstructor">
                         <DashboardLayout selectedDate={selectedDate} setSelectedDate={setSelectedDate} bgImage={bgImage} setBgImage={setBgImage}>
                             <ExcuseRequestsPage />
                         </DashboardLayout>
@@ -319,9 +319,9 @@ function AppContent() {
 
             {/* Admin Protected Routes */}
             <Route
-                path="/admin-dashboard"
+                path="/admin-Dashboard"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <AdminDashboard />
                         </AdminLayout>
@@ -330,9 +330,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-students"
+                path="/admin-Students"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <Admin_Students />
                         </AdminLayout>
@@ -341,9 +341,9 @@ function AppContent() {
             />
 
             <Route
-                path="/drop_requests"
+                path="/DropRequests"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <DropRequests />
                         </AdminLayout>
@@ -354,7 +354,7 @@ function AppContent() {
             <Route
                 path="/admin-instructor"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <InstructorAdminPage />
                         </AdminLayout>
@@ -363,9 +363,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-sections"
+                path="/admin-Sections"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <Sections />
                         </AdminLayout>
@@ -374,9 +374,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-sections/add"
+                path="/admin-Sections/add"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <AddSection />
                         </AdminLayout>
@@ -387,7 +387,7 @@ function AppContent() {
             <Route
                 path="/admin-edit-section/:id" 
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <EditSection />
                         </AdminLayout>
@@ -396,9 +396,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-courses"
+                path="/admin-Courses"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <Courses />
                         </AdminLayout>
@@ -407,9 +407,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-courses/add"
+                path="/admin-Courses/add"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <AddCourse />
                         </AdminLayout>
@@ -418,9 +418,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-courses/edit/:id"
+                path="/admin-Courses/edit/:id"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <EditCourse />
                         </AdminLayout>
@@ -429,9 +429,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-students/add"
+                path="/admin-Students/add"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <AddStudent />
                         </AdminLayout>
@@ -440,9 +440,9 @@ function AppContent() {
             />
 
             <Route
-                path="/admin-students/edit/:student_id"
+                path="/admin-Students/edit/:student_id"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <EditStudent />
                         </AdminLayout>
@@ -453,7 +453,7 @@ function AppContent() {
             <Route
                 path="/admin-instructor/add"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <AddInstructor />
                         </AdminLayout>
@@ -464,7 +464,7 @@ function AppContent() {
             <Route
                 path="/admin-instructor/edit/:instructor_id"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <EditInstructor />
                         </AdminLayout>
@@ -473,9 +473,9 @@ function AppContent() {
             />
 
             <Route
-                path="/sections/:sectionId/courses"
+                path="/Sections/:sectionId/Courses"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <SectionCourses />
                         </AdminLayout>
@@ -484,9 +484,9 @@ function AppContent() {
             />
 
             <Route
-                path="/sections/:sectionId/courses/:sectionCourseId/edit"
+                path="/Sections/:sectionId/Courses/:sectionCourseId/edit"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <EditSectionCourse />
                         </AdminLayout>
@@ -495,9 +495,9 @@ function AppContent() {
             />
 
             <Route
-                path="/sections/:sectionId/courses/add"
+                path="/Sections/:sectionId/Courses/add"
                 element={
-                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/login-admin">
+                    <ProtectedRoute allowedRoles={['admin']} redirectPath="/LoginAdmin">
                         <AdminLayout>
                             <AddSectionCourse />
                         </AdminLayout>

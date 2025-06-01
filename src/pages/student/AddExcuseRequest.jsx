@@ -8,7 +8,7 @@ const AddExcuseRequest = ({ studentId }) => {
 
     const navigate = useNavigate();
 
-    const [courses, setCourses] = useState([]);
+    const [Courses, setCourses] = useState([]);
     const [courseId, setCourseId] = useState('');
     const [selectedStudentDetailsId, setSelectedStudentDetailsId] = useState('');
     const [instructor, setInstructor] = useState(null);
@@ -34,32 +34,32 @@ const AddExcuseRequest = ({ studentId }) => {
         const fetchCourses = async () => {
             try {
                 const res = await axios.get(
-                    `http://localhost/ustp-student-attendance/api/student_backend/get_student_courses.php?student_id=${studentId}`
+                    `http://localhost/ustp-student-attendance-system/api/student-backend/GetStudent_Courses.php?student_id=${studentId}`
                 );
 
                 console.log("API response:", res.data);
 
-                if (res.data?.success && res.data.courses.length > 0) {
-                    setCourses(res.data.courses);
+                if (res.data?.success && res.data.Courses.length > 0) {
+                    setCourses(res.data.Courses);
                     setError('');
-                } else if (res.data?.success && res.data.courses.length === 0) {
+                } else if (res.data?.success && res.data.Courses.length === 0) {
                     setCourses([]);
-                    setError('No courses found for this student.');
+                    setError('No Courses found for this student.');
                 } else {
-                    setError('Failed to load courses.');
+                    setError('Failed to load Courses.');
                 }
             } catch (err) {
-                console.error("Error fetching courses:", err);
-                setMessage("Error loading courses.");
+                console.error("Error fetching Courses:", err);
+                setMessage("Error loading Courses.");
                 setSuccess(false);
             }
         };
 
         if (studentId) {
-            console.log("AddExcuseRequest (useEffect): studentId is truthy, fetching courses...");
+            console.log("AddExcuseRequest (useEffect): studentId is truthy, fetching Courses...");
             fetchCourses();
         } else {
-            console.log("AddExcuseRequest (useEffect): studentId is falsy, NOT fetching courses.");
+            console.log("AddExcuseRequest (useEffect): studentId is falsy, NOT fetching Courses.");
         }
     }, [studentId]);
 
@@ -69,7 +69,7 @@ const AddExcuseRequest = ({ studentId }) => {
             if (!courseId || !studentId) return;
 
             try {
-                const res = await axios.get(`http://localhost/ustp-student-attendance/api/student_backend/get_instructor_by_course.php?student_id=${studentId}&course_id=${courseId}`);
+                const res = await axios.get(`http://localhost/ustp-student-attendance-system/api/student-backend/GetInstructor_by_course.php?student_id=${studentId}&course_id=${courseId}`);
                 console.log("Instructor API response:", res.data);
                 if (res.data.success && res.data.instructor) {
                     setInstructor(res.data.instructor);
@@ -101,7 +101,7 @@ const AddExcuseRequest = ({ studentId }) => {
         setMessage('');
         setSuccess(null);
 
-        const selectedCourse = courses.find(course => course.course_id.toString() === selectedCourseId);
+        const selectedCourse = Courses.find(course => course.course_id.toString() === selectedCourseId);
         if (selectedCourse) {
             setSelectedStudentDetailsId(selectedCourse.student_details_id);
             console.log("Selected course student_details_id:", selectedCourse.student_details_id);
@@ -145,7 +145,7 @@ const AddExcuseRequest = ({ studentId }) => {
         }
 
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance/api/student_backend/submit_excuse_request.php', formData);
+            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/student-backend/SubmitExcuseRequest.php', formData);
             setMessage(res.data.message);
             const isSuccess = res.data.success === true || res.data.success === "true";
             setSuccess(isSuccess);
@@ -181,7 +181,7 @@ const AddExcuseRequest = ({ studentId }) => {
     // Function to handle closing success modal and navigating
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
-        navigate('/student-dashboard'); // Navigate after user acknowledges success
+        navigate('/student-Dashboard'); // Navigate after user acknowledges success
     };
 
     return (
@@ -212,11 +212,11 @@ const AddExcuseRequest = ({ studentId }) => {
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
                         >
                             <option value="">Select a course</option>
-                            {courses.map(course => (
+                            {Courses.map(course => (
                                 <option key={course.course_id} value={course.course_id}>{course.course_name}</option>
                             ))}
                         </select>
-                        {error && courses.length === 0 && (
+                        {error && Courses.length === 0 && (
                             <p className="text-red-500 text-sm mt-2">{error}</p>
                         )}
                     </div>

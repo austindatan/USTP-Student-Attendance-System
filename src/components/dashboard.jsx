@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import RightSidebar from './rightsidebar';
-import Teacher_Dashboard from '../pages/instructor/teacher_dashboard';
+import RightSidebar from './RightSidebar';
+import TeacherDashboard from '../pages/instructor/TeacherDashboard';
 
 
 export default function DashboardPage() {
@@ -8,7 +8,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex">
-            <Teacher_Dashboard selectedDate={selectedDate} />
+            <TeacherDashboard selectedDate={selectedDate} />
             <RightSidebar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
         </div>
     );

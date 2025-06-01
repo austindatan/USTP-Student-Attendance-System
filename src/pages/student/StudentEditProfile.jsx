@@ -52,7 +52,7 @@ const StudentEditProfile = () => {
 
     // Fetch student data from the API
     fetch(
-      `http://localhost/ustp-student-attendance/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/ustp-student-attendance-system/api/GetStudent.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
@@ -76,7 +76,7 @@ const StudentEditProfile = () => {
           // Resolve and set the image preview URL
           const image = data.student.image;
           const resolvedURL = image
-            ? `http://localhost/ustp-student-attendance/uploads/${image.replace(
+            ? `http://localhost/ustp-student-attendance-system/uploads/${image.replace(
                 "uploads/",
                 ""
               )}`
@@ -135,7 +135,7 @@ const StudentEditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/ustp-student-attendance/api/edit_student_profile.php",
+        "http://localhost/ustp-student-attendance-system/api/EditStudentProfile.php",
         {
           method: "POST",
           body: formPayload,
@@ -161,8 +161,8 @@ const StudentEditProfile = () => {
         const updatedStudent = { ...result.student, id: result.student.student_id, name };
         localStorage.setItem("student", JSON.stringify(updatedStudent));
 
-        // Directly navigate to dashboard on success, without a success modal
-        navigate("/student-dashboard");
+        // Directly navigate to Dashboard on success, without a success modal
+        navigate("/student-Dashboard");
       } else {
         // Display API-returned error message
         setMessage(`Profile update failed: ${result.message}`);
@@ -174,9 +174,9 @@ const StudentEditProfile = () => {
     }
   };
 
-  // Handler for navigating back to the dashboard
+  // Handler for navigating back to the Dashboard
   const handleBack = () => {
-    navigate("/student-dashboard");
+    navigate("/student-Dashboard");
   };
 
   return (

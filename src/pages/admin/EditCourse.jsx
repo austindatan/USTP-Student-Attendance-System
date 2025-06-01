@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'; 
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import ConfirmationModal from '../../components/confirmationmodal';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import MessageModal from '../../components/MessageModal'; 
 
 export default function EditCourse() {
@@ -19,9 +19,9 @@ export default function EditCourse() {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [messageModalTitle, setMessageModalTitle] = useState('');
-    const [messageModalMessage, setMessageModalMessage] = useState('');
-    const [messageModalType, setMessageModalType] = useState('info'); 
+    const [MessageModalTitle, setMessageModalTitle] = useState('');
+    const [MessageModalMessage, setMessageModalMessage] = useState('');
+    const [MessageModalType, setMessageModalType] = useState('info'); 
 
   
     const showMessageModal = useCallback((title, message, type = 'info') => {
@@ -39,11 +39,11 @@ export default function EditCourse() {
     };
 
     useEffect(() => {
-        axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/course_get.php?id=${id}`)
+        axios.get(`http://localhost/ustp-student-attendance-system/api/admin-backend/CourseGet.php?id=${id}`)
             .then((response) => {
                 if (response.data.success === false) {
                     showMessageModal('Error', response.data.message || 'Failed to fetch course data.', 'error');
-                    navigate('/admin-courses');
+                    navigate('/admin-Courses');
                     return;
                 }
                 setFormData(response.data);
@@ -51,7 +51,7 @@ export default function EditCourse() {
             .catch((error) => {
                 console.error('Error fetching course:', error);
                 showMessageModal('Error', 'Failed to fetch course data. Please check the console for details.', 'error');
-                navigate('/admin-courses');
+                navigate('/admin-Courses');
             });
     }, [id, navigate, showMessageModal]); 
 
@@ -72,11 +72,11 @@ export default function EditCourse() {
     const handleConfirmEditCourse = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/course_edit.php', formData);
+            const response = await axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/CourseEdit.php', formData);
             if (response.data.success) {
                 setIsEditCourseModalOpen(false);
                 showMessageModal('Success!', 'Course updated successfully!', 'success');
-                navigate('/admin-courses');
+                navigate('/admin-Courses');
             } else {
                 showMessageModal('Update Failed', `Failed to update course: ${response.data.message || 'Unknown error.'}`, 'error');
                 setIsEditCourseModalOpen(false);
@@ -95,7 +95,7 @@ export default function EditCourse() {
     };
 
     const handleCancel = () => {
-        navigate('/admin-courses');
+        navigate('/admin-Courses');
     };
 
     return (
@@ -193,9 +193,9 @@ export default function EditCourse() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={messageModalTitle}
-                message={messageModalMessage}
-                type={messageModalType}
+                title={MessageModalTitle}
+                message={MessageModalMessage}
+                type={MessageModalType}
             />
         </div>
     );

@@ -13,22 +13,22 @@ const LeftSidebar = ({ setBgImage }) => {
         return () => clearTimeout(timer);
     }, []);
 
-    const Classes_Dashboard = () => {
-        navigate("/classes-dashboard");
+    const ClassesDashboard = () => {
+        navigate("/classes-Dashboard");
     };
 
-    const Teacher_Dashboard = () => {
-        navigate("/teacher-dashboard");
+    const TeacherDashboard = () => {
+        navigate("/teacher-Dashboard");
     };
-    const Excuse_Requests_Page = () => {
+    const ExcuseRequests_Page = () => {
         navigate("/excuse-requests");
     };
 
-    const dashboard_active = location.pathname === '/teacher-dashboard';
-    const classes_active = ['/classes-dashboard', '/section-dashboard/:sectionId'].some(path =>
+    const Dashboard_active = location.pathname === '/teacher-Dashboard';
+    const classes_active = ['/classes-Dashboard', '/section-Dashboard/:sectionId'].some(path =>
         location.pathname.startsWith(path)
     );
-    const excuse_requests_active = location.pathname === '/excuse-requests';
+    const ExcuseRequests_active = location.pathname === '/excuse-requests';
 
     return (
         <>
@@ -92,9 +92,9 @@ const LeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Teacher_Dashboard}
+                        onClick={TeacherDashboard}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-                            dashboard_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
+                            Dashboard_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
                     >
                         {loading ? (
@@ -102,14 +102,14 @@ const LeftSidebar = ({ setBgImage }) => {
                         ) : (
                             <>
                                 <img
-                                    src={`${process.env.PUBLIC_URL}/assets/dashboard.png`}
+                                    src={`${process.env.PUBLIC_URL}/assets/Dashboard.png`}
                                     alt="Dashboard"
-                                    className={`w-8 h-8 mb-1 block ${dashboard_active ? 'hidden' : 'group-hover:hidden'}`}
+                                    className={`w-8 h-8 mb-1 block ${Dashboard_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
-                                    src={`${process.env.PUBLIC_URL}/assets/dashboard-active.png`}
+                                    src={`${process.env.PUBLIC_URL}/assets/Dashboard-active.png`}
                                     alt="Dashboard Active"
-                                    className={`w-8 h-8 mb-1 ${dashboard_active ? 'block' : 'hidden group-hover:block'}`}
+                                    className={`w-8 h-8 mb-1 ${Dashboard_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
                             </>
                         )}
@@ -122,7 +122,7 @@ const LeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Classes_Dashboard}
+                        onClick={ClassesDashboard}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
                             classes_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
@@ -152,9 +152,9 @@ const LeftSidebar = ({ setBgImage }) => {
 
                     <button
                         type="button"
-                        onClick={Excuse_Requests_Page}
+                        onClick={ExcuseRequests_Page}
                         className={`group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-                            excuse_requests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
+                            ExcuseRequests_active ? 'text-[#7685fc]' : 'hover:text-[#7685fc]'
                         }`}
                     >
                         {loading ? (
@@ -164,12 +164,12 @@ const LeftSidebar = ({ setBgImage }) => {
                                 <img
                                     src={`${process.env.PUBLIC_URL}/assets/excuse-2.png`}
                                     alt="Requests"
-                                    className={`w-6 h-8 mb-1 block ${excuse_requests_active ? 'hidden' : 'group-hover:hidden'}`}
+                                    className={`w-6 h-8 mb-1 block ${ExcuseRequests_active ? 'hidden' : 'group-hover:hidden'}`}
                                 />
                                 <img
                                     src={`${process.env.PUBLIC_URL}/assets/excuse-active-2.png`}
                                     alt="Requests Active"
-                                    className={`w-6 h-8 mb-1 ${excuse_requests_active ? 'block' : 'hidden group-hover:block'}`}
+                                    className={`w-6 h-8 mb-1 ${ExcuseRequests_active ? 'block' : 'hidden group-hover:block'}`}
                                 />
                             </>
                         )}

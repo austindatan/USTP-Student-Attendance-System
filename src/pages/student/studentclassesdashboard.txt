@@ -1,10 +1,10 @@
 import React from 'react';
-import ClassCard from './Classcard';
+import class_card from './class_card';
 
 export default function DemoCards() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 p-6 lg:pr-[400px] mt-6 ml-6">
-      <ClassCard
+      <class_card
         code="CS101"
         title="Intro to Programming"
         room="Room 201"
@@ -12,7 +12,7 @@ export default function DemoCards() {
         bgImage="/images/computer.png"
         bgColor="#007acc"
       />
-      <ClassCard
+      <class_card
         code="MATH102"
         title="Calculus 2"
         room="Room 105"
@@ -20,7 +20,7 @@ export default function DemoCards() {
         bgImage="/images/math.png"
         bgColor="#d97706"
       />
-      <ClassCard
+      <class_card
         code="ENG103"
         title="English Literature"
         room="Room 305"
@@ -28,7 +28,7 @@ export default function DemoCards() {
         bgImage="/images/book.png"
         bgColor="#10b981"
       />
-      <ClassCard
+      <class_card
         code="CS101"
         title="Intro to Programming"
         room="Room 201"
@@ -36,7 +36,7 @@ export default function DemoCards() {
         bgImage="/images/computer.png"
         bgColor="#007acc"
       />
-      <ClassCard
+      <class_card
         code="MATH102"
         title="Calculus 2"
         room="Room 105"
@@ -44,7 +44,7 @@ export default function DemoCards() {
         bgImage="/images/math.png"
         bgColor="#d97706"
       />
-      <ClassCard
+      <class_card
         code="ENG103"
         title="English Literature"
         room="Room 305"
