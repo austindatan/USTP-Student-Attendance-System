@@ -100,6 +100,7 @@ if (!$stmt3->execute()) {
     $stmt3->close();
     $conn->close();
     exit;
+    
 }
 $res3 = $stmt3->get_result();
 if ($row3 = $res3->fetch_assoc()) {
@@ -109,13 +110,21 @@ $stmt3->close();
 
 $excuse_requests_result = 0; 
 
-$stmt4 = $conn->prepare("SELECT COUNT(*) AS pending_excuse_requests FROM excused_request WHERE status = 'pending'");
+// Corrected Query 4: Count pending excuse requests for *this specific instructor* by joining tables
+$stmt4 = $conn->prepare("
+    SELECT COUNT(er.excused_request_id) AS pending_excuse_requests
+    FROM excused_request er
+    JOIN student_details sd ON er.student_details_id = sd.student_details_id
+    JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
+    WHERE sc.instructor_id = ? AND er.status = 'pending'
+");
 if ($stmt4 === false) {
     http_response_code(500);
     echo json_encode(["error" => "Failed to prepare statement 4: " . $conn->error]);
     $conn->close();
     exit;
 }
+$stmt4->bind_param("i", $instructor_id); // Bind instructor_id here
 if (!$stmt4->execute()) {
     http_response_code(500);
     echo json_encode(["error" => "Failed to execute statement 4: " . $stmt4->error]);
