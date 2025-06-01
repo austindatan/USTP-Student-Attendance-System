@@ -3,17 +3,35 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function SectionCourses() {
-    const { sectionId } = useParams(); // sectionId is correctly retrieved here
+    const { sectionId } = useParams();
     const navigate = useNavigate();
     const [sectionDetails, setSectionDetails] = useState(null);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete confirmation modal
-    const [courseToDelete, setCourseToDelete] = useState(null); // State to store course to be deleted
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [courseToDelete, setCourseToDelete] = useState(null);
 
     const handleNavigate = (path) => {
         navigate(path);
+    };
+
+    // Helper function to convert 24-hour time to 12-hour format
+    const formatTimeTo12Hour = (time24) => {
+        if (!time24) return 'N/A'; // Handle cases where time might be null or undefined
+
+        try {
+            const [hours, minutes] = time24.split(':');
+            let hour = parseInt(hours, 10);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            hour = hour % 12;
+            hour = hour === 0 ? 12 : hour; // The hour '0' should be '12' in 12-hour format
+
+            return `${hour}:${minutes} ${ampm}`;
+        } catch (e) {
+            console.error("Error formatting time:", time24, e);
+            return time24; // Return original if formatting fails
+        }
     };
 
     const fetchSectionCourses = async () => {
@@ -27,7 +45,7 @@ function SectionCourses() {
                 setError(response.data.message || 'Failed to fetch section courses.');
             }
         } catch (err) {
-            console.error("Error fetching section courses:", err); // Log the actual error
+            console.error("Error fetching section courses:", err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -36,7 +54,7 @@ function SectionCourses() {
 
     useEffect(() => {
         fetchSectionCourses();
-    }, [sectionId]); // Re-fetch when sectionId changes
+    }, [sectionId]);
 
     const handleDeleteClick = (course) => {
         setCourseToDelete(course);
@@ -48,17 +66,16 @@ function SectionCourses() {
 
         try {
             const response = await axios.post('http://localhost/ustp-student-attendance/admin_backend/delete_sectioncourse.php', {
-                _method: 'DELETE', // Laravel/PHP friendly method override
+                _method: 'DELETE',
                 section_course_id: courseToDelete.section_course_id,
             });
 
             if (response.data.success) {
-                // Filter out the deleted course from the state
                 setCourses(courses.filter(course => course.section_course_id !== courseToDelete.section_course_id));
                 console.log(response.data.message);
             } else {
                 console.error(response.data.message || "Failed to delete section course.");
-                setError(response.data.message || "Failed to delete section course."); // Display error to user
+                setError(response.data.message || "Failed to delete section course.");
             }
         } catch (err) {
             console.error("An error occurred while deleting the course:", err);
@@ -120,8 +137,8 @@ function SectionCourses() {
                                 <thead className="bg-blue-100 uppercase text-blue-700">
                                     <tr>
                                         <th className="px-3 py-2 w-[25%]">Course Name</th>
-                                        <th className="px-3 py-2 w-[25%]">Instructor</th>
-                                        <th className="px-3 py-2 w-[15%]">Schedule Day</th>
+                                        <th className="px-3 py-2 w-[20%]">Instructor</th>
+                                        <th className="px-3 py-2 w-[20%]">Schedule Day</th>
                                         <th className="px-3 py-2 w-[15%]">Start Time</th>
                                         <th className="px-3 py-2 w-[10%]">End Time</th>
                                         <th className="px-3 py-2 w-[10%] text-center">Action</th>
@@ -137,8 +154,9 @@ function SectionCourses() {
                                                     : 'N/A'}
                                             </td>
                                             <td className="px-3 py-2">{course.schedule_day}</td>
-                                            <td className="px-3 py-2">{course.start_time}</td>
-                                            <td className="px-3 py-2">{course.end_time}</td>
+                                            {/* Apply the time formatting function here */}
+                                            <td className="px-3 py-2">{formatTimeTo12Hour(course.start_time)}</td>
+                                            <td className="px-3 py-2">{formatTimeTo12Hour(course.end_time)}</td>
                                             <td className="px-3 py-2 text-center">
                                                 <div className="flex gap-1 justify-center items-center">
                                                     <button
