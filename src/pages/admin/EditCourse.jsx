@@ -39,7 +39,7 @@ export default function EditCourse() {
     };
 
     useEffect(() => {
-        axios.get(`http://localhost/ustp-student-attendance/api/admin_backend/course_get.php?id=${id}`)
+        axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/course_get.php?id=${id}`)
             .then((response) => {
                 if (response.data.success === false) {
                     showMessageModal('Error', response.data.message || 'Failed to fetch course data.', 'error');
@@ -72,7 +72,7 @@ export default function EditCourse() {
     const handleConfirmEditCourse = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost/ustp-student-attendance/api/admin_backend/course_edit.php', formData);
+            const response = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/course_edit.php', formData);
             if (response.data.success) {
                 setIsEditCourseModalOpen(false);
                 showMessageModal('Success!', 'Course updated successfully!', 'success');

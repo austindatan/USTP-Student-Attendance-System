@@ -76,7 +76,7 @@ export default function EditStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/section_dropdown.php', { params });
+            const secRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
@@ -92,10 +92,10 @@ export default function EditStudent() {
             setIsLoadingInitialData(true);
             try {
                 const [progRes, yearRes, semRes, studentRes] = await Promise.all([
-                    axios.get('http://localhost/ustp-student-attendance/api/admin_backend/pd_dropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance/api/admin_backend/get_year_levels.php'),
-                    axios.get('http://localhost/ustp-student-attendance/api/admin_backend/get_semesters.php'),
-                    axios.get(`http://localhost/ustp-student-attendance/api/admin_backend/student_get_api.php?student_id=${student_id}`),
+                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/pd_dropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_year_levels.php'),
+                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_semesters.php'),
+                    axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/student_get_api.php?student_id=${student_id}`),
                 ]);
 
                 setProgramDetails(progRes.data);
@@ -126,7 +126,7 @@ export default function EditStudent() {
                             const cacheKey = `${enrollment.year_level_id}-${enrollment.semester_id}`;
                             if (!newSectionsCache[cacheKey]) {
                                 try {
-                                    const res = await axios.get('http://localhost/ustp-student-attendance/api/admin_backend/section_dropdown.php', {
+                                    const res = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/section_dropdown.php', {
                                         params: { year_level_id: enrollment.year_level_id, semester_id: enrollment.semester_id }
                                     });
                                     newSectionsCache[cacheKey] = res.data;
@@ -337,7 +337,7 @@ export default function EditStudent() {
 
         try {
             const res = await axios.post(
-                `http://localhost/ustp-student-attendance/api/admin_backend/student_update_api.php?student_id=${student_id}`,
+                `http://localhost/ustp-student-attendance/api/admin-backend/student_update_api.php?student_id=${student_id}`,
                 submissionData,
                 {
                     headers: {

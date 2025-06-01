@@ -164,7 +164,7 @@ export default function Admin_Students() {
     setError(null); // Clear any previous errors
     try {
       const res = await axios.get(
-        "http://localhost/ustp-student-attendance/api/admin_backend/student_api.php"
+        "http://localhost/ustp-student-attendance/api/admin-backend/student_api.php"
       );
 
       let data = [];
@@ -211,7 +211,7 @@ export default function Admin_Students() {
 
     try {
       const res = await axios.post(
-        'http://localhost/ustp-student-attendance/api/admin_backend/delete_student.php',
+        'http://localhost/ustp-student-attendance/api/admin-backend/delete_student.php',
         {
           _method: 'DELETE', // Laravel/PHP common method override for DELETE requests
           student_id: selectedStudent.student_id,
