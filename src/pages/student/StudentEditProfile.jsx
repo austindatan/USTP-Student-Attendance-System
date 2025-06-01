@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Skeleton component for loading states
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
 );
@@ -22,19 +23,22 @@ const StudentEditProfile = () => {
     country: "",
     image: "",
   });
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(""); // For general error/info messages
   const [loading, setLoading] = useState(true);
   const [previewURL, setPreviewURL] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State for confirmation modal
+
   const navigate = useNavigate();
 
+  // Effect to fetch student data on component mount
   useEffect(() => {
     let studentIdToFetch = null;
     try {
       const storedStudent = JSON.parse(localStorage.getItem("student"));
-      // *** CHANGE IS HERE: Look for 'id' instead of 'student_id' ***
+      // Look for 'id' instead of 'student_id' from localStorage
       if (storedStudent && storedStudent.id) {
-        studentIdToFetch = storedStudent.id; // Use 'id' from localStorage
+        studentIdToFetch = storedStudent.id;
       }
     } catch (e) {
       console.error("Error parsing student data from localStorage:", e);
@@ -43,77 +47,95 @@ const StudentEditProfile = () => {
     if (!studentIdToFetch) {
       setMessage("Student ID not found in local storage. Please log in again.");
       setLoading(false);
-      // Optional: Redirect to login page if ID is absolutely required
-      // navigate('/login');
       return;
     }
 
-
-    // Now, `studentIdToFetch` should definitely have a valid ID
+    // Fetch student data from the API
     fetch(
-      `http://localhost/ustp-student-attendance-system/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/USTP-Student-Attendance-System/api/get_student.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
-          // This catches HTTP errors (e.g., 404, 500)
-          return res.text().then(text => { // Get text response for better error logging
-            throw new Error(`HTTP error! Status: ${res.status}, Response: ${text.substring(0, 200)}`);
+          // Handle HTTP errors (e.g., 404, 500)
+          return res.text().then((text) => {
+            throw new Error(
+              `HTTP error! Status: ${res.status}, Response: ${text.substring(
+                0,
+                200
+              )}`
+            );
           });
         }
         return res.json();
       })
       .then((data) => {
         if (data.success) {
-          // IMPORTANT: If get_student.php returns 'student_id' as key, ensure formData matches.
-          // Assuming get_student.php returns data.student with 'student_id' as the key
+          // Set form data with fetched student information
           setFormData(data.student);
 
+          // Resolve and set the image preview URL
           const image = data.student.image;
           const resolvedURL = image
-            ? `http://localhost/ustp-student-attendance-system/uploads/${image.replace("uploads/", "")}`
+            ? `http://localhost/USTP-Student-Attendance-System/uploads/${image.replace(
+                "uploads/",
+                ""
+              )}`
             : "";
           setPreviewURL(resolvedURL);
         } else {
-          // This captures the PHP-side error messages like "Invalid or missing student ID."
+          // Display error message from the API
           setMessage(`Failed to fetch student info: ${data.message}`);
         }
-        setTimeout(() => setLoading(false), 800);
+        setTimeout(() => setLoading(false), 800); // Simulate loading time
       })
       .catch((error) => {
-        // This catches network errors or issues with parsing JSON
+        // Catch network errors or JSON parsing issues
         console.error("Fetch error during profile load:", error);
         setMessage(`Server error while loading profile: ${error.message}`);
-        setTimeout(() => setLoading(false), 800);
+        setTimeout(() => setLoading(false), 800); // Simulate loading time
       });
   }, []);
 
+  // Handler for input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handler for file input change (image upload)
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setPreviewURL(URL.createObjectURL(file));
+      setPreviewURL(URL.createObjectURL(file)); // Create a local URL for image preview
     }
   };
 
+  // Handler for form submission (shows confirmation modal)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowConfirmationModal(true); // Show the confirmation modal
+  };
+
+  // Function to confirm and proceed with profile update
+  const confirmUpdate = async () => {
+    setShowConfirmationModal(false); // Hide the confirmation modal
+    setMessage(""); // Clear any previous messages
+
     const formPayload = new FormData();
+    // Append all current form data to the FormData object
     Object.keys(formData).forEach((key) =>
       formPayload.append(key, formData[key])
     );
 
+    // Append the selected image file if it exists
     if (selectedFile) {
       formPayload.append("image", selectedFile);
     }
 
     try {
       const res = await fetch(
-        "http://localhost/ustp-student-attendance-system/api/edit_student_profile.php",
+        "http://localhost/USTP-Student-Attendance-System/api/edit_student_profile.php",
         {
           method: "POST",
           body: formPayload,
@@ -121,35 +143,44 @@ const StudentEditProfile = () => {
       );
 
       if (!res.ok) {
+        // Handle HTTP errors during update
         const errorText = await res.text();
-        throw new Error(`HTTP error! Status: ${res.status}, Response: ${errorText.substring(0, 200)}`);
+        throw new Error(
+          `HTTP error! Status: ${res.status}, Response: ${errorText.substring(
+            0,
+            200
+          )}`
+        );
       }
 
       const result = await res.json();
       if (result.success) {
-        // Combine firstname, middlename, lastname for the 'name' field
+        // Update localStorage with the new student data
         const { firstname, middlename, lastname } = result.student;
         const name = [firstname, middlename, lastname].filter(Boolean).join(" ");
         const updatedStudent = { ...result.student, id: result.student.student_id, name };
         localStorage.setItem("student", JSON.stringify(updatedStudent));
+
+        // Directly navigate to dashboard on success, without a success modal
         navigate("/student-dashboard");
-        alert("Profile updated successfully!");
       } else {
-        // This captures the PHP-side error messages like "Invalid or missing student ID."
+        // Display API-returned error message
         setMessage(`Profile update failed: ${result.message}`);
       }
     } catch (error) {
       console.error("Update fetch error:", error);
-      alert("Profile update failed due to a server error: " + error.message);
+      // Display client-side error message
+      setMessage("Profile update failed due to a server error: " + error.message);
     }
   };
 
+  // Handler for navigating back to the dashboard
   const handleBack = () => {
     navigate("/student-dashboard");
   };
 
   return (
-   <div className="font-dm-sans px-4 sm:px-10 py-6 sm:py-10 text-left w-full max-w-[85%] sm:max-w-2xl ml-4 sm:ml-[200px] text-sm sm:text-base mt-10 mb-10 bg-white rounded-lg shadow-lg transition-all duration-300">
+    <div className="font-dm-sans px-4 sm:px-10 py-6 sm:py-10 text-left w-full max-w-[85%] sm:max-w-2xl ml-4 sm:ml-[200px] text-sm sm:text-base mt-10 mb-10 bg-white rounded-lg shadow-lg transition-all duration-300">
       <div className="mb-8">
         <button
           type="button"
@@ -165,12 +196,14 @@ const StudentEditProfile = () => {
         </button>
       </div>
 
-      <h2 className="text-2xl sm:text-3xl text-center font-bold mb-4">Edit Profile</h2>
+      <h2 className="text-2xl sm:text-3xl text-center font-bold mb-4">
+        Edit Profile
+      </h2>
 
       {message && <p className="mb-4 text-red-500 text-center">{message}</p>}
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit} // This now triggers the confirmation modal
         encType="multipart/form-data"
         className="grid gap-4"
       >
@@ -347,6 +380,7 @@ const StudentEditProfile = () => {
                 value={formData.country}
                 onChange={handleChange}
                 placeholder="Country"
+                className="p-2 border rounded w-full"
               />
             </>
           )}
@@ -361,6 +395,35 @@ const StudentEditProfile = () => {
           </button>
         )}
       </form>
+
+      {/* Confirmation Modal */}
+      {showConfirmationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Confirm Profile Update
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to update your profile with the current
+              information?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirmationModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmUpdate} // Call confirmUpdate when confirmed
+                className="px-4 py-2 rounded bg-blue-700 hover:bg-blue-800 text-white"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
