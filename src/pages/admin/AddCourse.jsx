@@ -51,14 +51,15 @@ export default function AddCourse() {
         setIsAddCourseModalOpen(true);
     };
 
-    const handleConfirmAddCourse = async () => {
-        setIsLoading(true);
-        try {
-            await axios.post(
-                'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add.php',
-                formData // formData now includes course_code
-            );
-            setIsAddCourseModalOpen(false);
+  const handleConfirmAddCourse = async () => {
+    setIsLoading(true);
+    try {
+      await axios.post(
+        'http://localhost/USTP-Student-Attendance-System/admin_backend/course_add.php',
+        formData // formData now includes course_code
+      );
+      alert('Course added successfully!');
+      setIsAddCourseModalOpen(false);
 
             // Clear the form after successful submission
             setFormData({
@@ -91,17 +92,17 @@ export default function AddCourse() {
         >
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 z-0 max-w-5xl mx-auto">
 
-                <div
-                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-                    style={{
-                        backgroundImage: "url('/assets/classroom_vector.png')",
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right',
-                        backgroundSize: 'contain',
-                    }}
-                >
-                    <h1 className="text-2xl text-blue-700 font-bold">Add New Course</h1>
-                </div>
+        <div
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          style={{
+            backgroundImage: "url('/assets/classroom_vector.png')",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right',
+            backgroundSize: 'contain',
+          }}
+        >
+          <h1 className="text-2xl text-blue-700 font-bold">Add New Course</h1>
+        </div>
 
                 <div className="bg-white shadow-md p-8 rounded-lg">
                     <form onSubmit={handleOpenAddCourseModal} className="grid grid-cols-1 md:grid-cols-2 gap-6">

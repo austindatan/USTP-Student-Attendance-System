@@ -73,7 +73,7 @@ function AddSectionCourse() {
                 <div
                     className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={{
-                        backgroundImage: "url('assets/teacher_vector.png')",
+                        backgroundImage: "url('/assets/teacher_vector.png')",
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'right',
                         backgroundSize: 'contain'

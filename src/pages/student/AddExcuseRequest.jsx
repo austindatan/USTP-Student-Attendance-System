@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const AddExcuseRequest = ({ studentId }) => {
   console.log("AddExcuseRequest (render): received studentId prop =", studentId);
+
+  const navigate = useNavigate();
 
   const [courses, setCourses] = useState([]);
   const [courseId, setCourseId] = useState('');
@@ -18,6 +21,9 @@ const AddExcuseRequest = ({ studentId }) => {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
+  // New state for confirmation modal
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
 
   useEffect(() => {
     console.log("AddExcuseRequest (useEffect): studentId in dependency array =", studentId);
@@ -25,7 +31,7 @@ const AddExcuseRequest = ({ studentId }) => {
     const fetchCourses = async () => {
       try {
         const res = await axios.get(
-          `http://localhost/ustp-student-attendance/api/student_backend/get_student_courses.php?student_id=${studentId}`
+          `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_student_courses.php?student_id=${studentId}`
         );
 
         console.log("API response:", res.data);
@@ -60,7 +66,7 @@ const AddExcuseRequest = ({ studentId }) => {
       if (!courseId || !studentId) return;
 
       try {
-        const res = await axios.get(`http://localhost/ustp-student-attendance/api/student_backend/get_instructor_by_course.php?student_id=${studentId}&course_id=${courseId}`);
+        const res = await axios.get(`http://localhost/USTP-Student-Attendance-System/api/student_backend/get_instructor_by_course.php?student_id=${studentId}&course_id=${courseId}`);
         console.log("Instructor API response:", res.data);
         if (res.data.success && res.data.instructor) {
           setInstructor(res.data.instructor);
@@ -106,6 +112,23 @@ const AddExcuseRequest = ({ studentId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Client-side validation before opening modal
+    if (!selectedStudentDetailsId || !instructorId || !reason || !dateOfAbsence) {
+      setMessage("Please fill in all required fields (Course, Instructor, Reason, Date of Absence).");
+      setSuccess(false);
+      return; // Stop here, do not open modal
+    }
+
+    // Open confirmation modal
+    setShowConfirmationModal(true);
+  };
+
+  const confirmSubmit = async () => {
+    setShowConfirmationModal(false); // Close the modal
+    setLoading(true);
+    setMessage('');
+    setSuccess(null);
+
     const formData = new FormData();
     formData.append('student_details_id', selectedStudentDetailsId);
     formData.append('instructor_id', instructorId);
@@ -113,44 +136,19 @@ const AddExcuseRequest = ({ studentId }) => {
     formData.append('file', file);
     formData.append('date_of_absence', dateOfAbsence);
 
-    console.log("Preparing to submit form with FormData:");
+    console.log("Preparing to submit form with FormData (after confirmation):");
     for (let pair of formData.entries()) {
       console.log(pair[0] + ': ' + pair[1]);
     }
 
-
-    console.log("--- State values before client-side validation ---");
-    console.log("selectedStudentDetailsId:", selectedStudentDetailsId);
-    console.log("instructorId:", instructorId);
-    console.log("reason:", reason);
-    console.log("dateOfAbsence:", dateOfAbsence);
-    console.log("--------------------------------------------------");
-
-    if (!selectedStudentDetailsId || !instructorId || !reason || !dateOfAbsence) {
-      setMessage("Please fill in all required fields (Course, Instructor, Reason, Date of Absence).");
-      setSuccess(false);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setMessage('');
-    setSuccess(null);
-
-    if (!selectedStudentDetailsId || !instructorId || !reason || !dateOfAbsence) {
-      setMessage("Please fill in all required fields (Course, Instructor, Reason, Date of Absence).");
-      setSuccess(false);
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await axios.post('http://localhost/ustp-student-attendance/api/student_backend/submit_excuse_request.php', formData);
+      const res = await axios.post('http://localhost/USTP-Student-Attendance-System/api/student_backend/submit_excuse_request.php', formData);
       setMessage(res.data.message);
       const isSuccess = res.data.success === true || res.data.success === "true";
       setSuccess(isSuccess);
 
       if (isSuccess) {
+        // Reset form fields
         setCourseId('');
         setSelectedStudentDetailsId('');
         setInstructor(null);
@@ -159,6 +157,8 @@ const AddExcuseRequest = ({ studentId }) => {
         setFile(null);
         setDateOfAbsence('');
         if (fileInputRef.current) fileInputRef.current.value = '';
+        // Navigate back to student dashboard upon successful submission
+        navigate('/student-dashboard');
       }
     } catch (err) {
       console.error("Axios submission error:", err);
@@ -178,108 +178,134 @@ const AddExcuseRequest = ({ studentId }) => {
   return (
     <div className="font-dm-sans min-h-screen overflow-y-auto">
       <section className="lg:w-[75%] xl:w-[76%] w-full pt-12 px-6 sm:px-6 md:px-12">
-    <form
-      onSubmit={handleSubmit}
-      className="font-dm-sans p-8 text-left w-full max-w-xl mx-auto my-10 bg-white rounded-xl shadow-2xl transition-all duration-300 space-y-6"
-    >
-      {/* Form Title */}
-      <h2 className="text-3xl font-bold text-center text-blue-800 mb-6 border-b pb-4 border-blue-100">Excuse Request Form</h2>
+        <form
+          onSubmit={handleSubmit} // This now just opens the modal
+          className="font-dm-sans p-8 text-left w-full max-w-xl mx-auto my-10 bg-white rounded-xl shadow-2xl transition-all duration-300 space-y-6"
+        >
+          {/* Form Title */}
+          <h2 className="text-3xl font-bold text-center text-blue-800 mb-6 border-b pb-4 border-blue-100">Excuse Request Form</h2>
 
-      {/* Message Display (Success/Error) */}
-      {message && (
-        <div className={`p-4 rounded-lg border text-center font-medium ${success ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}`}>
-          {message}
+          {/* Message Display (Success/Error) */}
+          {message && (
+            <div className={`p-4 rounded-lg border text-center font-medium ${success ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}`}>
+              {message}
+            </div>
+          )}
+
+          {/* Course Selection */}
+          <div>
+            <label htmlFor="course" className="block mb-2 font-semibold text-blue-700">Course</label>
+            <select
+              id="course"
+              value={courseId}
+              onChange={handleCourseChange}
+              required
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
+            >
+              <option value="">Select a course</option>
+              {courses.map(course => (
+                <option key={course.course_id} value={course.course_id}>{course.course_name}</option>
+              ))}
+            </select>
+            {error && courses.length === 0 && (
+              <p className="text-red-500 text-sm mt-2">{error}</p>
+            )}
+          </div>
+
+          {/* Instructor Display */}
+          <div>
+            <label htmlFor="instructor" className="block mb-2 font-semibold text-blue-700">Instructor</label>
+            <input
+              id="instructor"
+              type="text"
+              value={instructor ? `${instructor.firstname} ${instructor.lastname}` : ''}
+              readOnly
+              className="w-full border border-gray-300 bg-gray-100 rounded-lg px-4 py-2 text-gray-700 cursor-not-allowed"
+            />
+          </div>
+
+          {/* Reason Textarea */}
+          <div>
+            <label htmlFor="reason" className="block mb-2 font-semibold text-blue-700">Reason for Absence</label>
+            <textarea
+              id="reason"
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              required
+              rows={5}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-y text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
+              placeholder="E.g., Medical appointment, family emergency, etc."
+            />
+          </div>
+
+          {/* File Upload */}
+          <div>
+            <label htmlFor="file" className="block mb-2 font-semibold text-blue-700">Upload Supporting Document (Optional)</label>
+            <input
+              id="file"
+              type="file"
+              onChange={e => setFile(e.target.files[0])}
+              className="w-full text-gray-700 focus:outline-none
+                                       file:mr-4 file:py-2 file:px-4
+                                       file:rounded-full file:border-0
+                                       file:text-sm file:font-semibold
+                                       file:bg-blue-50 file:text-blue-700
+                                       hover:file:bg-blue-100 transition duration-200"
+              ref={fileInputRef}
+            />
+          </div>
+
+          {/* Date of Absence */}
+          <div>
+            <label htmlFor="dateOfAbsence" className="block mb-2 font-semibold text-blue-700">Date of Absence</label>
+            <input
+              id="dateOfAbsence"
+              type="date"
+              value={dateOfAbsence}
+              onChange={e => setDateOfAbsence(e.target.value)}
+              required
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit" // This button now triggers the modal
+            disabled={loading}
+            className={`w-full text-white font-bold py-3 rounded-lg transition-all duration-300 ${
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800 shadow-md"
+            }`}
+          >
+            {loading ? "Submitting Request..." : "Submit Excuse Request"}
+          </button>
+        </form>
+      </section>
+
+      {/* Confirmation Modal */}
+      {showConfirmationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Confirm Submission</h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to submit this excuse request?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirmationModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSubmit}
+                className="px-4 py-2 rounded bg-blue-700 hover:bg-blue-800 text-white"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Course Selection */}
-      <div>
-        <label htmlFor="course" className="block mb-2 font-semibold text-blue-700">Course</label>
-        <select
-          id="course"
-          value={courseId}
-          onChange={handleCourseChange}
-          required
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
-        >
-          <option value="">Select a course</option>
-          {courses.map(course => (
-            <option key={course.course_id} value={course.course_id}>{course.course_name}</option>
-          ))}
-        </select>
-        {error && courses.length === 0 && (
-          <p className="text-red-500 text-sm mt-2">{error}</p>
-        )}
-      </div>
-
-      {/* Instructor Display */}
-      <div>
-        <label htmlFor="instructor" className="block mb-2 font-semibold text-blue-700">Instructor</label>
-        <input
-          id="instructor"
-          type="text"
-          value={instructor ? `${instructor.firstname} ${instructor.lastname}` : ''}
-          readOnly
-          className="w-full border border-gray-300 bg-gray-100 rounded-lg px-4 py-2 text-gray-700 cursor-not-allowed"
-        />
-      </div>
-
-      {/* Reason Textarea */}
-      <div>
-        <label htmlFor="reason" className="block mb-2 font-semibold text-blue-700">Reason for Absence</label>
-        <textarea
-          id="reason"
-          value={reason}
-          onChange={e => setReason(e.target.value)}
-          required
-          rows={5} // Increased rows for better usability
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-y text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
-          placeholder="E.g., Medical appointment, family emergency, etc."
-        />
-      </div>
-
-      {/* File Upload */}
-      <div>
-        <label htmlFor="file" className="block mb-2 font-semibold text-blue-700">Upload Supporting Document (Optional)</label>
-        <input
-          id="file"
-          type="file"
-          onChange={e => setFile(e.target.files[0])}
-          className="w-full text-gray-700 focus:outline-none
-                             file:mr-4 file:py-2 file:px-4
-                             file:rounded-full file:border-0
-                             file:text-sm file:font-semibold
-                             file:bg-blue-50 file:text-blue-700
-                             hover:file:bg-blue-100 transition duration-200"
-          ref={fileInputRef}
-        />
-      </div>
-
-      {/* Date of Absence */}
-      <div>
-        <label htmlFor="dateOfAbsence" className="block mb-2 font-semibold text-blue-700">Date of Absence</label>
-        <input
-          id="dateOfAbsence"
-          type="date"
-          value={dateOfAbsence}
-          onChange={e => setDateOfAbsence(e.target.value)}
-          required
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition duration-200"
-        />
-      </div>
-
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className={`w-full text-white font-bold py-3 rounded-lg transition-all duration-300 ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800 shadow-md"
-        }`}
-      >
-        {loading ? "Submitting Request..." : "Submit Excuse Request"}
-      </button>
-    </form>
-    </section>
     </div>
   );
 };

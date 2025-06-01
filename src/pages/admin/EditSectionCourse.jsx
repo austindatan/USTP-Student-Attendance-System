@@ -89,7 +89,7 @@ function EditSectionCourse() {
             <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
                 <div className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
                     style={{
-                        backgroundImage: "url('assets/teacher_vector.png')",
+                        backgroundImage: "url('/assets/teacher_vector.png')",
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'right',
                         backgroundSize: 'contain'

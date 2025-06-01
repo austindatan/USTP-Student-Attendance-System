@@ -39,26 +39,24 @@ const AddSection = () => {
         setMessageModalType('info');
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Fetch semesters data
-                const semestersRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_semesters.php');
-                if (semestersRes.data.success) {
-                    setSemesters(semestersRes.data.semesters);
-                } else {
-                    console.warn("Failed to load semesters:", semestersRes.data.message);
-                    showMessageModal('Warning', `Failed to load semesters: ${semestersRes.data.message || 'Unknown error.'}`, 'warning');
-                }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch semesters data
+        const semestersRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_semesters.php');
+        if (semestersRes.data.success) {
+          setSemesters(semestersRes.data.semesters);
+        } else {
+          console.warn("Failed to load semesters:", semestersRes.data.message);
+        }
 
-                // Fetch year levels data
-                const yearLevelsRes = await axios.get('http://localhost/USTP-Student-Attendance-System/admin_backend/get_year_levels.php');
-                if (yearLevelsRes.data.success) {
-                    setYearLevels(yearLevelsRes.data.year_levels);
-                } else {
-                    console.warn("Failed to load year levels:", yearLevelsRes.data.message);
-                    showMessageModal('Warning', `Failed to load year levels: ${yearLevelsRes.data.message || 'Unknown error.'}`, 'warning');
-                }
+        // Fetch year levels data
+        const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance/admin_backend/get_year_levels.php');
+        if (yearLevelsRes.data.success) {
+          setYearLevels(yearLevelsRes.data.year_levels);
+        } else {
+          console.warn("Failed to load year levels:", yearLevelsRes.data.message);
+        }
 
             } catch (err) {
                 console.error("Error fetching data:", err);
@@ -88,26 +86,26 @@ const AddSection = () => {
         setIsAddSectionModalOpen(true);
     };
 
-    const handleConfirmAdd = async () => {
-        setIsSaving(true);
-        try {
-            const res = await axios.post('http://localhost/USTP-Student-Attendance-System/admin_backend/section_add.php', formData);
-            if (res.data.success) {
-                setIsAddSectionModalOpen(false);
-                showMessageModal('Success!', 'Section added successfully!', 'success');
-                navigate('/admin-sections'); 
-            } else {
-                showMessageModal('Failed to Add Section', res.data.message || 'Failed to add section.', 'error');
-                setIsAddSectionModalOpen(false);
-            }
-        } catch (error) {
-            console.error("Server error during section add:", error);
-            showMessageModal('Server Error', 'Server error during section add. Please try again.', 'error');
-            setIsAddSectionModalOpen(false);
-        } finally {
-            setIsSaving(false);
-        }
-    };
+  const handleConfirmAdd = async () => {
+    setIsSaving(true);
+    try {
+      const res = await axios.post('http://localhost/ustp-student-attendance/admin_backend/section_add.php', formData);
+      if (res.data.success) {
+        setIsAddSectionModalOpen(false);
+        alert(res.data.message);
+        navigate('/admin-sections'); // Navigate back to the sections list
+      } else {
+        alert(res.data.message || 'Failed to add section.');
+        setIsAddSectionModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Server error during section add:", error);
+      alert('Server error during section add.');
+      setIsAddSectionModalOpen(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
     const handleCloseAddSectionModal = () => {
         setIsAddSectionModalOpen(false);
@@ -115,20 +113,20 @@ const AddSection = () => {
 
     if (loading) return <p className="text-center mt-10">Loading...</p>;
 
-    return (
-        <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
-            <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
-                <div
-                    className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
-                    style={{
-                        backgroundImage: "url('assets/teacher_vector.png')",
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right',
-                        backgroundSize: 'contain',
-                    }}
-                >
-                    <h1 className="text-2xl text-blue-700 font-bold">Add New Section</h1>
-                </div>
+  return (
+    <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex hide-scrollbar overflow-scroll">
+      <section className="w-full pt-12 px-6 sm:px-6 md:px-12 mb-12 max-w-5xl mx-auto">
+        <div
+          className="bg-white rounded-lg p-6 text-white font-poppins mb-6 relative overflow-hidden"
+          style={{
+            backgroundImage: "url('assets/teacher_vector.png')",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right',
+            backgroundSize: 'contain',
+          }}
+        >
+          <h1 className="text-2xl text-blue-700 font-bold">Add New Section</h1>
+        </div>
 
                 <div className="bg-white shadow-md p-8 rounded-lg">
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
