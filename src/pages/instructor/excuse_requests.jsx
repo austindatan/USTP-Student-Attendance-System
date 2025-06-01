@@ -349,7 +349,7 @@ const ExcuseRequestsPage = () => {
                   <p className="font-bold mb-1 sm:mb-2 text-[#737373] text-sm sm:text-base">Attachment:</p>
                   {selectedRequest.file_path ? (
                     <a
-                      href={`http://localhost/USTP-Student-Attendance-System/${selectedRequest.file_path}`}
+                      href={`http://localhost/ustp-student-attendance/api/student_backend/${selectedRequest.file_path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 bg-gray-100 text-indigo-600 rounded-lg shadow-md hover:bg-gray-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out text-sm sm:text-base font-semibold border border-indigo-200"

@@ -16,12 +16,12 @@ export default function Teacher_Dashboard({ selectedDate }) {
   const [loading, setLoading] = useState(true);
 
   const [sections, setSections] = useState([]);
-  const [simplifiedNotifications, setSimplifiedNotifications] = useState([]); // For get_recent_req_notif.php
+  const [simplifiedNotifications, setSimplifiedNotifications] = useState([]); 
 
   const [totalStudents, setTotalStudents] = useState(0);
   const [studentsPresentToday, setStudentsPresentToday] = useState(0);
   const [totalClasses, setTotalClasses] = useState(0);
-  const [upcomingEvents, setUpcomingEvents] = useState(0);
+  const [excuseRequests, setExcuseRequests] = useState(0); 
   const instructor = JSON.parse(localStorage.getItem('instructor'));
 
   // Effect to fetch dashboard statistics
@@ -32,13 +32,13 @@ export default function Teacher_Dashboard({ selectedDate }) {
       try {
         const dateStr = format(selectedDate || new Date(), 'yyyy-MM-dd');
         const response = await fetch(
-          `http://localhost/USTP-Student-Attendance-System/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
+          `http://localhost/ustp-student-attendance-system/instructor_backend/get_teacher_dashboard_stats.php?instructor_id=${instructor.instructor_id}&date=${dateStr}`
         );
         const data = await response.json();
         setTotalStudents(data.totalStudents);
         setStudentsPresentToday(data.studentsPresentToday);
         setTotalClasses(data.totalClasses);
-        setUpcomingEvents(data.upcomingEvents);
+        setExcuseRequests(data.excuseRequests);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
       } finally {
@@ -55,7 +55,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
 
     const fetchSimplifiedNotifications = async () => {
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_recent_req_notif.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_recent_req_notif.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSimplifiedNotifications(data);
       } catch (err) {
@@ -74,7 +74,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const fetchWeeklyAttendance = async () => {
       if (!instructor?.instructor_id) return;
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_weekly_attendance.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setAttendanceData(data);
       } catch (err) {
@@ -90,7 +90,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const fetchSections = async () => {
       if (!instructor?.instructor_id) return;
       try {
-        const res = await fetch(`http://localhost/USTP-Student-Attendance-System/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
+        const res = await fetch(`http://localhost/ustp-student-attendance-system/instructor_backend/get_sections.php?instructor_id=${instructor.instructor_id}`);
         const data = await res.json();
         setSections(data);
       } catch (err) {
@@ -138,7 +138,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
               <DashboardCard icon={<FiUsers size={28} />} label="Total Students" count={totalStudents} />
               <DashboardCard icon={<FiCheckCircle size={28} />} label="Present Today" count={studentsPresentToday} />
               <DashboardCard icon={<FiBookOpen size={28} />} label="Total Classes" count={totalClasses} />
-              <DashboardCard icon={<FiCalendar size={28} />} label="Upcoming Events" count={upcomingEvents} />
+              <DashboardCard icon={<FiMail size={28} />} label="Excuse Requests" count={excuseRequests} />
             </>
           )}
         </div>
