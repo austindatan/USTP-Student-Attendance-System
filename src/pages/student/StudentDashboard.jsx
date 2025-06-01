@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
 import ClassCard from './components/class_card'; // Correct import for ClassCard
@@ -31,7 +31,7 @@ function SkeletonClassCard() {
   );
 }
 
-export default function StudentDashboard({ selectedDate }) { // Added selectedDate prop
+export default function StudentDashboard({ selectedDate }) {
   const navigate = useNavigate();
 
   const [present, setPresent] = useState(null);
@@ -40,48 +40,59 @@ export default function StudentDashboard({ selectedDate }) { // Added selectedDa
   const [missed, setMissed] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [student, setStudent] = useState(null);
-
-  const [messages, setMessages] = useState([]);
-  const [classes, setClasses] = useState([]); // State for sections/classes
-
-  const studentMemo = useMemo(() => {
+  const [student, setStudent] = useState(() => {
     const rawStudentData = localStorage.getItem("student");
     try {
       return rawStudentData ? JSON.parse(rawStudentData) : null;
     } catch {
       return null;
     }
+  });
+
+  const [messages, setMessages] = useState([]);
+  const [classes, setClasses] = useState([]); // State for sections/classes
+
+  // Keep student state in sync with localStorage changes (even from other tabs)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const rawStudentData = localStorage.getItem("student");
+      try {
+        setStudent(rawStudentData ? JSON.parse(rawStudentData) : null);
+      } catch {
+        setStudent(null);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   useEffect(() => {
-    if (!studentMemo || !studentMemo.id) {
+    if (!student || !student.id) {
       navigate("/login-student");
       return;
     }
-    setStudent(studentMemo);
 
     const commonHeaders = { "Content-Type": "application/json" };
-    const studentIdBody = { student_id: studentMemo.id };
+    const studentIdBody = { student_id: student.id };
 
     const attendanceEndpoints = [
       {
-        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_present_count.php",
+        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_absent_count.php",
+        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_excused_count.php",
+        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_excused_count.php",
         setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/USTP-Student-Attendance-System/api/student_backend/get_yearly_late_count.php",
+        url: "http://localhost/ustp-student-attendance-system/api/student_backend/get_yearly_late_count.php",
         setter: setMissed,
         key: "total_late",
       },
@@ -113,7 +124,7 @@ export default function StudentDashboard({ selectedDate }) { // Added selectedDa
 
     // New API call for classes, using GET and query parameter
     const fetchClassesData = fetch(
-      `http://localhost/USTP-Student-Attendance-System/api/student_backend/get_sections.php?student_id=${studentMemo.id}`
+      `http://localhost/ustp-student-attendance-system/api/student_backend/get_sections.php?student_id=${student.id}`
     )
       .then(async (res) => {
         if (!res.ok) {
@@ -142,7 +153,7 @@ export default function StudentDashboard({ selectedDate }) { // Added selectedDa
         setError(err.message || "Failed to fetch dashboard data.");
       })
       .finally(() => setLoading(false));
-  }, [studentMemo, navigate]); // Depend on studentMemo and navigate
+  }, [student, navigate]); // Depend on student and navigate
 
   const handleLogout = () => {
     localStorage.removeItem("student");
@@ -188,7 +199,9 @@ export default function StudentDashboard({ selectedDate }) { // Added selectedDa
               ) : (
                 <>
                   <h2 className="text-base font-semibold">Welcome back,</h2>
-                  <h1 className="text-3xl font-bold">{student?.firstname || "Student"}</h1>
+                  <h1 className="text-3xl font-bold">
+                    {student?.name ? student.name.split(" ")[0] : "Student"}
+                  </h1>
                   <p className="text-sm mt-12">Ready to learn today?</p>
                 </>
               )}

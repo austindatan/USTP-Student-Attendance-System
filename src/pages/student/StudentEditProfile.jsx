@@ -51,7 +51,7 @@ const StudentEditProfile = () => {
 
     // Now, `studentIdToFetch` should definitely have a valid ID
     fetch(
-      `http://localhost/USTP-Student-Attendance-System/api/get_student.php?id=${studentIdToFetch}`
+      `http://localhost/ustp-student-attendance-system/api/get_student.php?id=${studentIdToFetch}`
     )
       .then((res) => {
         if (!res.ok) {
@@ -70,7 +70,7 @@ const StudentEditProfile = () => {
 
           const image = data.student.image;
           const resolvedURL = image
-            ? `http://localhost/USTP-Student-Attendance-System/uploads/${image.replace("uploads/", "")}`
+            ? `http://localhost/ustp-student-attendance-system/uploads/${image.replace("uploads/", "")}`
             : "";
           setPreviewURL(resolvedURL);
         } else {
@@ -113,7 +113,7 @@ const StudentEditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/USTP-Student-Attendance-System/api/edit_student_profile.php",
+        "http://localhost/ustp-student-attendance-system/api/edit_student_profile.php",
         {
           method: "POST",
           body: formPayload,
@@ -127,8 +127,10 @@ const StudentEditProfile = () => {
 
       const result = await res.json();
       if (result.success) {
-        // Add id property for compatibility
-        const updatedStudent = { ...result.student, id: result.student.student_id };
+        // Combine firstname, middlename, lastname for the 'name' field
+        const { firstname, middlename, lastname } = result.student;
+        const name = [firstname, middlename, lastname].filter(Boolean).join(" ");
+        const updatedStudent = { ...result.student, id: result.student.student_id, name };
         localStorage.setItem("student", JSON.stringify(updatedStudent));
         navigate("/student-dashboard");
         alert("Profile updated successfully!");
