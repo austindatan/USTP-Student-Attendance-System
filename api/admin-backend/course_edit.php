@@ -1,12 +1,11 @@
 <?php
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET"); // Allow GET for fetching data
+header("Access-Control-Allow-Methods: POST, GET"); 
 header("Access-Control-Allow-Headers: Content-Type");
 
 include __DIR__ . '/../../src/conn.php'; 
 
-// Handle GET request to fetch course details
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $course_id = $_GET['id'] ?? null;
 
@@ -37,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 $data = json_decode(file_get_contents("php://input"));
 
 $course_id = $data->course_id ?? null;
-$course_code = trim($data->course_code ?? ''); // Get course_code from the request
+$course_code = trim($data->course_code ?? ''); 
 $course_name = trim($data->course_name ?? '');
 $description = trim($data->description ?? '');
 
@@ -49,7 +48,6 @@ if (!$course_id || empty($course_code) || empty($course_name) || empty($descript
     exit;
 }
 
-// Optional: Check for duplicate course_code if it's being changed to an existing one (excluding the current course itself)
 $check_duplicate_sql = "SELECT course_id FROM course WHERE course_code = ? AND course_id != ?";
 $check_duplicate_stmt = $conn->prepare($check_duplicate_sql);
 $check_duplicate_stmt->bind_param("si", $course_code, $course_id);
@@ -67,10 +65,10 @@ if ($check_duplicate_stmt->num_rows > 0) {
 $check_duplicate_stmt->close();
 
 
-// Update the SQL query to include course_code
+// Update the SQL query 
 $sql = "UPDATE course SET course_code = ?, course_name = ?, description = ? WHERE course_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sssi", $course_code, $course_name, $description, $course_id); // Add 's' for course_code
+$stmt->bind_param("sssi", $course_code, $course_name, $description, $course_id); 
 
 if ($stmt->execute()) {
     echo json_encode([

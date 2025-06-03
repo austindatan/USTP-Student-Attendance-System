@@ -18,7 +18,7 @@ export default function MessageModal({ isOpen, onClose, title, message, type = '
         textColor = 'text-green-700';
         buttonBg = 'bg-green-600';
         buttonHoverBg = 'hover:bg-green-700';
-    } else if (type === 'warning') { // Added warning type handling
+    } else if (type === 'warning') { 
         borderColor = 'border-yellow-500';
         textColor = 'text-yellow-700';
         buttonBg = 'bg-yellow-600';

@@ -83,12 +83,12 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setShowConfirmationModal(true); // Show the confirmation modal
+    setShowConfirmationModal(true); 
   };
 
   const confirmUpdate = async () => {
-    setShowConfirmationModal(false); // Hide the confirmation modal
-    setMessage(""); // Clear any previous messages
+    setShowConfirmationModal(false); 
+    setMessage(""); 
 
     const formPayload = new FormData();
     Object.keys(formData).forEach((key) =>
@@ -360,7 +360,7 @@ const EditProfile = () => {
                 Cancel
               </button>
               <button
-                onClick={confirmUpdate} // Call confirmUpdate when confirmed
+                onClick={confirmUpdate} 
                 className="px-4 py-2 rounded bg-blue-700 hover:bg-blue-800 text-white"
               >
                 Confirm

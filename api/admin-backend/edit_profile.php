@@ -15,7 +15,6 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Pass $uploadDir to the function to ensure correct path for deletion
 function deleteOldImage($conn, $instructor_id, $uploadDir) {
     $stmt = $conn->prepare("SELECT image FROM instructor WHERE instructor_id = ?");
     $stmt->bind_param("i", $instructor_id);
@@ -23,13 +22,11 @@ function deleteOldImage($conn, $instructor_id, $uploadDir) {
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
         $oldImage = $row["image"];
-        // Check if oldImage exists and delete it from the correct path
-        // Ensure DIRECTORY_SEPARATOR is used for consistency
         if ($oldImage && file_exists($uploadDir . DIRECTORY_SEPARATOR . $oldImage)) {
             unlink($uploadDir . DIRECTORY_SEPARATOR . $oldImage);
         }
     }
-    $stmt->close(); // Close the statement
+    $stmt->close(); 
 }
 
 $instructor_id = $_POST["instructor_id"] ?? null;
@@ -46,27 +43,20 @@ $province = $_POST["province"] ?? "";
 $zipcode = $_POST["zipcode"] ?? "";
 $country = $_POST["country"] ?? "";
 
-if (empty($instructor_id)) { // Use the $instructor_id variable directly
+if (empty($instructor_id)) {
     echo json_encode(['success' => false, 'message' => 'Missing instructor ID.']);
     exit;
 }
 
 $imageName = null;
-// MODIFIED: Set upload directory to ustp-student-attendance/api/uploads
-// Assuming this script is in `your_project/api/instructor/`
-// `__DIR__` is `/your_project/api/instructor/`
-// `__DIR__ . DIRECTORY_SEPARATOR . '..'` is `/your_project/api/`
-// Then append 'uploads'
 $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
 if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     $imageTmp = $_FILES["image"]["tmp_name"];
     $imageName = uniqid("instructor_") . "_" . basename($_FILES["image"]["name"]);
-    // Ensure correct path concatenation
     $uploadPath = $uploadDir . $imageName; 
 
     if (!is_dir($uploadDir)) {
-        // Create directory recursively with permissions
         if (!mkdir($uploadDir, 0777, true)) {
             echo json_encode(["success" => false, "message" => "Failed to create upload directory."]);
             exit;
@@ -74,15 +64,15 @@ if (isset($_FILES["image"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
     }
 
     if (move_uploaded_file($imageTmp, $uploadPath)) {
-        deleteOldImage($conn, $instructor_id, $uploadDir); // Pass uploadDir to the function
+        deleteOldImage($conn, $instructor_id, $uploadDir);
     } else {
         echo json_encode(["success" => false, "message" => "Image upload failed: Could not move uploaded file."]);
         exit;
     }
 }
 
-// Fetch current password if new one is not provided or is too short
-if (empty($password) || strlen($password) < 60) { // Check if password is empty or not a hash
+// Fetch current password
+if (empty($password) || strlen($password) < 60) {
     $stmt = $conn->prepare("SELECT password FROM instructor WHERE instructor_id = ?");
     $stmt->bind_param("i", $instructor_id);
     $stmt->execute();
@@ -90,13 +80,12 @@ if (empty($password) || strlen($password) < 60) { // Check if password is empty 
     if ($row = $result->fetch_assoc()) {
         $password = $row["password"]; // Keep old password
     } else {
-        // Handle case where instructor ID is not found, maybe an error or invalid ID
         echo json_encode(["success" => false, "message" => "Instructor not found to retrieve old password."]);
         exit;
     }
-    $stmt->close(); // Close the statement
+    $stmt->close();
 } else {
-    // Hash new password if provided and long enough
+    // Hash new password
     $password = password_hash($password, PASSWORD_DEFAULT);
 }
 
@@ -141,13 +130,13 @@ if ($stmt === false) {
 $stmt->bind_param($types, ...$params);
 
 if ($stmt->execute()) {
-    $stmt->close(); // Close previous statement before new query
+    $stmt->close(); 
     $stmt = $conn->prepare("SELECT * FROM instructor WHERE instructor_id = ?");
     $stmt->bind_param("i", $instructor_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($instructor = $result->fetch_assoc()) {
-        unset($instructor["password"]); // Remove password before sending to frontend
+        unset($instructor["password"]); 
         echo json_encode(["success" => true, "instructor" => $instructor]);
     } else {
         echo json_encode(["success" => false, "message" => "Updated, but failed to fetch updated instructor data."]);
@@ -156,6 +145,6 @@ if ($stmt->execute()) {
     echo json_encode(["success" => false, "message" => "Update failed: " . $stmt->error]);
 }
 
-$stmt->close(); // Ensure statement is closed
+$stmt->close(); 
 $conn->close();
 ?>

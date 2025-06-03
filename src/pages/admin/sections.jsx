@@ -20,7 +20,7 @@ export default function Admin_Sections() {
         setTimeout(() => {
             setMessage("");
             setIsMessageError(false);
-        }, 3000); // Message disappears after 3 seconds
+        }, 3000); 
     };
 
     useEffect(() => {

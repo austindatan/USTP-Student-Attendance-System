@@ -1,5 +1,4 @@
 <?php
-// courses_list.php
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -14,7 +13,6 @@ if ($conn->connect_error) {
     exit();
 }
 
-// SQL query to fetch all courses
 $sql = "SELECT course_id, course_name FROM course ORDER BY course_name";
 
 $result = $conn->query($sql);

@@ -32,22 +32,22 @@ $student_details_id = isset($data['student_details_id']) ? (int)$data['student_d
 $date = isset($data['date']) ? $data['date'] : null;
 $status = isset($data['status']) ? $data['status'] : null;
 $section_id = isset($data['section_id']) ? (int)$data['section_id'] : 0;
-$course_id = isset($data['course_id']) ? (int)$data['course_id'] : 0; // ADD THIS LINE: Receive course_id from frontend
+$course_id = isset($data['course_id']) ? (int)$data['course_id'] : 0; 
 
 error_log("save_attendance.php: student_details_id = " . $student_details_id);
 error_log("save_attendance.php: date = " . ($date ?? 'null'));
 error_log("save_attendance.php: status = " . ($status ?? 'null'));
 error_log("save_attendance.php: section_id = " . $section_id);
-error_log("save_attendance.php: course_id = " . $course_id); // Log course_id
+error_log("save_attendance.php: course_id = " . $course_id); 
 
-// Basic validation for required fields
-if (!$date || !$status || !$student_details_id || !$section_id || !$course_id) { // ADD course_id to check
+// validate
+if (!$date || !$status || !$student_details_id || !$section_id || !$course_id) {
     $missingFields = [];
     if (!$student_details_id) $missingFields[] = 'student_details_id (value: ' . $student_details_id . ')';
     if (!$date) $missingFields[] = 'date (value: ' . ($date ?? 'null') . ')';
     if (!$status) $missingFields[] = 'status (value: ' . ($status ?? 'null') . ')';
     if (!$section_id) $missingFields[] = 'section_id (value: ' . $section_id . ')';
-    if (!$course_id) $missingFields[] = 'course_id (value: ' . $course_id . ')'; // Add missing field for course_id
+    if (!$course_id) $missingFields[] = 'course_id (value: ' . $course_id . ')'; 
 
     $errorMessage = 'Missing required fields: ' . implode(', ', $missingFields) . '.';
     error_log("save_attendance.php: " . $errorMessage);
@@ -55,12 +55,12 @@ if (!$date || !$status || !$student_details_id || !$section_id || !$course_id) {
     exit;
 }
 
-// --- CHECK IF ATTENDANCE IS LOCKED FOR THIS SPECIFIC SECTION, COURSE, AND DATE ---
+//checks id attendance is locked
 $checkLockQuery = "SELECT a.is_locked FROM attendance a
                    JOIN student_details sd ON a.student_details_id = sd.student_details_id
                    JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
                    WHERE sc.section_id = ?
-                   AND sc.course_id = ?  -- ADD THIS LINE: Filter by course_id
+                   AND sc.course_id = ?
                    AND a.date = ? AND a.is_locked = 1 LIMIT 1";
 
 $lockStmt = $conn->prepare($checkLockQuery);
@@ -69,7 +69,7 @@ if ($lockStmt === false) {
     echo json_encode(['success' => false, 'message' => 'Failed to prepare lock check statement: ' . $conn->error]);
     exit;
 }
-$lockStmt->bind_param("iis", $section_id, $course_id, $date); // ADD course_id to bind_param
+$lockStmt->bind_param("iis", $section_id, $course_id, $date); 
 $lockStmt->execute();
 $lockResult = $lockStmt->get_result();
 
@@ -81,10 +81,7 @@ if ($lockResult->num_rows > 0) {
     exit;
 }
 $lockStmt->close();
-// --- END LOCK CHECK ---
 
-
-// Existing logic for attendance table (no changes needed here for course_id, as it's per student_details_id)
 $checkQuery = "SELECT 1 FROM attendance WHERE student_details_id = ? AND date = ?";
 $stmt = $conn->prepare($checkQuery);
 if ($stmt === false) {

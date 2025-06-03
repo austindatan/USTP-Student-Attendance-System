@@ -112,7 +112,6 @@ $stmt3->close();
 
 $excuse_requests_result = 0; 
 
-// Corrected Query 4: Count pending excuse requests for *this specific instructor* by joining tables
 $stmt4 = $conn->prepare("
     SELECT COUNT(er.excused_request_id) AS pending_excuse_requests
     FROM excused_request er
@@ -126,7 +125,7 @@ if ($stmt4 === false) {
     $conn->close();
     exit;
 }
-$stmt4->bind_param("i", $instructor_id); // Bind instructor_id here
+$stmt4->bind_param("i", $instructor_id); 
 if (!$stmt4->execute()) {
     http_response_code(500);
     echo json_encode(["error" => "Failed to execute statement 4: " . $stmt4->error]);

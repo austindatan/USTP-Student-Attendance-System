@@ -12,13 +12,12 @@ export default function Admin_Courses() {
     const [selectedCourse, setSelectedCourse] = useState(null);
     const navigate = useNavigate();
 
-    // Message Modal states (for blocking modals)
+    // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [messageModalTitle, setMessageModalTitle] = useState('');
     const [messageModalMessage, setMessageModalMessage] = useState('');
     const [messageModalType, setMessageModalType] = useState('info');
 
-    // NEW: States for the floating message
     const [floatingMessage, setFloatingMessage] = useState("");
     const [isFloatingMessageError, setIsFloatingMessageError] = useState(false);
 
@@ -36,15 +35,14 @@ export default function Admin_Courses() {
         setMessageModalType('info');
     };
 
-    // NEW: Helper function to show floating message
     const showFloatingMessage = useCallback((msg, isError) => {
         setFloatingMessage(msg);
         setIsFloatingMessageError(isError);
         const timer = setTimeout(() => {
             setFloatingMessage("");
             setIsFloatingMessageError(false);
-        }, 3000); // Message disappears after 3 seconds
-        return () => clearTimeout(timer); // Cleanup the timer if component unmounts
+        }, 3000); 
+        return () => clearTimeout(timer);
     }, []);
 
 
@@ -68,18 +66,16 @@ export default function Admin_Courses() {
                 } else {
                     console.error("Unexpected data format from get_course.php:", res.data);
                     setCourses([]);
-                    // UPDATED: Use floating message for data format errors
                     showFloatingMessage('Received unexpected data format for courses. Cannot display courses.', true);
                 }
             })
             .catch((err) => {
                 console.error("Error fetching courses:", err);
                 setError("Failed to fetch courses. Please check the server.");
-                // UPDATED: Use floating message for fetch errors
                 showFloatingMessage('Failed to fetch courses from the server. Please try again later.', true);
             })
             .finally(() => setLoading(false));
-    }, [showFloatingMessage]); // Dependency added for showFloatingMessage
+    }, [showFloatingMessage]); 
 
     const handleDeleteClick = (course) => {
         setSelectedCourse(course);
@@ -94,16 +90,13 @@ export default function Admin_Courses() {
             .then((res) => {
                 if (res.data.success) {
                     setCourses(courses.filter(c => c.course_id !== selectedCourse.course_id));
-                    // UPDATED: Use floating message for success
                     showFloatingMessage('Course deleted successfully!', false);
                 } else {
-                    // UPDATED: Use floating message for deletion failure
                     showFloatingMessage(res.data.message || "Failed to delete course.", true);
                 }
             })
             .catch((err) => {
                 console.error("Error deleting course:", err);
-                // UPDATED: Use floating message for deletion error
                 showFloatingMessage("An error occurred while deleting the course. Please try again.", true);
             })
             .finally(() => {
@@ -119,7 +112,7 @@ export default function Admin_Courses() {
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex overflow-auto scrollbar-thin">
-            {/* NEW: Floating message display */}
+            {/* Floating message */}
             {floatingMessage && (
                 <div className={`fixed top-4 right-4 p-3 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isFloatingMessageError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
                     {floatingMessage}

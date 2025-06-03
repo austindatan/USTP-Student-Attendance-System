@@ -26,7 +26,6 @@ if (!$section_id || !$course_id || !$date || $lock_status === null) {
     exit;
 }
 
-// 1. Lock/unlock attendance records
 $updateLockStatusQuery = "UPDATE attendance a
                           JOIN student_details sd ON a.student_details_id = sd.student_details_id
                           JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
@@ -44,9 +43,7 @@ $stmt->bind_param("iiis", $lock_status, $section_id, $course_id, $date);
 $stmt->execute();
 $stmt->close();
 
-// 2. If locking, insert "Absent" for students with no attendance record for this date
 if ($lock_status == 1) {
-    // Get all students in this section/course
     $students_sql = "SELECT sd.student_details_id
                      FROM student_details sd
                      JOIN section_courses sc ON sd.section_course_id = sc.section_course_id
@@ -58,7 +55,6 @@ if ($lock_status == 1) {
 
     $inserted = 0;
     while ($student = $students_result->fetch_assoc()) {
-        // Check if attendance already exists for this student/date
         $check_sql = "SELECT 1 FROM attendance WHERE student_details_id = ? AND date = ?";
         $check_stmt = $conn->prepare($check_sql);
         $check_stmt->bind_param("is", $student['student_details_id'], $date);

@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS"); // Ensure POST is allowed
-header("Access-Control-Allow-Headers: Content-Type"); // Add Content-Type to allowed headers
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS"); 
+header("Access-Control-Allow-Headers: Content-Type");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 include __DIR__ . '/../../src/conn.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $conn->begin_transaction(); // Start a transaction for atomicity
+    $conn->begin_transaction();
 
     try {
         $studentFields = [
@@ -25,17 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $$field = isset($_POST[$field]) ? $conn->real_escape_string($_POST[$field]) : '';
         }
 
-        // Validate required student personal fields
+        // Validate
         if (empty($firstname) || empty($lastname) || empty($email) || empty($password)) {
             http_response_code(400);
             echo json_encode(["message" => "Missing required student personal information (firstname, lastname, email, password)."]);
             exit();
         }
 
-        // Handle image upload
+        // Handles image upload
         $imagePath = '';
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            // MODIFIED LINE: Set upload directory to ustp-student-attendance/uploads
             $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads';
             
             if (!is_dir($uploadDir)) {
@@ -43,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $filename = uniqid() . "_" . basename($_FILES['image']['name']);
-            // Ensure correct path concatenation
             $targetFile = $uploadDir . DIRECTORY_SEPARATOR . $filename; 
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
@@ -75,32 +73,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $student_id = $conn->insert_id;
         $stmt_student->close();
 
-        // Handle enrollments
         if (!isset($_POST['enrollments'])) {
             throw new Exception("No enrollment data provided.");
         }
 
         $enrollments_json = $_POST['enrollments'];
-        $enrollments = json_decode($enrollments_json, true); // Decode the JSON string into an array
+        $enrollments = json_decode($enrollments_json, true); 
 
         if (!is_array($enrollments) || empty($enrollments)) {
             throw new Exception("Invalid or empty enrollment data.");
         }
 
-        // Changed 'section_id' to 'section_course_id' in the SQL INSERT statement
         $insert_details_stmt = $conn->prepare("INSERT INTO student_details (student_id, section_course_id, program_details_id) VALUES (?, ?, ?)");
 
         foreach ($enrollments as $enrollment) {
-            // Changed to read 'section_course_id' from the enrollment array
             $section_course_id = isset($enrollment['section_course_id']) ? $conn->real_escape_string($enrollment['section_course_id']) : '';
             $program_details_id = isset($enrollment['program_details_id']) ? $conn->real_escape_string($enrollment['program_details_id']) : '';
 
-            // Changed validation to use $section_course_id
             if (empty($section_course_id) || empty($program_details_id)) {
                 throw new Exception("Missing section/course/program ID in one of the enrollments.");
             }
 
-            // Bind parameters, ensuring correct order and variable names
             $insert_details_stmt->bind_param("iii", $student_id, $section_course_id, $program_details_id);
             if (!$insert_details_stmt->execute()) {
                 throw new Exception("Failed to insert student enrollment details: " . $insert_details_stmt->error);
@@ -108,11 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $insert_details_stmt->close();
 
-        $conn->commit(); // Commit the transaction if all operations are successful
+        $conn->commit(); 
         echo json_encode(["message" => "Student and all enrollments added successfully"]);
 
     } catch (Exception $e) {
-        $conn->rollback(); // Rollback transaction on error
+        $conn->rollback();
         http_response_code(500);
         echo json_encode(["message" => $e->getMessage()]);
     } finally {

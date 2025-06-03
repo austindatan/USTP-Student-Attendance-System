@@ -6,7 +6,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [showThemes, setShowThemes] = useState(false); // Add this state
+    const [showThemes, setShowThemes] = useState(false);
 
     const studentDetailsId = localStorage.getItem('studentDetailsId');
 
@@ -162,7 +162,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                     <div className="relative group">
                         <button
                             type="button"
-                            onClick={() => setShowThemes(prev => !prev)} // Add this onClick handler
+                            onClick={() => setShowThemes(prev => !prev)} 
                             className="group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center text-[#737373] hover:text-[#7685fc]"
                         >
                             {loading ? (
@@ -191,14 +191,14 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                         {!loading && (
                             <div
                                 className={`absolute bottom-full font-dm-sans text-sm left-1 bg-white border rounded-md shadow-md z-50 ${
-                                    showThemes ? "block" : "hidden" // Use showThemes state here
+                                    showThemes ? "block" : "hidden"
                                 } md:group-hover:block`}
                             >
                                 <button
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                                     onClick={() => {
                                         setBgImage(`url('${process.env.PUBLIC_URL}/assets/water_theme.png')`);
-                                        setShowThemes(false); // Close dropdown after selection
+                                        setShowThemes(false); 
                                     }}
                                 >
                                     Water
@@ -207,7 +207,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                                     onClick={() => {
                                         setBgImage(`url('${process.env.PUBLIC_URL}/assets/forest_theme.png')`);
-                                        setShowThemes(false); // Close dropdown after selection
+                                        setShowThemes(false); 
                                     }}
                                 >
                                     Forest
@@ -216,7 +216,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                                     onClick={() => {
                                         setBgImage(`url('${process.env.PUBLIC_URL}/assets/ustp_theme.png')`);
-                                        setShowThemes(false); // Close dropdown after selection
+                                        setShowThemes(false); 
                                     }}
                                 >
                                     USTP
@@ -225,7 +225,7 @@ const StudentLeftSidebar = ({ setBgImage }) => {
                                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                                     onClick={() => {
                                         setBgImage(`url('${process.env.PUBLIC_URL}/assets/white_theme.png')`);
-                                        setShowThemes(false); // Close dropdown after selection
+                                        setShowThemes(false); 
                                     }}
                                 >
                                     Default

@@ -48,7 +48,6 @@ $result = $stmt->get_result();
 
 $students = [];
 while ($row = $result->fetch_assoc()) {
-    // REMOVED: $row['name'] = trim($row['firstname'] . ' ' . $row['middlename'] . ' ' . $row['lastname']);
     $students[] = $row;
 }
 

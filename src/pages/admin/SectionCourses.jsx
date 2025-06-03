@@ -15,35 +15,33 @@ function SectionCourses() {
     const [message, setMessage] = useState("");
     const [isMessageError, setIsMessageError] = useState(false);
 
-    // Helper function to show floating message
     const showFloatingMessage = (msg, isError) => {
         setMessage(msg);
         setIsMessageError(isError);
         setTimeout(() => {
             setMessage("");
             setIsMessageError(false);
-        }, 3000); // Message disappears after 3 seconds
+        }, 3000);
     };
 
     const handleNavigate = (path) => {
         navigate(path);
     };
 
-    // Helper function to convert 24-hour time to 12-hour format
     const formatTimeTo12Hour = (time24) => {
-        if (!time24) return 'N/A'; // Handle cases where time might be null or undefined
+        if (!time24) return 'N/A'; 
 
         try {
             const [hours, minutes] = time24.split(':');
             let hour = parseInt(hours, 10);
             const ampm = hour >= 12 ? 'PM' : 'AM';
             hour = hour % 12;
-            hour = hour === 0 ? 12 : hour; // The hour '0' should be '12' in 12-hour format
+            hour = hour === 0 ? 12 : hour; 
 
             return `${hour}:${minutes} ${ampm}`;
         } catch (e) {
             console.error("Error formatting time:", time24, e);
-            return time24; // Return original if formatting fails
+            return time24; 
         }
     };
 
@@ -72,8 +70,7 @@ function SectionCourses() {
 
     useEffect(() => {
         fetchSectionCourses();
-    }, [sectionId]); // fetchSectionCourses is implicitly stable due to no external dependencies other than sectionId which is in dependency array
-
+    }, [sectionId]); 
     const handleDeleteClick = (course) => {
         setCourseToDelete(course);
         setIsDeleteModalOpen(true);

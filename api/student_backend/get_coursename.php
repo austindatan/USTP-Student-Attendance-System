@@ -4,15 +4,14 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
-include_once __DIR__ . '/../../src/conn.php'; // Your database connection file
+include_once __DIR__ . '/../../src/conn.php'; 
 
 $response = [];
 
 if (isset($_GET['student_id']) && isset($_GET['course_code'])) {
     $studentId = intval($_GET['student_id']);
-    $courseCode = $_GET['course_code']; // Get the course_code from the URL
+    $courseCode = $_GET['course_code']; 
 
-    // SQL query to join tables and fetch the course_name, image, and hexcode
     $stmt = $conn->prepare("
         SELECT
             course.course_name,
@@ -32,7 +31,6 @@ if (isset($_GET['student_id']) && isset($_GET['course_code'])) {
         exit();
     }
 
-    // 'i' for integer (student_id), 's' for string (course_code)
     $stmt->bind_param("is", $studentId, $courseCode);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -40,8 +38,8 @@ if (isset($_GET['student_id']) && isset($_GET['course_code'])) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $response['course_name'] = $row['course_name'];
-        $response['image'] = $row['image'];   // Included image in response
-        $response['hexcode'] = $row['hexcode']; // Included hexcode in response
+        $response['image'] = $row['image'];  
+        $response['hexcode'] = $row['hexcode'];
     } else {
         $response['error'] = "Course not found for the given student and course code.";
     }

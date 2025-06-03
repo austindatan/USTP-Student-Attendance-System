@@ -2,14 +2,13 @@
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: DELETE, POST, OPTIONS'); // Add POST
+header('Access-Control-Allow-Methods: DELETE, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Accept POST with _method override
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 

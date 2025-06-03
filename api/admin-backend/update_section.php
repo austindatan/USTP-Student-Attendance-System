@@ -1,5 +1,4 @@
 <?php
-// update_section.php (Already mostly correct based on your provided code)
 
 header("Content-Type: application/json");
 header('Access-Control-Allow-Origin: *');
@@ -12,27 +11,23 @@ $data = json_decode(file_get_contents("php://input"));
 
 $section_id = $data->section_id ?? null;
 $section_name = $data->section_name ?? '';
-$year_level_id = $data->year_level_id ?? null; // Keep this
-$semester_id = $data->semester_id ?? null;   // Keep this
+$year_level_id = $data->year_level_id ?? null; 
+$semester_id = $data->semester_id ?? null;
 
 if (!$section_id) {
     echo json_encode(["success" => false, "message" => "Section ID is missing."]);
     exit;
 }
 
-// Update only section_name, year_level_id, semester_id in the 'section' table
-// This SQL query is already correct based on your provided code for this purpose
 $sql = "UPDATE section SET section_name = ?, year_level_id = ?, semester_id = ? WHERE section_id = ?";
 $stmt = $conn->prepare($sql);
 
-// Check if statement preparation was successful
 if ($stmt === false) {
     error_log("Failed to prepare statement in update_section.php: " . $conn->error);
     echo json_encode(["success" => false, "message" => "Database error: Could not prepare statement."]);
     exit;
 }
 
-// 'siii' for string (section_name), integer (year_level_id), integer (semester_id), integer (section_id)
 $stmt->bind_param("siii", $section_name, $year_level_id, $semester_id, $section_id);
 
 if ($stmt->execute()) {

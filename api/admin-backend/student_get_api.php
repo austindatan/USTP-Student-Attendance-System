@@ -20,7 +20,7 @@ $conn->close();
 exit();
 }
 
-// Fetch main student details
+// Fetch student details
 $query_student = "
 SELECT 
 	student_id, email, firstname, middlename, lastname, date_of_birth,
@@ -50,7 +50,6 @@ exit();
 $student = $result_student->fetch_assoc();
 $stmt_student->close();
 
-// Fetch all associated student_details and section_courses for this student
 $query_enrollments = "
 SELECT 
 	sd.student_details_id,
@@ -105,7 +104,6 @@ while ($row = $result_enrollments->fetch_assoc()) {
 }
 $stmt_enrollments->close();
 
-// Combine main student data with enrollments
 $student['enrollments'] = $enrollments;
 
 echo json_encode($student);

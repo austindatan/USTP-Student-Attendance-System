@@ -50,13 +50,13 @@ if ($count > 0) {
 // Prepare and execute the INSERT statement
 $sql = "INSERT INTO course (course_code, course_name, description) VALUES (?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sss", $course_code, $course_name, $description); // Bind course_code here
+$stmt->bind_param("sss", $course_code, $course_name, $description);
 
 if ($stmt->execute()) {
     echo json_encode([
         "success" => true,
         "message" => "Course added successfully.",
-        "course_code" => $course_code // Return the code that was used
+        "course_code" => $course_code 
     ]);
 } else {
     echo json_encode([

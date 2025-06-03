@@ -26,14 +26,14 @@ export default function InstructorAdminPage() {
                     setInstructors([]);
                     setMessage(res.data.error || 'Failed to load instructors due to data error.');
                     setIsMessageError(true);
-                    setTimeout(() => setMessage(""), 3000); // Auto-hide after 3 seconds
+                    setTimeout(() => setMessage(""), 3000);
                 }
             })
             .catch(() => {
                 setError("Failed to fetch instructors.");
                 setMessage('Failed to fetch instructors. Please check your network connection or server.');
                 setIsMessageError(true);
-                setTimeout(() => setMessage(""), 3000); // Auto-hide after 3 seconds
+                setTimeout(() => setMessage(""), 3000);
             })
             .finally(() => setLoading(false));
     }, []); 
@@ -55,24 +55,21 @@ export default function InstructorAdminPage() {
             .then((res) => {
                 if (res.data.success) {
                     setInstructors(instructors.filter(i => i.instructor_id !== selectedInstructor.instructor_id));
-                    // UPDATED: Use floating message for success
                     setMessage("Instructor deleted successfully!");
                     setIsMessageError(false);
                 } else {
-                    // UPDATED: Use floating message for deletion failure
                     setMessage(res.data.message || "Failed to delete instructor.");
                     setIsMessageError(true);
                 }
             })
             .catch(() => {
-                // UPDATED: Use floating message for delete error
                 setMessage("An error occurred while deleting the instructor. Please try again.");
                 setIsMessageError(true);
             })
             .finally(() => {
                 setIsModalOpen(false);
                 setSelectedInstructor(null);
-                setTimeout(() => { // Auto-hide the message after 3 seconds
+                setTimeout(() => { 
                     setMessage("");
                     setIsMessageError(false);
                 }, 3000);
@@ -86,7 +83,7 @@ export default function InstructorAdminPage() {
 
     return (
         <div className="font-dm-sans bg-cover bg-center bg-fixed min-h-screen flex flex-col overflow-y-auto">
-            {/* ADDED: Floating message display */}
+            {/* Floating message display */}
             {message && (
                 <div className={`fixed top-4 right-4 p-3 rounded-md shadow-lg z-50 transition-opacity duration-300 ${isMessageError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
                     {message}

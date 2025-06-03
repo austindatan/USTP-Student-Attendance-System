@@ -26,7 +26,7 @@ $student_id = $input['student_id'];
 
 error_log(LOG_PREFIX . " Processing attendance summary for student_id: '{$student_id}'");
 
-// Main SQL query
+// SQL query
 $sql = "
     SELECT 
         c.course_name AS course,

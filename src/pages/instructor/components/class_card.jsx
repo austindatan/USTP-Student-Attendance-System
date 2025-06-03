@@ -1,8 +1,6 @@
 function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, bgColor = "bg-[#0097b2]"}) {
 
-    // Helper function to format 24-hour time to 12-hour AM/PM
     const formatTime = (timeString24hr) => {
-        // Handle cases where time string might be null, undefined, or empty
         if (!timeString24hr) {
             return '';
         }
@@ -10,33 +8,25 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
         try {
             const [hours, minutes, seconds] = timeString24hr.split(':');
 
-            // Basic validation for numbers
             if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) {
                 throw new Error("Invalid time components");
             }
 
-            // Create a dummy Date object. The date part doesn't matter for time formatting.
             const dummyDate = new Date(2000, 0, 1, parseInt(hours), parseInt(minutes), parseInt(seconds));
 
             const options = {
-                hour: 'numeric',   // '2-digit' for 01, 'numeric' for 1
-                minute: '2-digit', // '2-digit' ensures 05, 06 etc.
-                // second: '2-digit', // Uncomment if you want seconds displayed
-                hour12: true       // Set to true for 12-hour format with AM/PM
+                hour: 'numeric',   
+                minute: '2-digit',
+                hour12: true
             };
 
-            // You can specify a locale (e.g., 'en-US') or let it default to the user's browser locale
             return dummyDate.toLocaleTimeString('en-US', options);
         } catch (error) {
             console.error("Error formatting time string:", timeString24hr, error);
-            // Fallback to the original string or a custom error message
             return timeString24hr;
         }
     };
 
-    // Prepare schedule parts for display.
-    // It's good practice to do this once outside the JSX,
-    // especially since you're calling split multiple times.
     let displayDay1 = '';
     let displayTime1 = '';
     let displayDay2 = '';
@@ -44,18 +34,15 @@ function ClassCard({ isLoading, onClick, code, title, room, schedule, bgImage, b
 
     if (schedule && !isLoading) {
         const parts = schedule.split(" ");
-        // Ensure we have enough parts to safely access the indices
-        if (parts.length > 5) { // Need at least 6 parts (0 to 5)
+        if (parts.length > 5) { 
             displayDay1 = parts[0];
-            displayTime1 = formatTime(parts[3]); // Assuming parts[3] is the first time string
+            displayTime1 = formatTime(parts[3]); 
 
-            displayDay2 = parts[2]; // Assuming parts[2] is the second day
-            displayTime2 = formatTime(parts[5]); // Assuming parts[5] is the second time string
+            displayDay2 = parts[2]; 
+            displayTime2 = formatTime(parts[5]); 
         } else {
             console.warn("Schedule string does not have enough parts for expected format:", schedule);
-            // Handle cases where schedule might not conform to the expected format
-            // Perhaps display the raw schedule or an "N/A"
-            displayDay1 = schedule; // Fallback to displaying the whole raw string if insufficient parts
+            displayDay1 = schedule; 
         }
     }
 

@@ -70,7 +70,7 @@ export default function AddInstructor() {
             country: '',
             image: null,
         });
-        // Clear file input manually if needed (not directly controlled by value prop)
+        // Clears file input
         const fileInput = document.querySelector('input[name="image"]');
         if (fileInput) fileInput.value = '';
     };

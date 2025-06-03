@@ -6,7 +6,6 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 include __DIR__ . '/../../src/conn.php'; 
 
-// Check for database connection error
 if ($conn->connect_error) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed: ' . $conn->connect_error]);
@@ -14,15 +13,13 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $view = $_GET['view'] ?? 'active'; // Default to 'active' view
+    $view = $_GET['view'] ?? 'active'; 
 
     $sql = "";
     $stmt = null;
     $dropRequests = [];
 
     if ($view === 'active') {
-        // Fetch active/pending requests from drop_request table
-        // Use INNER JOINs as these student_details should still exist
         $sql = "
             SELECT
                 s.student_id,
@@ -46,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt = $conn->prepare($sql);
 
     } elseif ($view === 'history') {
-        // Fetch history from the new drop_history table
         $sql = "
             SELECT
                 history_id AS drop_request_id, -- Alias to match frontend's expected ID field
@@ -98,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo json_encode($dropRequests);
 
 } else {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405); 
     echo json_encode(['error' => 'Invalid request method. Only GET is allowed for this endpoint.']);
 }
 ?>

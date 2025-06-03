@@ -28,18 +28,16 @@ export default function AddStudent() {
         semester_id: '',
     });
 
-    // To lock academic details once selected
+    //locks academic details
     const [academicDetailsLocked, setAcademicDetailsLocked] = useState(false);
 
-    // Dropdown options states
+    // Dropdown options
     const [programDetails, setProgramDetails] = useState([]);
     const [yearLevels, setYearLevels] = useState([]);
     const [semesters, setSemesters] = useState([]);
 
-    // State to manage multiple enrollments
-    const [enrollments, setEnrollments] = useState([]); // Array to hold all enrollments for this new student
-
-    // State for a *new* enrollment being added (only section_course_id needed now)
+    // manages multiple enrollments
+    const [enrollments, setEnrollments] = useState([]); 
     const [newEnrollmentSectionCourseId, setNewEnrollmentSectionCourseId] = useState('');
     const [cachedSections, setCachedSections] = useState({});
 
@@ -205,10 +203,10 @@ export default function AddStudent() {
             year_level_id: '',
             semester_id: '',
         });
-        setAcademicDetailsLocked(false); // Unlock the dropdowns
-        setEnrollments([]); // Clear all added enrollments, as they depend on these details
-        setNewEnrollmentSectionCourseId(''); // Clear the pending section selection
-        setCachedSections({}); // Clear section cache as it depends on academic details
+        setAcademicDetailsLocked(false);
+        setEnrollments([]);
+        setNewEnrollmentSectionCourseId('');
+        setCachedSections({}); 
     };
 
     const handleResetForm = () => {
@@ -237,7 +235,6 @@ export default function AddStudent() {
 
     const handleOpenAddStudentModal = (e) => {
         e.preventDefault();
-        // Validate main student personal info
         if (
             !formData.firstname ||
             !formData.lastname ||
@@ -250,7 +247,7 @@ export default function AddStudent() {
             return;
         }
 
-        // Validate overall academic details are selected
+        // Validate academic details 
         if (
             !studentAcademicDetails.program_details_id ||
             !studentAcademicDetails.year_level_id ||
@@ -272,11 +269,11 @@ export default function AddStudent() {
     const handleConfirmAddStudent = async () => {
         setIsLoading(true);
         const submissionData = new FormData();
-        // Append all formData fields
+        // Append formData fields
         Object.entries(formData).forEach(([key, value]) => {
             submissionData.append(key, value);
         });
-        // Append student's main academic details
+        // Append academic details
         Object.entries(studentAcademicDetails).forEach(([key, value]) => {
             submissionData.append(key, value);
         });
@@ -325,7 +322,7 @@ export default function AddStudent() {
         );
     }
 
-    // Determine if the "Add Class" section should be enabled
+    // Add Class button
     const isAcademicDetailsSelected = studentAcademicDetails.program_details_id &&
                                        studentAcademicDetails.year_level_id &&
                                        studentAcademicDetails.semester_id;

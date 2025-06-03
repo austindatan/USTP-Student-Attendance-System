@@ -32,7 +32,6 @@ function deleteOldImage($conn, $student_id) {
     $result = $stmt->get_result();
     if ($row = $result->fetch_assoc()) {
         $oldImage = $row["image"];
-        // MODIFIED: Set upload directory to ustp-student-attendance/uploads
         $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads';
 
         if ($oldImage && file_exists($uploadDir . DIRECTORY_SEPARATOR . $oldImage)) {
@@ -44,10 +43,10 @@ function deleteOldImage($conn, $student_id) {
     $stmt->close();
 }
 
-// Get student_id from URL parameter
+// Get student_id
 $student_id = $_GET["student_id"] ?? null;
 
-// Basic Validation for student_id
+// validate
 if (empty($student_id)) {
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Missing student ID for update."]);
@@ -55,12 +54,11 @@ if (empty($student_id)) {
     exit;
 }
 
-$conn->begin_transaction(); // Start a transaction for atomicity
+$conn->begin_transaction(); 
 
 try {
-    // Get main student data from POST
     $email = $_POST["email"] ?? "";
-    $password = $_POST["password"] ?? ""; // Password might be empty if not changed
+    $password = $_POST["password"] ?? ""; 
     $firstname = $_POST["firstname"] ?? "";
     $middlename = $_POST["middlename"] ?? "";
     $lastname = $_POST["lastname"] ?? "";
@@ -72,15 +70,14 @@ try {
     $zipcode = $_POST["zipcode"] ?? "";
     $country = $_POST["country"] ?? "";
 
-    // Validate required student personal fields
+    // Validate
     if (empty($firstname) || empty($lastname) || empty($email) || empty($date_of_birth) || empty($contact_number)) {
         throw new Exception("Missing required student personal information (firstname, lastname, email, date of birth, contact number).");
     }
 
     $imagePath = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        deleteOldImage($conn, $student_id); // Delete old image before uploading new one
-        // MODIFIED: Set upload directory to ustp-student-attendance/uploads
+        deleteOldImage($conn, $student_id); // Deletes old image
         $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads';
         
         if (!is_dir($uploadDir)) {
@@ -88,7 +85,7 @@ try {
         }
 
         $filename = uniqid() . "_" . basename($_FILES['image']['name']);
-        $targetFile = $uploadDir . DIRECTORY_SEPARATOR . $filename; // Ensure correct path concatenation
+        $targetFile = $uploadDir . DIRECTORY_SEPARATOR . $filename; 
 
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
             $imagePath = $filename;
@@ -96,7 +93,7 @@ try {
             throw new Exception("Failed to upload new image.");
         }
     } else {
-        // If no new image is uploaded, retain the existing one
+        //retains the old image
         $stmt = $conn->prepare("SELECT image FROM student WHERE student_id = ?");
         $stmt->bind_param("i", $student_id);
         $stmt->execute();
@@ -108,7 +105,6 @@ try {
     }
 
     // Update student table
-    // Only update password if it's provided (i.e., not empty)
     $sql_update_student = "UPDATE student SET
         email = ?, firstname = ?, middlename = ?, lastname = ?,
         date_of_birth = ?, contact_number = ?, street = ?, city = ?, province = ?,
@@ -116,7 +112,7 @@ try {
         " . (!empty($password) ? ", password = ?" : "") . "
         WHERE student_id = ?";
 
-    $types = "ssssssssssss"; // Base types for the 12 fields
+    $types = "ssssssssssss";
     $params = [
         $email, $firstname, $middlename, $lastname,
         $date_of_birth, $contact_number, $street, $city, $province,
@@ -124,11 +120,11 @@ try {
     ];
 
     if (!empty($password)) {
-        $types .= "s"; // Add type for password
-        $params[] = $password; // Add password to params
+        $types .= "s"; 
+        $params[] = $password; 
     }
-    $types .= "i"; // Add type for student_id
-    $params[] = $student_id; // Add student_id to params
+    $types .= "i";
+    $params[] = $student_id;
 
     $stmt_student = $conn->prepare($sql_update_student);
     if ($stmt_student === false) {
@@ -141,13 +137,13 @@ try {
     }
     $stmt_student->close();
 
-    // Handle enrollments synchronization
+    // Handle enrollments
     $submittedEnrollments = json_decode($_POST['enrollments'] ?? '[]', true);
     if (!is_array($submittedEnrollments)) {
         throw new Exception("Invalid enrollment data format.");
     }
 
-    // Fetch current enrollments for this student from the database
+    // Fetch current enrollments
     $currentEnrollments = [];
     $stmt_fetch_enrollments = $conn->prepare("SELECT student_details_id, section_course_id, program_details_id FROM student_details WHERE student_id = ?");
     if ($stmt_fetch_enrollments === false) {
@@ -221,11 +217,11 @@ try {
         $stmt_insert_enrollment->close();
     }
 
-    $conn->commit(); // Commit the transaction if all operations are successful
+    $conn->commit(); 
     echo json_encode(["success" => true, "message" => "Student and enrollments updated successfully."]);
 
 } catch (Exception $e) {
-    $conn->rollback(); // Rollback transaction on error
+    $conn->rollback(); 
     http_response_code(500);
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 } finally {

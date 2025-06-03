@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { createPortal } from 'react-dom'; // Import createPortal for modals
+import { createPortal } from 'react-dom'; 
 
 const AddExcuseRequest = ({ studentId }) => {
     console.log("AddExcuseRequest (render): received studentId prop =", studentId);
@@ -22,9 +22,8 @@ const AddExcuseRequest = ({ studentId }) => {
     const [error, setError] = useState('');
     const fileInputRef = useRef(null);
 
-    // State for confirmation modal
+    // confirmation modal
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-    // New state for success modal
     const [showSuccessModal, setShowSuccessModal] = useState(false);
 
 
@@ -115,11 +114,10 @@ const AddExcuseRequest = ({ studentId }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Client-side validation before opening modal
         if (!selectedStudentDetailsId || !instructorId || !reason || !dateOfAbsence) {
             setMessage("Please fill in all required fields (Course, Instructor, Reason, Date of Absence).");
             setSuccess(false);
-            return; // Stop here, do not open modal
+            return; 
         }
 
         // Open confirmation modal
@@ -151,9 +149,9 @@ const AddExcuseRequest = ({ studentId }) => {
             setSuccess(isSuccess);
 
             if (isSuccess) {
-                // Instead of navigating immediately, show success modal
                 setShowSuccessModal(true);
-                // Reset form fields, but don't navigate yet
+
+                // Reset form fields
                 setCourseId('');
                 setSelectedStudentDetailsId('');
                 setInstructor(null);
@@ -178,17 +176,17 @@ const AddExcuseRequest = ({ studentId }) => {
         }
     };
 
-    // Function to handle closing success modal and navigating
+    // closing success modal 
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
-        navigate('/student-dashboard'); // Navigate after user acknowledges success
+        navigate('/student-dashboard'); 
     };
 
     return (
         <div className="font-dm-sans min-h-screen overflow-y-auto">
             <section className="lg:w-[75%] xl:w-[76%] w-full pt-12 px-6 sm:px-6 md:px-12">
                 <form
-                    onSubmit={handleSubmit} // This now just opens the modal
+                    onSubmit={handleSubmit}
                     className="font-dm-sans p-8 text-left w-full max-w-xl mx-auto my-10 bg-white rounded-xl shadow-2xl transition-all duration-300 space-y-6"
                 >
                     {/* Form Title */}
@@ -279,7 +277,7 @@ const AddExcuseRequest = ({ studentId }) => {
 
                     {/* Submit Button */}
                     <button
-                        type="submit" // This button now triggers the modal
+                        type="submit"
                         disabled={loading}
                         className={`w-full text-white font-bold py-3 rounded-lg transition-all duration-300 ${
                             loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-700 hover:bg-blue-800 shadow-md"

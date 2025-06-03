@@ -20,10 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $instructors[] = $row;
     }
 
-    // --- CHANGE STARTS HERE ---
-    // Wrap the instructors array in a JSON object with 'success' and 'instructors' keys
     echo json_encode(["success" => true, "instructors" => $instructors]);
-    // --- CHANGE ENDS HERE ---
 
 } else {
     http_response_code(405);

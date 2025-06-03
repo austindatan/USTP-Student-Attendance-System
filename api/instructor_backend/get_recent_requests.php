@@ -15,7 +15,7 @@ $sql = "SELECT
             er.excused_request_id AS id,
             er.reason AS subject,
             CONCAT(s.firstname, ' ', s.lastname) AS sender,
-            er.date_requested AS date_requested_raw -- Select the raw date for formatting in PHP
+            er.date_requested AS date_requested_raw 
         FROM
             excused_request er
         JOIN
@@ -33,7 +33,6 @@ $sql = "SELECT
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {
-    // Log error for debugging, don't expose sensitive info to user
     error_log("Failed to prepare statement for get_recent_requests.php: " . $conn->error);
     echo json_encode(["success" => false, "message" => "Database query preparation failed."]);
     exit();

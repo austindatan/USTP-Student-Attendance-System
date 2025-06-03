@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../App.css'; // Ensure this CSS file is correctly imported and defines global styles
+import '../../App.css'; 
 import ClassCard from './components/class_card';
 import { format } from 'date-fns';
 
@@ -65,7 +65,7 @@ export default function Classes_Dashboard({ selectedDate }) {
   return (
     <section className="w-full pt-8 px-4 sm:px-6 md:px-12 mx-auto">
       {/* Search Input */}
-      <div className="relative w-full sm:w-80 md:w-96 mb-6"> {/* Added mb-6 for spacing */}
+      <div className="relative w-full sm:w-80 md:w-96 mb-6"> 
         <div className="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
           <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 20 20">
             <path

@@ -161,7 +161,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
     }, [instructor, navigate]);
 
-    // Fetch section info for header (only if not passed via location state)
+    // Fetch section info
     useEffect(() => {
         console.log("DEBUG (fetchSectionInfo useEffect): Fetching section info for sectionId:", sectionId);
         if (!sectionInfo && sectionId) {
@@ -520,7 +520,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             });
             const data = await response.json();
             if (data.success) {
-                setShowUnlockSuccessModal(true); // Show the success modal instead of alert
+                setShowUnlockSuccessModal(true);
                 setIsAttendanceLocked(false);
                 setShowUnlockModal(false);
                 setUnlockPasscode('');
@@ -533,9 +533,9 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
     };
 
-    // Function to handle locking attendance after confirmation
+    // Function to handle locking attendance
     const handleLockAttendanceConfirm = async () => {
-        setShowLockConfirmModal(false); // Close the confirmation modal immediately
+        setShowLockConfirmModal(false); 
 
         try {
             const response = await fetch('http://localhost/ustp-student-attendance/api/instructor_backend/lock_attendance.php', {
@@ -550,7 +550,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
             });
             const data = await response.json();
             if (data.success) {
-                setShowLockSuccessModal(true); // Show the success modal instead of alert
+                setShowLockSuccessModal(true); 
                 setIsAttendanceLocked(true);
             } else {
                 alert("Failed to lock attendance: " + data.message);

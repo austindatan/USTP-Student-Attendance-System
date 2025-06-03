@@ -45,7 +45,7 @@ const EditSection = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch single section data
+                // Fetch section data
                 const sectionRes = await axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/get_single_section.php?section_id=${id}`);
                 if (sectionRes.data.success && sectionRes.data.section) {
                     setFormData({

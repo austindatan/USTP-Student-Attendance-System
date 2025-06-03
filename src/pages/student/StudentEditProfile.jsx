@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Skeleton component for loading states
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
 );
 
 const StudentEditProfile = () => {
   const [formData, setFormData] = useState({
-    student_id: "", // This will be updated with the fetched 'id' later
+    student_id: "", 
     email: "",
     password: "",
     firstname: "",
@@ -23,20 +22,19 @@ const StudentEditProfile = () => {
     country: "",
     image: "",
   });
-  const [message, setMessage] = useState(""); // For general error/info messages
+  const [message, setMessage] = useState(""); 
   const [loading, setLoading] = useState(true);
   const [previewURL, setPreviewURL] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State for confirmation modal
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false); 
 
   const navigate = useNavigate();
 
-  // Effect to fetch student data on component mount
+  // fetch student data on component mount
   useEffect(() => {
     let studentIdToFetch = null;
     try {
       const storedStudent = JSON.parse(localStorage.getItem("student"));
-      // Look for 'id' instead of 'student_id' from localStorage
       if (storedStudent && storedStudent.id) {
         studentIdToFetch = storedStudent.id;
       }
@@ -56,7 +54,6 @@ const StudentEditProfile = () => {
     )
       .then((res) => {
         if (!res.ok) {
-          // Handle HTTP errors (e.g., 404, 500)
           return res.text().then((text) => {
             throw new Error(
               `HTTP error! Status: ${res.status}, Response: ${text.substring(
@@ -73,7 +70,7 @@ const StudentEditProfile = () => {
           // Set form data with fetched student information
           setFormData(data.student);
 
-          // Resolve and set the image preview URL
+          // set the image preview URL
           const image = data.student.image;
           const resolvedURL = image
             ? `http://localhost/ustp-student-attendance/uploads/${image.replace(
@@ -83,52 +80,46 @@ const StudentEditProfile = () => {
             : "";
           setPreviewURL(resolvedURL);
         } else {
-          // Display error message from the API
           setMessage(`Failed to fetch student info: ${data.message}`);
         }
-        setTimeout(() => setLoading(false), 800); // Simulate loading time
+        setTimeout(() => setLoading(false), 800); 
       })
       .catch((error) => {
-        // Catch network errors or JSON parsing issues
         console.error("Fetch error during profile load:", error);
         setMessage(`Server error while loading profile: ${error.message}`);
-        setTimeout(() => setLoading(false), 800); // Simulate loading time
+        setTimeout(() => setLoading(false), 800); 
       });
   }, []);
 
-  // Handler for input field changes
+  // input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handler for file input change (image upload)
+  // file input change (image upload)
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setPreviewURL(URL.createObjectURL(file)); // Create a local URL for image preview
+      setPreviewURL(URL.createObjectURL(file)); 
     }
   };
 
-  // Handler for form submission (shows confirmation modal)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setShowConfirmationModal(true); // Show the confirmation modal
+    setShowConfirmationModal(true); 
   };
 
-  // Function to confirm and proceed with profile update
   const confirmUpdate = async () => {
-    setShowConfirmationModal(false); // Hide the confirmation modal
-    setMessage(""); // Clear any previous messages
+    setShowConfirmationModal(false); 
+    setMessage(""); 
 
     const formPayload = new FormData();
-    // Append all current form data to the FormData object
     Object.keys(formData).forEach((key) =>
       formPayload.append(key, formData[key])
     );
 
-    // Append the selected image file if it exists
     if (selectedFile) {
       formPayload.append("image", selectedFile);
     }
@@ -155,26 +146,23 @@ const StudentEditProfile = () => {
 
       const result = await res.json();
       if (result.success) {
-        // Update localStorage with the new student data
+        // Update localStorage 
         const { firstname, middlename, lastname } = result.student;
         const name = [firstname, middlename, lastname].filter(Boolean).join(" ");
         const updatedStudent = { ...result.student, id: result.student.student_id, name };
         localStorage.setItem("student", JSON.stringify(updatedStudent));
 
-        // Directly navigate to dashboard on success, without a success modal
         navigate("/student-dashboard");
       } else {
-        // Display API-returned error message
         setMessage(`Profile update failed: ${result.message}`);
       }
     } catch (error) {
       console.error("Update fetch error:", error);
-      // Display client-side error message
       setMessage("Profile update failed due to a server error: " + error.message);
     }
   };
 
-  // Handler for navigating back to the dashboard
+  // navigating back to the dashboard
   const handleBack = () => {
     navigate("/student-dashboard");
   };
@@ -203,7 +191,7 @@ const StudentEditProfile = () => {
       {message && <p className="mb-4 text-red-500 text-center">{message}</p>}
 
       <form
-        onSubmit={handleSubmit} // This now triggers the confirmation modal
+        onSubmit={handleSubmit} 
         encType="multipart/form-data"
         className="grid gap-4"
       >
@@ -415,7 +403,7 @@ const StudentEditProfile = () => {
                 Cancel
               </button>
               <button
-                onClick={confirmUpdate} // Call confirmUpdate when confirmed
+                onClick={confirmUpdate} 
                 className="px-4 py-2 rounded bg-blue-700 hover:bg-blue-800 text-white"
               >
                 Confirm

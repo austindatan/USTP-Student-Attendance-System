@@ -26,10 +26,10 @@ $sql = "SELECT
             section_courses sc ON sd.section_course_id = sc.section_course_id
         WHERE
             sc.instructor_id = ?
-            AND er.date_requested >= DATE_SUB(CURDATE(), INTERVAL 5 DAY) -- New condition: filter for last 5 days
+            AND er.date_requested >= DATE_SUB(CURDATE(), INTERVAL 5 DAY) 
         ORDER BY
             er.date_requested DESC
-        LIMIT 5"; // This limit still applies to the most recent 5 within that 5-day window
+        LIMIT 5"; 
 
 $stmt = $conn->prepare($sql);
 

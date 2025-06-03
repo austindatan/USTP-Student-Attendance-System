@@ -23,7 +23,7 @@ if ($conn->connect_error) {
 $data = json_decode(file_get_contents('php://input'), true);
 
 $section_course_id = $data['section_course_id'] ?? null;
-$image_path = $data['image_path'] ?? null; // Expecting the full relative path from root, e.g., 'uploads/section_images/classes_vector_2.png'
+$image_path = $data['image_path'] ?? null; 
 
 if (!$section_course_id) {
     http_response_code(400);
@@ -37,8 +37,6 @@ if (!$image_path) {
     exit;
 }
 
-// Optional: Validate if the image_path refers to one of your allowed images
-// You could have a predefined list in PHP as well, or just trust the frontend.
 $allowedImagePaths = [
     'classes_vector_2.png',
     'classes_vector_3.png',
@@ -58,7 +56,6 @@ if (!in_array($image_path, $allowedImagePaths)) {
 try {
     $conn->begin_transaction();
 
-    // Update the database with the new image path
     $stmt_update = $conn->prepare("UPDATE section_courses SET image = ? WHERE section_course_id = ?");
     if (!$stmt_update) {
         throw new Exception("Failed to prepare update statement: " . $conn->error);

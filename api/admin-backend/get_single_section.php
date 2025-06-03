@@ -1,5 +1,4 @@
 <?php
-// get_single_section.php
 
 header("Content-Type: application/json");
 header('Access-Control-Allow-Origin: *');
@@ -22,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 
-    // SQL query to fetch section details including year_level and semester information
     $sql = "SELECT
                 s.section_id,
                 s.section_name,

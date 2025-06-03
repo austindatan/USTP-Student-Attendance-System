@@ -56,7 +56,7 @@ export default function EditInstructor() {
                     setForm({
                         instructor_id: instructor.instructor_id || '',
                         email: instructor.email || '',
-                        password: '', // Password should usually not be pre-filled for security
+                        password: '', 
                         firstname: instructor.firstname || '',
                         middlename: instructor.middlename || '',
                         lastname: instructor.lastname || '',
@@ -67,7 +67,7 @@ export default function EditInstructor() {
                         province: instructor.province || '',
                         zipcode: instructor.zipcode || '',
                         country: instructor.country || '',
-                        image: null, // Image file input should be null initially
+                        image: null, 
                     });
                 } else {
                     showMessageModal('Instructor Not Found', 'Instructor not found or missing ID.', 'error');
@@ -97,7 +97,7 @@ export default function EditInstructor() {
             return;
         }
 
-        // Basic validation before opening modal
+        // validation
         if (!form.email || !form.firstname || !form.lastname || !form.date_of_birth || !form.contact_number) {
             showMessageModal(
                 'Missing Information',

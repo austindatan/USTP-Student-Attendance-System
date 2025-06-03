@@ -4,13 +4,13 @@ import { createPortal } from 'react-dom';
 const ExcuseRequestsPage = () => {
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false); // For view details modal
+  const [showModal, setShowModal] = useState(false); 
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [modal, setModal] = useState({ show: false, id: null, type: '' }); // For confirmation modal (approve/reject/delete)
+  const [modal, setModal] = useState({ show: false, id: null, type: '' }); 
   const [instructorId, setInstructorId] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Added isLoading state
-  const [showActionSuccessModal, setShowActionSuccessModal] = useState(false); // NEW: State for action success modal
-  const [actionSuccessMessage, setActionSuccessMessage] = useState(''); // NEW: State for success message
+  const [isLoading, setIsLoading] = useState(true); 
+  const [showActionSuccessModal, setShowActionSuccessModal] = useState(false); 
+  const [actionSuccessMessage, setActionSuccessMessage] = useState('');
 
   useEffect(() => {
     const storedInstructor = localStorage.getItem("instructor");
@@ -22,23 +22,22 @@ const ExcuseRequestsPage = () => {
           setInstructorId(instructorData.instructor_id);
         } else {
           setError("Instructor data in localStorage is incomplete or missing ID. Please log in again.");
-          setIsLoading(false); // Set loading to false on error
+          setIsLoading(false); 
         }
       } catch (e) {
         setError("Failed to parse instructor data from localStorage. Please log in again.");
         console.error("Error parsing instructor data from localStorage:", e);
-        setIsLoading(false); // Set loading to false on error
+        setIsLoading(false); 
       }
     } else {
       setError("Instructor not logged in. Please log in to view requests.");
-      setIsLoading(false); // Set loading to false if no instructor
+      setIsLoading(false); 
     }
   }, []);
 
-  // Modified fetchRequests to accept a parameter controlling skeleton display
   const fetchRequests = (currentInstructorId, showSkeleton = true) => {
     setError(null);
-    if (showSkeleton) { // Only show skeleton if explicitly requested
+    if (showSkeleton) { // Only show skeleton if requested
       setIsLoading(true);
     }
 
@@ -47,15 +46,13 @@ const ExcuseRequestsPage = () => {
       setError("Cannot fetch requests: Instructor ID is missing.");
       setRequests([]);
       if (showSkeleton) {
-        setIsLoading(false); // Set loading to false if no ID and skeleton was requested
+        setIsLoading(false); 
       }
       return;
     }
 
     const MIN_LOADING_TIME_MS = 1300;
-    const startTime = showSkeleton ? Date.now() : 0; // Record start time only if skeleton is shown
-
-    // Helper function to handle final state updates and loading toggle
+    const startTime = showSkeleton ? Date.now() : 0;
     const finalizeFetch = (data, fetchError = null) => {
       const executeUpdate = () => {
         if (fetchError) {
@@ -69,11 +66,11 @@ const ExcuseRequestsPage = () => {
             setError(data.message || 'No requests found or unexpected error from backend.');
             setRequests([]);
           } else {
-            setError('Unexpected response format from backend.'); // Setting error for unexpected format
-            setRequests([]); // Clear requests on unexpected format
+            setError('Unexpected response format from backend.'); 
+            setRequests([]); 
           }
         }
-        if (showSkeleton) { // Only turn off loading if skeleton was used
+        if (showSkeleton) { 
           setIsLoading(false);
         }
       };
@@ -84,7 +81,7 @@ const ExcuseRequestsPage = () => {
         const remainingTime = MIN_LOADING_TIME_MS - elapsedTime;
         setTimeout(executeUpdate, remainingTime > 0 ? remainingTime : 0);
       } else {
-        executeUpdate(); // Execute immediately if no skeleton is desired
+        executeUpdate(); 
       }
     };
 
@@ -96,16 +93,15 @@ const ExcuseRequestsPage = () => {
         return res.json();
       })
       .then(data => {
-        finalizeFetch(data); // Call helper for success
+        finalizeFetch(data); 
       })
       .catch(err => {
-        finalizeFetch(null, err); // Call helper for error
+        finalizeFetch(null, err);
       });
   };
 
   useEffect(() => {
     if (instructorId) {
-      // On initial page load, show the skeleton
       fetchRequests(instructorId, true);
     }
   }, [instructorId]);
@@ -121,11 +117,11 @@ const ExcuseRequestsPage = () => {
 
   const closeModal = () => {
     setModal({ show: false, id: null, type: '' });
-    setShowModal(false); // Close view details modal as well
+    setShowModal(false); 
     setSelectedRequest(null);
   };
 
-  // NEW: Function to close the action success modal
+  //closes the action success modal
   const closeActionSuccessModal = () => {
     setShowActionSuccessModal(false);
     setActionSuccessMessage('');
@@ -143,7 +139,7 @@ const ExcuseRequestsPage = () => {
       endpoint = "http://localhost/ustp-student-attendance/api/instructor_backend/update_excuse_req.php";
       method = "PUT";
       body = JSON.stringify({ excused_request_id: modal.id, status });
-      successMessage = `Request ${status.toLowerCase()} successfully!`; // Dynamic message
+      successMessage = `Request ${status.toLowerCase()} successfully!`; 
       errorMessage = "Failed to update status.";
     } else if (modal.type === "delete") {
       endpoint = "http://localhost/ustp-student-attendance/api/instructor_backend/delete_excuse_req.php";
@@ -166,11 +162,9 @@ const ExcuseRequestsPage = () => {
       });
 
       const result = await res.json();
-      if (result.success) { // Assuming your PHP scripts return { success: true } on success
-        // REPLACE alert with modal
+      if (result.success) { 
         setActionSuccessMessage(successMessage);
         setShowActionSuccessModal(true);
-        // After a button press, re-fetch without showing the skeleton
         fetchRequests(instructorId, false);
       } else {
         alert(result.message || errorMessage);

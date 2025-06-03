@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom"; // Import createPortal
+import { createPortal } from "react-dom";
 
 export default function DropRequests() {
   const [requests, setRequests] = useState([]);
@@ -8,8 +8,8 @@ export default function DropRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState({ isOpen: false, type: null, id: null });
   const [selectedReason, setSelectedReason] = useState("");
-  const [showHistory, setShowHistory] = useState(false); // Controls 'Dropped' view (fetches history)
-  const [showRejected, setShowRejected] = useState(false); // Controls 'Rejected' view (filters history)
+  const [showHistory, setShowHistory] = useState(false); 
+  const [showRejected, setShowRejected] = useState(false);
 
   const [showDropSuccessModal, setShowDropSuccessModal] = useState(false);
   const [showRejectSuccessModal, setShowRejectSuccessModal] = useState(false);
@@ -54,15 +54,12 @@ export default function DropRequests() {
   };
 
   useEffect(() => {
-    // Determine what to fetch based on current view states
     if (showHistory || showRejected) {
-      // If either 'Dropped' or 'Rejected' view is active, fetch 'history'
       fetchRequests('history');
     } else {
-      // Otherwise, fetch 'active' requests
       fetchRequests('active');
     }
-  }, [showHistory, showRejected]); // Re-run effect when showHistory or showRejected changes
+  }, [showHistory, showRejected]);
 
   const openModal = (type, id, reason = "") => {
     setModal({ isOpen: true, type, id });
@@ -94,14 +91,13 @@ export default function DropRequests() {
         } else {
           if (modal.type === "drop") {
             setShowDropSuccessModal(true);
-            setShowHistory(true); // Switch to 'Dropped' view
-            setShowRejected(false); // Ensure Rejected view is off
+            setShowHistory(true); 
+            setShowRejected(false); 
           } else if (modal.type === "reject") {
             setShowRejectSuccessModal(true);
-            setShowRejected(true); // Switch to explicitly rejected view
-            setShowHistory(false); // Ensure Dropped view is off
+            setShowRejected(true); 
+            setShowHistory(false); 
           }
-          // The useEffect will handle the re-fetch because showHistory or showRejected changed.
         }
       } catch (error) {
         alert("An error occurred while performing the action.");
@@ -112,7 +108,7 @@ export default function DropRequests() {
     }
   };
 
-  // Filter requests based on search term AND current view (active, dropped, or rejected)
+  // Filter requests
   const filteredRequests = requests.filter((req) => {
     const matchesSearchTerm =
       (req.student_name &&
@@ -124,7 +120,7 @@ export default function DropRequests() {
     } else if (showRejected) {
       return matchesSearchTerm && req.status === "Rejected";
     } else {
-      // For active view, filter out 'Dropped' and 'Archived' (as per your PHP)
+      // filter out 'Dropped' and 'Archived'
       return matchesSearchTerm && req.status !== "Dropped" && req.status !== "Archived" && req.status !== "Rejected";
     }
   });

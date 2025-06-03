@@ -21,8 +21,8 @@ export default function Teacher_Dashboard({ selectedDate }) {
     const colorModalRef = useRef(null);
     const settingsButtonRef = useRef(null);
     const [lateStudents, setLateStudents] = useState([]);
-    const [isAttendanceLocked, setIsAttendanceLocked] = useState(false); // Attendance locked state
-    const [showUnlockModal, setShowUnlockModal] = useState(false); // State for unlock modal
+    const [isAttendanceLocked, setIsAttendanceLocked] = useState(false);
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
     const [unlockPasscode, setUnlockPasscode] = useState('');
   
 
@@ -33,7 +33,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     console.log("sectionInfo (top level):", sectionInfo);
     console.log("Image (top level):", sectionInfo?.image);
 
-    // Helper function to format 24-hour time to 12-hour AM/PM
+    // format 24-hour time to 12-hour AM/PM
     const formatTime = (timeString24hr) => {
         if (!timeString24hr) {
             return '';
@@ -46,32 +46,29 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 throw new Error("Invalid time components");
             }
 
-            // We'll use a dummy date for the Date object as only the time is relevant
             const dummyDate = new Date(2000, 0, 1, parseInt(hours), parseInt(minutes), parseInt(seconds));
 
             const options = {
                 hour: 'numeric',
                 minute: '2-digit',
-                hour12: true // This is the key for 12-hour format with AM/PM
+                hour12: true 
             };
 
-            // Using 'en-US' for consistent AM/PM formatting.
             return dummyDate.toLocaleTimeString('en-US', options);
         } catch (error) {
             console.error("Error formatting time string:", timeString24hr, error);
-            return timeString24hr; // Fallback to original string on error
+            return timeString24hr;
         }
     };
 
-    // Helper to get day name from selectedDate
     const getDayName = (date) => {
         console.log("DEBUG: getDayName - selectedDate (inside helper):", date);
-        const dayName = format(date || new Date(), 'EEEE'); // e.g., "Monday"
+        const dayName = format(date || new Date(), 'EEEE'); 
         console.log("DEBUG: getDayName - Day Name (inside helper):", dayName);
         return dayName;
     };
 
-    // Helper to check if today is a scheduled class day
+    // checks if today is a scheduled class day
     const isClassDay = () => {
         console.log("DEBUG: isClassDay - sectionInfo:", sectionInfo);
         console.log("DEBUG: isClassDay - sectionInfo?.schedule_day:", sectionInfo?.schedule_day);
@@ -100,7 +97,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         }
     }, [instructor, navigate]);
 
-    // Fetch section info for header (only if not passed via location state)
+    // Fetch section info
     useEffect(() => {
         console.log("DEBUG (fetchSectionInfo useEffect): Fetching section info for sectionId:", sectionId);
         if (!sectionInfo && sectionId) {
@@ -155,7 +152,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
         };
 
         fetchLockStatus();
-    }, [sectionInfo, selectedDate]); // Dependencies
+    }, [sectionInfo, selectedDate]);
 
     useEffect(() => {
         console.log("DEBUG (fetchStudents useEffect): Running. selectedDate:", selectedDate, "instructor:", instructor, "sectionId:", sectionId);

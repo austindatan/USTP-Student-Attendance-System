@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
-import ClassCard from './components/class_card'; // Correct import for ClassCard
-import { format } from 'date-fns'; // Used for formatting date for navigation
+import ClassCard from './components/class_card'; 
+import { format } from 'date-fns'; 
 
 function DashboardCard({ icon, label, count }) {
   return (
@@ -20,7 +20,6 @@ function SkeletonCard() {
   return <div className="bg-gray-200 rounded-2xl h-20 animate-pulse w-full"></div>;
 }
 
-// Skeleton for the actual ClassCard component
 function SkeletonClassCard() {
   return (
     <div className="bg-gray-200 rounded-2xl p-5 shadow-lg flex flex-col gap-3 animate-pulse w-full">
@@ -50,9 +49,9 @@ export default function StudentDashboard({ selectedDate }) {
   });
 
   const [messages, setMessages] = useState([]);
-  const [classes, setClasses] = useState([]); // State for sections/classes
+  const [classes, setClasses] = useState([]); 
 
-  // Keep student state in sync with localStorage changes (even from other tabs)
+  // Keep student state in sync
   useEffect(() => {
     const handleStorageChange = () => {
       const rawStudentData = localStorage.getItem("student");
@@ -122,7 +121,7 @@ export default function StudentDashboard({ selectedDate }) {
       )
     );
 
-    // New API call for classes, using GET and query parameter
+    // API call for classes
     const fetchClassesData = fetch(
       `http://localhost/ustp-student-attendance/api/student_backend/get_sections.php?student_id=${student.id}`
     )
@@ -133,12 +132,12 @@ export default function StudentDashboard({ selectedDate }) {
         return res.json();
       })
       .then((data) => {
-        setClasses(data); // Assuming data is directly the array of sections
+        setClasses(data); 
       })
       .catch((err) => {
         console.error('Error fetching classes:', err);
-        setClasses([]); // Set to empty array on error
-        throw err; // Re-throw to be caught by Promise.all's catch
+        setClasses([]);
+        throw err; 
       });
 
     Promise.all([fetchAttendanceData, fetchClassesData])
@@ -153,7 +152,7 @@ export default function StudentDashboard({ selectedDate }) {
         setError(err.message || "Failed to fetch dashboard data.");
       })
       .finally(() => setLoading(false));
-  }, [student, navigate]); // Depend on student and navigate
+  }, [student, navigate]); 
 
   const handleLogout = () => {
     localStorage.removeItem("student");
@@ -243,7 +242,7 @@ export default function StudentDashboard({ selectedDate }) {
                   schedule={`${section.schedule_day} ${section.start_time} – ${section.end_time}`}
                   onClick={() => handleSectionClick(section)}
                   bgImage={section.image ? `${process.env.PUBLIC_URL}/assets/${section.image}` : ''}
-                  bgColor={section.hexcode || "#0097b2"} // Default color if hexcode is missing
+                  bgColor={section.hexcode || "#0097b2"} 
                 />
               ))
             ) : (

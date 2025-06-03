@@ -21,7 +21,7 @@ function ClassCard({ code, title, room, schedule, bgImage, bgColor = "#0097b2" }
           backgroundImage: `url(${bgImage})`,
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'right 5px bottom',
-          backgroundSize: '100px', // Reduced for mobile
+          backgroundSize: '100px', 
         }}
       >
         <p className="text-white text-xs sm:text-sm font-semibold">{code}</p>

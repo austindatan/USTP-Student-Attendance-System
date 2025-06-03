@@ -2,7 +2,6 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-// Use robust include path
 include_once __DIR__ . '/../../src/conn.php';
 
 $student_id = $_GET['student_id'] ?? null;

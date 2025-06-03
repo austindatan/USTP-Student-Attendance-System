@@ -33,19 +33,12 @@ if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
     $imageTmp = $_FILES['image']['tmp_name'];
 
     $imageName = uniqid() . '_' . basename($_FILES['image']['name']);
-
-    // MODIFIED: Set upload directory to ustp-student-attendance/api/uploads
-    // Assuming this script is in `your_project/api/instructor/`
-    // `__DIR__` is `/your_project/api/instructor/`
-    // `__DIR__ . DIRECTORY_SEPARATOR . '..'` is `/your_project/api/`
-    // Then append 'uploads'
     $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
-    // Ensure correct path concatenation
     move_uploaded_file($imageTmp, $uploadDir . $imageName);
 }
 

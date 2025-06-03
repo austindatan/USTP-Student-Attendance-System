@@ -112,7 +112,7 @@ export default function AddCourse() {
                             <label className="block text-sm font-semibold text-gray-700">Course Code</label>
                             <input
                                 type="text"
-                                name="course_code" // Name matches formData key
+                                name="course_code" 
                                 value={formData.course_code}
                                 onChange={handleChange}
                                 required

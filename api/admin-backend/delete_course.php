@@ -9,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Accept POST with _method override
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 

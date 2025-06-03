@@ -1,94 +1,55 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Assuming react-router-dom is set up
+import { useNavigate } from "react-router-dom"; 
 
-/**
- * ClassDropdown Component
- * Displays a list of classes in a dropdown, adjusting its direction (up/down)
- * to prevent overlapping the bottom of the screen.
- *
- * @param {object} props - The component props.
- * @param {string} props.classes - A semicolon-separated string of class names.
- * @param {boolean} props.isLastEight - Indicates if this dropdown is for one of the last 8 students.
- */
+
 const ClassDropdown = ({ classes, isLastEight }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownDirection, setDropdownDirection] = useState('down'); // 'down' or 'up'
-  const dropdownRef = useRef(null); // Reference to the dropdown container div
-  const buttonRef = useRef(null); // Reference to the button element
+  const [dropdownDirection, setDropdownDirection] = useState('down'); 
+  const dropdownRef = useRef(null); 
+  const buttonRef = useRef(null); 
 
-  /**
-   * Toggles the dropdown's open/close state.
-   */
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
-  /**
-   * Effect to handle clicks outside the dropdown to close it.
-   */
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // If the dropdown is open and the click is outside the dropdown container, close it.
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
 
-    // Add event listener when component mounts
     document.addEventListener("mousedown", handleClickOutside);
-    // Clean up event listener when component unmounts
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount
+  }, []); 
 
-  // Split the classes string into an array and filter out empty items
-  // This needs to be done before the useEffect that depends on classList.length
-  // NOTE: The .filter(item => item !== '') removes any empty strings
-  // that might result from trailing semicolons or double semicolons in the input string.
-  // This is a common reason why "added courses" might not match "displayed courses"
-  // if the input string format creates empty entries.
   const classList = classes ? classes.split(';').map(item => item.trim()).filter(item => item !== '') : [];
 
-
-  /**
-   * Effect to calculate the dropdown's opening direction (up or down).
-   * This runs when the dropdown opens or the class list changes.
-   * IMPORTANT: This useEffect is now unconditionally called at the top level.
-   */
   useEffect(() => {
-    // Only calculate direction if the dropdown is open and references are available
     if (isOpen && dropdownRef.current && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect(); // Get button's position and size
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight; // Get viewport height
-
-      // Calculate a more accurate estimated dropdown height based on the number of items.
-      // Each class item (including its padding and line-height) is approximately 44px tall.
-      // The dropdown content div itself has py-1 (8px total vertical padding).
+      const buttonRect = buttonRef.current.getBoundingClientRect(); 
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight; 
       const itemHeight = 44;
-      const dropdownContainerPadding = 8; // py-1 on the inner div
+      const dropdownContainerPadding = 8; 
       const estimatedDropdownHeight = (classList.length * itemHeight) + dropdownContainerPadding;
 
-      const spaceBelow = viewportHeight - buttonRect.bottom; // Space from button bottom to viewport bottom
-      const spaceAbove = buttonRect.top; // Space from button top to viewport top
+      const spaceBelow = viewportHeight - buttonRect.bottom; 
+      const spaceAbove = buttonRect.top; 
 
-      // Determine direction:
-      // If it's one of the last 8 items AND there's sufficient space above, prioritize opening upwards.
       if (isLastEight && spaceAbove > estimatedDropdownHeight) {
         setDropdownDirection('up');
       } else if ((spaceBelow < 200 || spaceBelow < estimatedDropdownHeight) && spaceAbove > estimatedDropdownHeight) {
-        // Fallback to existing logic: if not among last 8, or if last 8 but no space above,
-        // open upwards if general space conditions allow.
         setDropdownDirection('up');
       } else {
-        // Otherwise, open downwards.
         setDropdownDirection('down');
       }
     }
-  }, [isOpen, classes, classList.length, isLastEight]); // Add isLastEight to dependencies
+  }, [isOpen, classes, classList.length, isLastEight]); 
 
-  // Handle cases where classes prop is null/undefined or empty after classList is derived
   if (!classes) {
     return <span className="text-gray-500">N/A</span>;
   }
@@ -97,7 +58,6 @@ const ClassDropdown = ({ classes, isLastEight }) => {
     return <span className="text-gray-500">None</span>;
   }
 
-  // Dynamically apply Tailwind CSS classes based on dropdown direction
   const dropdownClasses = `
     absolute left-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10
     ${dropdownDirection === 'up' ? 'origin-bottom-left bottom-full mb-2' : 'origin-top-left top-full mt-2'}
@@ -109,7 +69,7 @@ const ClassDropdown = ({ classes, isLastEight }) => {
         type="button"
         className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-2 py-1 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500"
         onClick={toggleDropdown}
-        ref={buttonRef} // Assign the button ref for position calculation
+        ref={buttonRef} 
       >
         View Classes
         {/* Dropdown arrow icon */}
@@ -118,7 +78,7 @@ const ClassDropdown = ({ classes, isLastEight }) => {
         </svg>
       </button>
 
-      {/* Render dropdown content only if isOpen is true */}
+      {/* Render dropdown content */}
       {isOpen && (
         <div className={dropdownClasses} role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
           <div className="py-1">
@@ -140,35 +100,28 @@ const ClassDropdown = ({ classes, isLastEight }) => {
   );
 };
 
-/**
- * Admin_Students Component
- * Displays a list of students, allows searching, adding, editing, and deleting students.
- * Includes a confirmation modal for deletion and a message display for feedback.
- */
+
 export default function Admin_Students() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for delete confirmation modal
-  const [selectedStudent, setSelectedStudent] = useState(null); // State to hold student selected for deletion
-  const [message, setMessage] = useState(""); // State for general success/error messages
-  const [isMessageError, setIsMessageError] = useState(false); // State to differentiate success/error messages
-  const navigate = useNavigate(); // Hook for navigation (e.g., to add/edit pages)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null); 
+  const [message, setMessage] = useState(""); 
+  const [isMessageError, setIsMessageError] = useState(false); 
+  const navigate = useNavigate(); 
 
-  /**
-   * Fetches student data from the backend API.
-   */
   const fetchStudents = async () => {
-    setLoading(true); // Set loading state to true
-    setError(null); // Clear any previous errors
+    setLoading(true); 
+    setError(null); 
     try {
       const res = await axios.get(
         "http://localhost/ustp-student-attendance/api/admin-backend/student_api.php"
       );
 
       let data = [];
-      // Check if the response data is an array or contains a 'students' array
+      //checks if array
       if (Array.isArray(res.data)) {
         data = res.data;
       } else if (Array.isArray(res.data.students)) {
@@ -177,64 +130,52 @@ export default function Admin_Students() {
 
       // Sort students by student_id
       data.sort((a, b) => a.student_id - b.student_id);
-      setStudents(data); // Update students state
+      setStudents(data); 
     } catch (err) {
-      console.error("Failed to fetch students:", err); // Log the error
-      setError("Failed to fetch students. Please try again."); // Set user-friendly error message
+      console.error("Failed to fetch students:", err); 
+      setError("Failed to fetch students. Please try again."); 
     } finally {
-      setLoading(false); // Set loading state to false
+      setLoading(false); 
     }
   };
 
-  /**
-   * Effect to fetch students when the component mounts.
-   */
   useEffect(() => {
     fetchStudents();
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []); 
 
-  /**
-   * Handles the click event for deleting a student, opening the confirmation modal.
-   * @param {object} student - The student object to be deleted.
-   */
+
   const handleDeleteClick = (student) => {
-    setSelectedStudent(student); // Store the student to be deleted
-    setIsModalOpen(true); // Open the confirmation modal
+    setSelectedStudent(student); 
+    setIsModalOpen(true); 
   };
 
-  /**
-   * Confirms and performs the student deletion.
-   * Sends a DELETE request to the backend.
-   */
   const confirmDelete = async () => {
-    if (!selectedStudent) return; // Guard clause if no student is selected
+    if (!selectedStudent) return; 
 
     try {
       const res = await axios.post(
         'http://localhost/ustp-student-attendance/api/admin-backend/delete_student.php',
         {
-          _method: 'DELETE', // Laravel/PHP common method override for DELETE requests
+          _method: 'DELETE', 
           student_id: selectedStudent.student_id,
         }
       );
 
       if (res.data.success) {
-        // Filter out the deleted student from the current list
         setStudents(students.filter(s => s.student_id !== selectedStudent.student_id));
-        setMessage("Student deleted successfully!"); // Set success message
-        setIsMessageError(false); // Indicate success message
+        setMessage("Student deleted successfully!"); 
+        setIsMessageError(false); 
       } else {
-        setMessage(res.data.message || "Failed to delete student."); // Set error message from backend
-        setIsMessageError(true); // Indicate error message
+        setMessage(res.data.message || "Failed to delete student.");
+        setIsMessageError(true);
       }
     } catch (err) {
-      console.error("Delete error:", err); // Log the detailed error
-      setMessage("An error occurred while deleting the student."); // Set generic error message
-      setIsMessageError(true); // Indicate error message
+      console.error("Delete error:", err);
+      setMessage("An error occurred while deleting the student."); 
+      setIsMessageError(true); 
     } finally {
-      setIsModalOpen(false); // Close the modal
-      setSelectedStudent(null); // Clear the selected student
-      // Automatically hide the message after 3 seconds
+      setIsModalOpen(false); 
+      setSelectedStudent(null); 
       setTimeout(() => {
         setMessage("");
         setIsMessageError(false);
@@ -242,15 +183,12 @@ export default function Admin_Students() {
     }
   };
 
-  /**
-   * Filters the students based on the search term.
-   */
+  /*Filters the students*/
   const filteredStudents = students.filter((student) => {
     const fullName = `${student.firstname} ${student.middlename} ${student.lastname}`.toLowerCase();
-    const enrolledClasses = (student.enrolled_classes || '').toLowerCase(); // Handle null/undefined classes
+    const enrolledClasses = (student.enrolled_classes || '').toLowerCase(); 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-    // Check if full name or enrolled classes include the search term
     return fullName.includes(lowerCaseSearchTerm) || enrolledClasses.includes(lowerCaseSearchTerm);
   });
 
@@ -270,7 +208,6 @@ export default function Admin_Students() {
           style={
             !loading
               ? {
-                  // Using placehold.co for Canvas compatibility
                   backgroundImage: "url('assets/teacher_vector.png')",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "right",
@@ -297,7 +234,7 @@ export default function Admin_Students() {
           </div>
         </div>
 
-        {/* Main content area with search, add button, and student table */}
+        {/* Main content area */}
         <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg overflow-x-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
             <p className="text-blue-700 font-semibold whitespace-nowrap">
@@ -324,10 +261,8 @@ export default function Admin_Students() {
           </div>
 
           {loading ? (
-            // Loading message for table
             <p className="text-center text-gray-500">Loading students...</p>
           ) : error ? (
-            // Error message for table
             <p className="text-center text-red-500">{error}</p>
           ) : (
             // Student data table
@@ -354,9 +289,7 @@ export default function Admin_Students() {
                       </td>
                     </tr>
                   ) : (
-                    // Map through filtered students and display each row
                     filteredStudents.map((student, index) => {
-                      // Determine if the current student is among the last 8
                       const isLastEight = index >= filteredStudents.length - 8;
                       return (
                         <tr
@@ -367,7 +300,7 @@ export default function Admin_Students() {
                           <td className="px-3 py-2 truncate">
                             {student.firstname} {student.middlename} {student.lastname}
                           </td>
-                          {/* Pass the new isLastEight prop to ClassDropdown */}
+                          {/* Pass the isLastEight prop to ClassDropdown */}
                           <td className="px-3 py-2 min-w-0">
                             <ClassDropdown classes={student.enrolled_classes} isLastEight={isLastEight} />
                           </td>

@@ -35,11 +35,9 @@ $sql = "
 ";
 
 if ($year_level_id !== null && $year_level_id > 0) {
-    // Apply year_level_id condition to the 'section' table
     $sql .= " AND s.year_level_id = " . $year_level_id;
 }
 if ($semester_id !== null && $semester_id > 0) {
-    // Apply semester_id condition to the 'section' table
     $sql .= " AND s.semester_id = " . $semester_id;
 }
 

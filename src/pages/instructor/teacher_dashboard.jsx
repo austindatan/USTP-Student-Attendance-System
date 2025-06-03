@@ -24,7 +24,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   const [excuseRequests, setExcuseRequests] = useState(0); 
   const instructor = JSON.parse(localStorage.getItem('instructor'));
 
-  // Effect to fetch dashboard statistics
+  // fetch dashboard statistics
   useEffect(() => {
     async function fetchDashboardStats() {
       if (!instructor?.instructor_id) return;
@@ -49,7 +49,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     fetchDashboardStats();
   }, [instructor?.instructor_id, selectedDate]);
 
-  // Effect to fetch simplified notifications (from get_recent_req_notif.php)
+  // fetch simplified notifications
   useEffect(() => {
     if (!instructor?.instructor_id) return;
 
@@ -68,7 +68,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
   }, [instructor?.instructor_id]);
 
 
-  // Effect to fetch weekly attendance data for the chart
+  // fetch weekly attendance data
   const [attendanceData, setAttendanceData] = useState([]);
   useEffect(() => {
     const fetchWeeklyAttendance = async () => {
@@ -85,7 +85,7 @@ export default function Teacher_Dashboard({ selectedDate }) {
     if (!loading) fetchWeeklyAttendance();
   }, [loading, instructor?.instructor_id]);
 
-  // Effect to fetch sections (classes)
+  // Effect to fetch sections
   useEffect(() => {
     const fetchSections = async () => {
       if (!instructor?.instructor_id) return;
@@ -181,7 +181,6 @@ export default function Teacher_Dashboard({ selectedDate }) {
                 {simplifiedNotifications.length > 0 ? (
                   simplifiedNotifications.map(notif => (
                     <li key={notif.id} className="py-2">
-                      {/* Assuming get_recent_req_notif.php returns an object with 'sender' */}
                       <p className="font-medium text-gray-800">{notif.sender} excuse request !</p>
                     </li>
                   ))

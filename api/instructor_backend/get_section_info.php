@@ -7,8 +7,6 @@ include __DIR__ . '/../../src/conn.php';
 if (isset($_GET['section_id'])) {
     $section_id = $_GET['section_id'];
 
-    // Modified SQL query to join through the new `section_courses` table
-    // and fetch all courses associated with the given section.
     $sql = "SELECT
                 sc.section_id,
                 s.section_name,
@@ -32,9 +30,7 @@ if (isset($_GET['section_id'])) {
     $sectionInfo = null;
     $courses = [];
 
-    // Loop through all results to gather all courses linked to the section
     while ($row = $result->fetch_assoc()) {
-        // Initialize sectionInfo object from the first row fetched
         if ($sectionInfo === null) {
             $sectionInfo = [
                 'section_id' => $row['section_id'],
@@ -44,10 +40,9 @@ if (isset($_GET['section_id'])) {
                 'end_time' => $row['end_time'],
                 'image' => $row['image'],
                 'hexcode' => $row['hexcode'],
-                'courses' => [] // Initialize an array to hold all associated courses
+                'courses' => [] 
             ];
         }
-        // Add current course details to the 'courses' array
         $courses[] = [
             'course_name' => $row['course_name'],
             'course_code' => $row['course_code']
@@ -55,10 +50,8 @@ if (isset($_GET['section_id'])) {
     }
 
     if ($sectionInfo === null) {
-        // If no section is found or no courses are associated with the section
         echo json_encode(["success" => false, "message" => "Section not found or no courses associated."]);
     } else {
-        // Assign the collected courses to the sectionInfo object
         $sectionInfo['courses'] = $courses;
         echo json_encode($sectionInfo);
     }

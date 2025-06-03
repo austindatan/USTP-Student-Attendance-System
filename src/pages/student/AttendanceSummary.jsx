@@ -26,12 +26,12 @@ export default function SubjectAttendanceSummary({ studentId }) {
   const [totalExcused, setTotalExcused] = useState(0);
 
   // State for attendance dates (YYYY-MM-DD format)
-  const [presentDates, setPresentDates] = useState(new Set()); // Using Set for efficient lookups
+  const [presentDates, setPresentDates] = useState(new Set()); 
   const [absentDates, setAbsentDates] = useState(new Set());
   const [lateDates, setLateDates] = useState(new Set());
   const [excusedDates, setExcusedDates] = useState(new Set());
 
-  // Helper function to fetch attendance data
+  // to fetch attendance data
   const fetchAttendanceData = useCallback(async (status) => {
     const url = `http://localhost/ustp-student-attendance/api/student_backend/get_class_${status}.php?student_id=${studentId}&course_code=${course_code}`;
 
@@ -61,7 +61,6 @@ export default function SubjectAttendanceSummary({ studentId }) {
 
   useEffect(() => {
     if (studentId && course_code) {
-      // --- Fetch Course Name, Image, and Hexcode ---
       const fetchCourseInfoUrl = `http://localhost/ustp-student-attendance/api/student_backend/get_coursename.php?student_id=${studentId}&course_code=${course_code}`;
 
       fetch(fetchCourseInfoUrl)
@@ -75,7 +74,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
           if (data && data.error) {
             setCourseInfo({ course_name: "Error loading course" });
           } else if (data && data.course_name) {
-            setCourseInfo(data); // data now includes image and hexcode
+            setCourseInfo(data); 
           } else {
             setCourseInfo({ course_name: "Course Not Found" });
           }
@@ -85,7 +84,6 @@ export default function SubjectAttendanceSummary({ studentId }) {
           setCourseInfo({ course_name: "Failed to Load Course" });
         });
 
-      // --- Fetch all attendance data concurrently ---
       const statuses = ["present", "absent", "late", "excused"];
       Promise.all(statuses.map(status => fetchAttendanceData(status)))
         .then(([presentData, absentData, lateData, excusedData]) => {
@@ -198,20 +196,19 @@ export default function SubjectAttendanceSummary({ studentId }) {
           attendanceTitle = "Present";
         }
 
-        // Combine base styles with attendance status styles
         const cellClasses = `text-sm text-center cursor-pointer rounded-full w-8 h-8 flex items-center justify-center mx-auto transition-all duration-150 relative
           ${
             isSelected
-              ? "ring-2 ring-offset-2 ring-[#7685fc]" // Add a ring for selected date
+              ? "ring-2 ring-offset-2 ring-[#7685fc]" 
               : ""
           }
           ${
-            isToday && !attendanceClass // Only show default today border if no attendance status overrides it
+            isToday && !attendanceClass 
               ? "border border-[#7685fc] text-[#7685fc]"
               : ""
           }
           ${
-            isCurrentMonth && !attendanceClass // Only apply default text color if no attendance status
+            isCurrentMonth && !attendanceClass
               ? isSunday
                 ? "text-red-500"
                 : "text-gray-700"
@@ -257,7 +254,7 @@ export default function SubjectAttendanceSummary({ studentId }) {
         <div
           className="rounded-lg p-6 md:p-10 text-white font-poppins mb-6 relative overflow-hidden"
           style={{
-            backgroundColor: courseInfo?.hexcode || '#7685fc', // Apply hexcode for background
+            backgroundColor: courseInfo?.hexcode || '#7685fc', 
             backgroundImage: courseInfo?.image ? `url(${process.env.PUBLIC_URL}/assets/${courseInfo.image})` : "url('assets/teacher_vector.png')", // Apply image
             backgroundRepeat: "no-repeat",
             backgroundPosition: "right 20px center",
@@ -338,11 +335,10 @@ function StatCard({ label, value }) {
     <div className="bg-[#f5f5f0] p-5 rounded-lg text-gray-700
                          flex flex-col items-center justify-center
                          shadow-md hover:shadow-lg transition-shadow duration-300">
-      {/* Label on top, typically smaller */}
+   
       <p className="text-base sm:text-lg font-semibold text-center w-full truncate mb-1">
         {label}
       </p>
-      {/* Value below, much larger and bold */}
       <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center w-full">
         {value}
       </p>

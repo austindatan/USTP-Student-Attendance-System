@@ -29,13 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     }
 
     $excuse_req_id = $data['excused_request_id'];
-    $status = $data['status']; // Expected values: 'Approved', 'Denied', 'Pending'
+    $status = $data['status']; 
 
-    // Start a transaction to ensure atomicity
     $conn->begin_transaction();
 
     try {
-        // Step 1: Update the status of the excused_request
         $stmt_update_excused = $conn->prepare("UPDATE excused_request SET status=? WHERE excused_request_id=?");
         if (!$stmt_update_excused) {
             throw new Exception("Failed to prepare excused_request update statement: " . $conn->error);
@@ -46,9 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         }
         $stmt_update_excused->close();
 
-        // Step 2: If the status is 'Approved', manage the corresponding attendance record
         if ($status === 'Approved') {
-            // Fetch student_details_id and date_of_absence from the excused_request
             $stmt_fetch_details = $conn->prepare("SELECT student_details_id, date_of_absence FROM excused_request WHERE excused_request_id = ?");
             if (!$stmt_fetch_details) {
                 throw new Exception("Failed to prepare fetch excused request details statement: " . $conn->error);
@@ -66,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $date_of_absence = $request_details['date_of_absence'];
             $stmt_fetch_details->close();
 
-            // Check if an attendance record already exists for this student on this date
             $stmt_check_attendance = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE student_details_id = ? AND date = ?");
             if (!$stmt_check_attendance) {
                 throw new Exception("Failed to prepare check attendance statement: " . $conn->error);
@@ -81,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $stmt_check_attendance->close();
 
             if ($count > 0) {
-                // If record exists, update its status to 'excused'
                 $stmt_update_attendance = $conn->prepare("UPDATE attendance SET status = 'excused' WHERE student_details_id = ? AND date = ?");
                 if (!$stmt_update_attendance) {
                     throw new Exception("Failed to prepare attendance update statement: " . $conn->error);
@@ -92,8 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
                 }
                 $stmt_update_attendance->close();
             } else {
-                // If no record exists, insert a new one with status 'excused'
-                // is_locked is set to 0 (unlocked) by default for new entries
                 $stmt_insert_attendance = $conn->prepare("INSERT INTO attendance (student_details_id, date, status, is_locked) VALUES (?, ?, 'excused', 0)");
                 if (!$stmt_insert_attendance) {
                     throw new Exception("Failed to prepare attendance insert statement: " . $conn->error);
@@ -106,17 +98,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             }
         }
 
-        // Commit the transaction if all operations were successful
         $conn->commit();
         echo json_encode(["success" => true, "message" => "Request " . $status . " and attendance record managed successfully."]);
 
     } catch (Exception $e) {
-        // Rollback the transaction on any error
+        // Rollbacks
         $conn->rollback();
         error_log("Error in approve_excused_request.php: " . $e->getMessage());
         echo json_encode(["success" => false, "error" => "Operation failed: " . $e->getMessage()]);
     } finally {
-        // Close the database connection
         if ($conn) {
             $conn->close();
         }

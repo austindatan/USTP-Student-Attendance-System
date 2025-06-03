@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
-import ClassCard from './components/class_card'; // Assuming this component exists
+import ClassCard from './components/class_card';
 import { format } from 'date-fns';
 
 export default function Classes_Dashboard({ selectedDate }) {
@@ -47,11 +47,11 @@ export default function Classes_Dashboard({ selectedDate }) {
   }, [instructor?.instructor_id]);
 
   const filteredSections = sections.filter(section =>
-    // Added year_level_name and semester_name to search filter
+    // filters year_level_name and semester_name
     section.section_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     section.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    section.year_level_name?.toLowerCase().includes(searchTerm.toLowerCase()) || // New filter
-    section.semester_name?.toLowerCase().includes(searchTerm.toLowerCase())     // New filter
+    section.year_level_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    section.semester_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
 
@@ -61,7 +61,6 @@ export default function Classes_Dashboard({ selectedDate }) {
     const dateParam = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null;
     const url = `/section-dashboard/${section.section_id}`;
 
-    // Pass all section information including year_level_name and semester_name
     navigate(url, { state: { sectionInfo: section, selectedDate: dateParam } });
   };
 

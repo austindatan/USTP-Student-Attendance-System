@@ -1,8 +1,7 @@
-// StudentExcuseRequestsTable.js
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 
 const StudentExcuseRequestsTable = ({ studentId }) => {
   const [requests, setRequests] = useState([]);
@@ -12,7 +11,7 @@ const StudentExcuseRequestsTable = ({ studentId }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [noRequestsMessage, setNoRequestsMessage] = useState('');
 
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate(); 
 
   const fetchStudentRequests = async () => {
     setError(null);
@@ -89,7 +88,7 @@ const StudentExcuseRequestsTable = ({ studentId }) => {
     setSelectedRequest(null);
   };
 
-  // Function to handle navigation to the add request page
+  // handles navigation to the add request
   const handleAddRequest = () => {
     navigate('/add-excuse-request');
   };

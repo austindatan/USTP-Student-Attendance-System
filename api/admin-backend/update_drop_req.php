@@ -10,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $data = json_decode(file_get_contents("php://input"), true);
 
     $drop_req_id = $data['drop_request_id'] ?? null;
-    // The status sent from the frontend (e.g., 'Dropped' or 'Rejected')
     $original_request_status = $data['status'] ?? null;
 
     if (!$drop_req_id || !$original_request_status) {
@@ -18,11 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         exit;
     }
 
-    // Start a database transaction for atomicity
     $conn->begin_transaction();
 
     try {
-        // 1. Fetch the student_details_id and reason from the original drop_request
         $stmt_fetch_original_req = $conn->prepare("SELECT student_details_id, reason FROM drop_request WHERE drop_request_id = ?");
         if (!$stmt_fetch_original_req) {
             throw new Exception("Failed to prepare statement for fetching original drop request: " . $conn->error);
@@ -39,8 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         $student_details_id_affected = $original_req_data['student_details_id'];
         $reason_for_request = $original_req_data['reason'];
 
-        // 2. Update the status of the original `drop_request`
-        // This update is still necessary to mark the request as processed BEFORE potentially deleting it
         $stmt_update_original_req = $conn->prepare("UPDATE drop_request SET status = ? WHERE drop_request_id = ?");
         if (!$stmt_update_original_req) {
             throw new Exception("Failed to prepare statement for updating original drop request status: " . $conn->error);
@@ -51,14 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
         }
         $stmt_update_original_req->close();
 
-        $message = ""; // Initialize message
+        $message = ""; 
 
-        // Conditional logic based on the status sent from the frontend
         if ($original_request_status === 'Dropped') {
-            // This block runs only if the request is being 'Dropped'
-            
-            // Fetch current student, program, course, and instructor details before deletion
-            // These are the details to be saved as a snapshot in drop_history
+
             $stmt_fetch_details_snapshot = $conn->prepare("
                 SELECT
                     s.student_id,
@@ -84,14 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $details_snapshot_row = $result_details_snapshot->fetch_assoc();
             $stmt_fetch_details_snapshot->close();
 
-            // Prepare snapshot data
             $student_id_at_drop = $details_snapshot_row['student_id'] ?? NULL;
             $student_name_snapshot = $details_snapshot_row['student_name'] ?? 'N/A';
             $program_name_snapshot = $details_snapshot_row['program_name'] ?? 'N/A';
             $course_name_snapshot = $details_snapshot_row['course_name'] ?? 'N/A';
             $instructor_name_snapshot = $details_snapshot_row['instructor_name'] ?? 'N/A';
 
-            // Insert into `drop_history` table with the 'Dropped' status
+            // Insert into `drop_history`
             $stmt_insert_history = $conn->prepare("
                 INSERT INTO drop_history
                 (drop_request_id, reason, status, student_details_id_at_drop, student_id_at_drop, student_name, program_name, course_name, instructor_name)
@@ -119,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             }
             $stmt_insert_history->close();
 
-            // Physical Delete: Remove the student from the student_details table
+            // Removes the student
             $stmt_delete_student_details = $conn->prepare("DELETE FROM student_details WHERE student_details_id = ?");
             if (!$stmt_delete_student_details) {
                 throw new Exception("Failed to prepare statement for deleting student details: " . $conn->error);
@@ -130,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             }
             $stmt_delete_student_details->close();
 
-            // NEW: Delete the request from the `drop_request` table
+            // Delete the request from the `drop_request` table
             $stmt_delete_drop_request = $conn->prepare("DELETE FROM drop_request WHERE drop_request_id = ?");
             if (!$stmt_delete_drop_request) {
                 throw new Exception("Failed to prepare statement for deleting drop request: " . $conn->error);
@@ -144,9 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $message = "Drop request approved, student dropped, and history saved. Request removed from pending.";
 
         } elseif ($original_request_status === 'Rejected') {
-            // This block runs if the request is being 'Rejected'
-            
-            // Fetch current student, program, course, and instructor details for the snapshot
             $stmt_fetch_details_snapshot = $conn->prepare("
                 SELECT
                     s.student_id,
@@ -172,14 +159,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $details_snapshot_row = $result_details_snapshot->fetch_assoc();
             $stmt_fetch_details_snapshot->close();
 
-            // Prepare snapshot data
             $student_id_at_drop = $details_snapshot_row['student_id'] ?? NULL;
             $student_name_snapshot = $details_snapshot_row['student_name'] ?? 'N/A';
             $program_name_snapshot = $details_snapshot_row['program_name'] ?? 'N/A';
             $course_name_snapshot = $details_snapshot_row['course_name'] ?? 'N/A';
             $instructor_name_snapshot = $details_snapshot_row['instructor_name'] ?? 'N/A';
 
-            // Insert into `drop_history` table with the 'Rejected' status
             $stmt_insert_history = $conn->prepare("
                 INSERT INTO drop_history
                 (drop_request_id, reason, status, student_details_id_at_drop, student_id_at_drop, student_name, program_name, course_name, instructor_name)
@@ -207,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             }
             $stmt_insert_history->close();
 
-            // NEW: Delete the request from the `drop_request` table
+            // Delete the request from the `drop_request` table
             $stmt_delete_drop_request = $conn->prepare("DELETE FROM drop_request WHERE drop_request_id = ?");
             if (!$stmt_delete_drop_request) {
                 throw new Exception("Failed to prepare statement for deleting drop request: " . $conn->error);
@@ -223,12 +208,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             throw new Exception("Invalid status provided for processing.");
         }
 
-        // If all operations succeed, commit the transaction
         $conn->commit();
         echo json_encode(["message" => $message]);
 
     } catch (Exception $e) {
-        // If any operation fails, roll back the transaction
         $conn->rollback();
         error_log("Drop request processing error: " . $e->getMessage());
         echo json_encode(["error" => $e->getMessage()]);

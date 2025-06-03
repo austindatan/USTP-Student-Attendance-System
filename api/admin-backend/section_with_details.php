@@ -1,5 +1,4 @@
 <?php
-// sections_with_details.php
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -8,12 +7,10 @@ header('Content-Type: application/json');
 
 include __DIR__ . '/../../src/conn.php'; 
 
-// Check connection
 if ($conn->connect_error) {
     die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
 }
 
-// SQL query to fetch sections with year level and semester names
 $sql = "SELECT
             s.section_id,
             s.section_name,
