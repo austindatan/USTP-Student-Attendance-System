@@ -6,7 +6,7 @@ function SectionCourses() {
     const { sectionId } = useParams();
     const navigate = useNavigate();
     const [sectionDetails, setSectionDetails] = useState(null);
-    const [Courses, setCourses] = useState([]);
+    const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -49,22 +49,22 @@ function SectionCourses() {
 
     const fetchSectionCourses = async () => {
         try {
-            const response = await axios.get(`http://localhost/ustp-student-attendance-system/api/admin-backend/SectionCourses.php?section_id=${sectionId}`);
-            console.log("Fetched section Courses data:", response.data);
+            const response = await axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/section_courses.php?section_id=${sectionId}`);
+            console.log("Fetched section courses data:", response.data);
             if (response.data.success) {
                 setSectionDetails(response.data.section);
-                setCourses(response.data.Courses);
-                if (response.data.Courses.length > 0) {
-                    showFloatingMessage("Section Courses loaded successfully!", false);
+                setCourses(response.data.courses);
+                if (response.data.courses.length > 0) {
+                    showFloatingMessage("Section courses loaded successfully!", false);
                 }
             } else {
-                setError(response.data.message || 'Failed to fetch section Courses.');
-                showFloatingMessage(response.data.message || 'Failed to fetch section Courses.', true);
+                setError(response.data.message || 'Failed to fetch section courses.');
+                showFloatingMessage(response.data.message || 'Failed to fetch section courses.', true);
             }
         } catch (err) {
-            console.error("Error fetching section Courses:", err);
+            console.error("Error fetching section courses:", err);
             setError(err.message);
-            showFloatingMessage("Failed to fetch section Courses. Please check your network or server.", true);
+            showFloatingMessage("Failed to fetch section courses. Please check your network or server.", true);
         } finally {
             setLoading(false);
         }
@@ -83,13 +83,13 @@ function SectionCourses() {
         if (!courseToDelete) return;
 
         try {
-            const response = await axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/DeleteSectioncourse.php', {
+            const response = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/delete_sectioncourse.php', {
                 _method: 'DELETE',
                 section_course_id: courseToDelete.section_course_id,
             });
 
             if (response.data.success) {
-                setCourses(Courses.filter(course => course.section_course_id !== courseToDelete.section_course_id));
+                setCourses(courses.filter(course => course.section_course_id !== courseToDelete.section_course_id));
                 showFloatingMessage("Course successfully removed from section!", false);
             } else {
                 console.error(response.data.message || "Failed to delete section course.");
@@ -143,18 +143,18 @@ function SectionCourses() {
                 <div className="bg-white shadow-md p-4 sm:p-6 rounded-lg">
                     <div className="flex justify-end mb-4">
                         <button
-                            onClick={() => handleNavigate(`/Sections/${sectionId}/Courses/add`)}
+                            onClick={() => handleNavigate(`/sections/${sectionId}/courses/add`)}
                             className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
                         >
                             + Add Courses
                         </button>
                     </div>
                     {loading ? (
-                        <p className="text-center text-gray-500">Loading section Courses...</p>
+                        <p className="text-center text-gray-500">Loading section courses...</p>
                     ) : error ? (
                         <p className="text-center text-red-500">{error}</p>
-                    ) : Courses.length === 0 ? (
-                        <div className="text-center text-gray-600 text-lg">No Courses assigned to this section.</div>
+                    ) : courses.length === 0 ? (
+                        <div className="text-center text-gray-600 text-lg">No courses assigned to this section.</div>
                     ) : (
                         <div className="overflow-x-auto max-w-full">
                             <table className="min-w-full text-sm text-left text-blue-900 border-collapse table-fixed w-full">
@@ -169,7 +169,7 @@ function SectionCourses() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {Courses.map((course) => (
+                                    {courses.map((course) => (
                                         <tr key={course.section_course_id} className="border-b border-blue-200 hover:bg-blue-50">
                                             <td className="px-3 py-2 truncate">{course.course_name}</td>
                                             <td className="px-3 py-2 truncate">
@@ -184,7 +184,7 @@ function SectionCourses() {
                                             <td className="px-3 py-2 text-center">
                                                 <div className="flex gap-1 justify-center items-center">
                                                     <button
-                                                        onClick={() => navigate(`/Sections/${sectionId}/Courses/${course.section_course_id}/edit`)}
+                                                        onClick={() => navigate(`/sections/${sectionId}/courses/${course.section_course_id}/edit`)}
                                                         className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap"
                                                     >
                                                         Edit
@@ -205,7 +205,7 @@ function SectionCourses() {
                     )}
                     <div className="mt-6 text-right">
                         <button
-                            onClick={() => handleNavigate("/admin-Sections")}
+                            onClick={() => handleNavigate("/admin-sections")}
                             className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
                         >
                             Back to Sections

@@ -9,7 +9,7 @@ const StudentNavbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("student");
-    navigate("/LoginStudent");
+    navigate("/login-student");
   };
 
   return (

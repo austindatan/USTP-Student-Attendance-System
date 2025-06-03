@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'; 
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/ConfirmationModal';
+import ConfirmationModal from '../../components/confirmationmodal';
 import MessageModal from '../../components/MessageModal'; 
 
 const EditSection = () => {
@@ -23,9 +23,9 @@ const EditSection = () => {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [MessageModalTitle, setMessageModalTitle] = useState('');
-    const [MessageModalMessage, setMessageModalMessage] = useState('');
-    const [MessageModalType, setMessageModalType] = useState('info'); 
+    const [messageModalTitle, setMessageModalTitle] = useState('');
+    const [messageModalMessage, setMessageModalMessage] = useState('');
+    const [messageModalType, setMessageModalType] = useState('info'); 
 
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
@@ -46,7 +46,7 @@ const EditSection = () => {
         const fetchData = async () => {
             try {
                 // Fetch single section data
-                const sectionRes = await axios.get(`http://localhost/ustp-student-attendance-system/api/admin-backend/GetSingleSection.php?section_id=${id}`);
+                const sectionRes = await axios.get(`http://localhost/ustp-student-attendance/api/admin-backend/get_single_section.php?section_id=${id}`);
                 if (sectionRes.data.success && sectionRes.data.section) {
                     setFormData({
                         section_id: id,
@@ -56,12 +56,12 @@ const EditSection = () => {
                     });
                 } else {
                     showMessageModal('Error Loading Section', sectionRes.data.message || 'Failed to load section data.', 'error');
-                    navigate('/admin-Sections');
+                    navigate('/admin-sections');
                     return;
                 }
 
                 // Fetch semesters data
-                const semestersRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetSemesters.php');
+                const semestersRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_semesters.php');
                 if (semestersRes.data.success) {
                     setSemesters(semestersRes.data.semesters);
                 } else {
@@ -70,7 +70,7 @@ const EditSection = () => {
                 }
 
                 // Fetch year levels data
-                const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetYearLevels.php');
+                const yearLevelsRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_year_levels.php');
                 if (yearLevelsRes.data.success) {
                     setYearLevels(yearLevelsRes.data.year_levels);
                 } else {
@@ -81,7 +81,7 @@ const EditSection = () => {
             } catch (err) {
                 console.error("Error fetching data:", err);
                 showMessageModal('Error', 'Error fetching section or related data. Please try again later.', 'error');
-                navigate('/admin-Sections');
+                navigate('/admin-sections');
             } finally {
                 setLoading(false);
             }
@@ -109,11 +109,11 @@ const EditSection = () => {
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         try {
-            const res = await axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/UpdateSection.php', formData);
+            const res = await axios.post('http://localhost/ustp-student-attendance/api/admin-backend/update_section.php', formData);
             if (res.data.success) {
                 setIsEditSectionModalOpen(false);
                 showMessageModal('Success!', 'Section updated successfully!', 'success'); 
-                navigate('/admin-Sections');
+                navigate('/admin-sections');
             } else {
                 showMessageModal('Update Failed', res.data.message || 'Update failed.', 'error');
                 setIsEditSectionModalOpen(false);
@@ -204,7 +204,7 @@ const EditSection = () => {
                         <div className="md:col-span-2 flex justify-end items-center gap-3">
                             <button
                                 type="button"
-                                onClick={() => navigate('/admin-Sections')}
+                                onClick={() => navigate('/admin-sections')}
                                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200"
                             >
                                 Cancel
@@ -235,9 +235,9 @@ const EditSection = () => {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={MessageModalTitle}
-                message={MessageModalMessage}
-                type={MessageModalType}
+                title={messageModalTitle}
+                message={messageModalMessage}
+                type={messageModalType}
             />
         </div>
     );

@@ -30,7 +30,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
   const email = instructor?.email || "";
 
   const imagePath = instructor?.image
-    ? `http://localhost/ustp-student-attendance-system/api/uploads/${instructor.image.replace(
+    ? `http://localhost/ustp-student-attendance/api/uploads/${instructor.image.replace(
         "uploads/",
         ""
       )}`
@@ -42,7 +42,7 @@ const RightSidebar = ({ selectedDate, setSelectedDate }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("instructor");
-    navigate("/LoginInstructor");
+    navigate("/login-instructor");
   };
 
   useEffect(() => {

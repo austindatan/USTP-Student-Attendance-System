@@ -57,7 +57,7 @@ const RegisterInstructor = () => {
     Object.entries(form).forEach(([key, value]) => data.append(key, value));
 
     try {
-      const res = await fetch("http://localhost/ustp-student-attendance-system/api/auth/LoginInstructor.php", {
+      const res = await fetch("http://localhost/ustp-student-attendance/api/auth/register-instructor.php", {
         method: "POST",
         body: data
       });
@@ -65,7 +65,7 @@ const RegisterInstructor = () => {
 
       if (result.success) {
         alert("Registered successfully!");
-        navigate("/LoginInstructor");
+        navigate("/login-instructor");
       } else {
         alert(result.message || "Registration failed.");
       }
@@ -231,7 +231,7 @@ const RegisterInstructor = () => {
           Already have an account?{" "}
           <span
             className="text-blue-600 hover:underline cursor-pointer"
-            onClick={() => navigate("/LoginInstructor")}
+            onClick={() => navigate("/login-instructor")}
           >
             Login here
           </span>

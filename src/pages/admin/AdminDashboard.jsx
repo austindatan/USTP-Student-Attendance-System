@@ -37,7 +37,7 @@ const AdminDashboard = () => {
   const blueBase = '#1D4ED8';
 
   useEffect(() => {
-    const apiUrl = 'http://localhost/ustp-student-attendance-system/api/admin-backend/GetStudentsByProgram.php';
+    const apiUrl = 'http://localhost/ustp-student-attendance/api/admin-backend/get_students_by_program.php';
     console.log('Fetching pie chart data from:', apiUrl);
 
     fetch(apiUrl)
@@ -71,7 +71,7 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    const apiUrl = 'http://localhost/ustp-student-attendance-system/api/admin-backend/GetMonthlyAttendance.php';
+    const apiUrl = 'http://localhost/ustp-student-attendance/api/admin-backend/get_monthly_attendance.php';
     console.log('Fetching line chart data from:', apiUrl);
 
     fetch(apiUrl)
@@ -233,7 +233,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('admin');
-    navigate('/LoginAdmin');
+    navigate('/login-admin');
   };
 
   return (

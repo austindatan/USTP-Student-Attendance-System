@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/ConfirmationModal';
+import ConfirmationModal from '../../components/confirmationmodal';
 import MessageModal from '../../components/MessageModal'; 
 
 export default function AddCourse() {
@@ -17,9 +17,9 @@ export default function AddCourse() {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [MessageModalTitle, setMessageModalTitle] = useState('');
-    const [MessageModalMessage, setMessageModalMessage] = useState('');
-    const [MessageModalType, setMessageModalType] = useState('info'); 
+    const [messageModalTitle, setMessageModalTitle] = useState('');
+    const [messageModalMessage, setMessageModalMessage] = useState('');
+    const [messageModalType, setMessageModalType] = useState('info'); 
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
         setMessageModalTitle(title);
@@ -55,7 +55,7 @@ export default function AddCourse() {
     setIsLoading(true);
     try {
       await axios.post(
-        'http://localhost/ustp-student-attendance-system/api/admin-backend/CourseAdd.php',
+        'http://localhost/ustp-student-attendance/api/admin-backend/course_add.php',
         formData // formData now includes course_code
       );
       alert('Course added successfully!');
@@ -68,7 +68,7 @@ export default function AddCourse() {
                 description: '',
             });
             showMessageModal('Success!', 'Course added successfully!', 'success');
-            navigate('/admin-Courses');
+            navigate('/admin-courses');
         } catch (error) {
             console.error('Error adding course:', error.response?.data || error.message);
             showMessageModal('Error Adding Course', `Failed to add course: ${error.response?.data?.message || 'Please check the console.'}`, 'error');
@@ -82,7 +82,7 @@ export default function AddCourse() {
     };
 
     const handleCancel = () => {
-        navigate('/admin-Courses');
+        navigate('/admin-courses');
     };
 
     return (
@@ -178,9 +178,9 @@ export default function AddCourse() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={MessageModalTitle}
-                message={MessageModalMessage}
-                type={MessageModalType}
+                title={messageModalTitle}
+                message={messageModalMessage}
+                type={messageModalType}
             />
         </div>
     );

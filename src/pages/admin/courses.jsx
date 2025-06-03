@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MessageModal from '../../components/MessageModal';
 
 export default function Admin_Courses() {
-    const [Courses, setCourses] = useState([]);
+    const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -14,9 +14,9 @@ export default function Admin_Courses() {
 
     // Message Modal states (for blocking modals)
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [MessageModalTitle, setMessageModalTitle] = useState('');
-    const [MessageModalMessage, setMessageModalMessage] = useState('');
-    const [MessageModalType, setMessageModalType] = useState('info');
+    const [messageModalTitle, setMessageModalTitle] = useState('');
+    const [messageModalMessage, setMessageModalMessage] = useState('');
+    const [messageModalType, setMessageModalType] = useState('info');
 
     // NEW: States for the floating message
     const [floatingMessage, setFloatingMessage] = useState("");
@@ -49,34 +49,34 @@ export default function Admin_Courses() {
 
 
     useEffect(() => {
-        axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetCourse.php')
+        axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_course.php')
             .then(res => {
                 if (Array.isArray(res.data)) {
                     setCourses(res.data);
                     if (res.data.length > 0) {
                         showFloatingMessage("Courses loaded successfully!", false);
                     } else {
-                        showFloatingMessage("No Courses found.", false);
+                        showFloatingMessage("No courses found.", false);
                     }
-                } else if (Array.isArray(res.data.Courses)) {
-                    setCourses(res.data.Courses);
-                     if (res.data.Courses.length > 0) {
+                } else if (Array.isArray(res.data.courses)) {
+                    setCourses(res.data.courses);
+                     if (res.data.courses.length > 0) {
                         showFloatingMessage("Courses loaded successfully!", false);
                     } else {
-                        showFloatingMessage("No Courses found.", false);
+                        showFloatingMessage("No courses found.", false);
                     }
                 } else {
-                    console.error("Unexpected data format from GetCourse.php:", res.data);
+                    console.error("Unexpected data format from get_course.php:", res.data);
                     setCourses([]);
                     // UPDATED: Use floating message for data format errors
-                    showFloatingMessage('Received unexpected data format for Courses. Cannot display Courses.', true);
+                    showFloatingMessage('Received unexpected data format for courses. Cannot display courses.', true);
                 }
             })
             .catch((err) => {
-                console.error("Error fetching Courses:", err);
-                setError("Failed to fetch Courses. Please check the server.");
+                console.error("Error fetching courses:", err);
+                setError("Failed to fetch courses. Please check the server.");
                 // UPDATED: Use floating message for fetch errors
-                showFloatingMessage('Failed to fetch Courses from the server. Please try again later.', true);
+                showFloatingMessage('Failed to fetch courses from the server. Please try again later.', true);
             })
             .finally(() => setLoading(false));
     }, [showFloatingMessage]); // Dependency added for showFloatingMessage
@@ -87,13 +87,13 @@ export default function Admin_Courses() {
     };
 
     const confirmDelete = () => {
-        axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/DeleteCourse.php', {
+        axios.post('http://localhost/ustp-student-attendance/api/admin-backend/delete_course.php', {
             _method: 'DELETE',
             course_id: selectedCourse.course_id,
         })
             .then((res) => {
                 if (res.data.success) {
-                    setCourses(Courses.filter(c => c.course_id !== selectedCourse.course_id));
+                    setCourses(courses.filter(c => c.course_id !== selectedCourse.course_id));
                     // UPDATED: Use floating message for success
                     showFloatingMessage('Course deleted successfully!', false);
                 } else {
@@ -112,7 +112,7 @@ export default function Admin_Courses() {
             });
     };
 
-    const filteredCourses = Courses.filter(course =>
+    const filteredCourses = courses.filter(course =>
         (course.course_code?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
         (course.course_name?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
     );
@@ -161,13 +161,13 @@ export default function Admin_Courses() {
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input
                                 type="text"
-                                placeholder="Search Courses..."
+                                placeholder="Search courses..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
                             />
                             <button
-                                onClick={() => navigate("/admin-Courses/add")}
+                                onClick={() => navigate("/admin-courses/add")}
                                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
                             >
                                 + Add Course
@@ -176,7 +176,7 @@ export default function Admin_Courses() {
                     </div>
 
                     {loading ? (
-                        <p className="text-center text-gray-500">Loading Courses...</p>
+                        <p className="text-center text-gray-500">Loading courses...</p>
                     ) : error ? (
                         <p className="text-center text-red-500">{error}</p>
                     ) : (
@@ -194,7 +194,7 @@ export default function Admin_Courses() {
                                     {filteredCourses.length === 0 ? (
                                         <tr>
                                             <td colSpan="4" className="px-4 py-4 text-center text-gray-500">
-                                                No Courses found.
+                                                No courses found.
                                             </td>
                                         </tr>
                                     ) : (
@@ -209,7 +209,7 @@ export default function Admin_Courses() {
                                                 <td className="px-3 py-2">
                                                     <div className="flex flex-col sm:flex-row gap-1 justify-center items-center">
                                                         <button
-                                                            onClick={() => navigate(`/admin-Courses/edit/${course.course_id}`)}
+                                                            onClick={() => navigate(`/admin-courses/edit/${course.course_id}`)}
                                                             className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs sm:text-sm whitespace-nowrap w-full sm:w-auto"
                                                         >
                                                             Edit
@@ -265,9 +265,9 @@ export default function Admin_Courses() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={MessageModalTitle}
-                message={MessageModalMessage}
-                type={MessageModalType}
+                title={messageModalTitle}
+                message={messageModalMessage}
+                type={messageModalType}
             />
         </div>
     );

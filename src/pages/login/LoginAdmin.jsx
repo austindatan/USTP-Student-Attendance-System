@@ -11,7 +11,7 @@ const LoginAdmin = () => {
   useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
     if (storedAdmin) {
-      navigate("/admin-Dashboard", { replace: true });
+      navigate("/admin-dashboard", { replace: true });
     }
   }, [navigate]);
 
@@ -22,7 +22,7 @@ const LoginAdmin = () => {
 
     try {
       const response = await fetch(
-        "http://localhost/ustp-student-attendance-system/api/auth/LoginAdmin.php",
+        "http://localhost/ustp-student-attendance/api/auth/login-admin.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -35,7 +35,7 @@ const LoginAdmin = () => {
       if (data.success) {
         localStorage.setItem("userRole", "admin");
         localStorage.setItem("admin", JSON.stringify(data.user));
-        navigate("/admin-Dashboard");
+        navigate("/admin-dashboard");
       } else {
         setError(data.message || "Invalid credentials");
       }

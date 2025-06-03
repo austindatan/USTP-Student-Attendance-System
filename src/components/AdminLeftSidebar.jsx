@@ -47,7 +47,7 @@ const AdminLeftSidebar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("admin");
-    navigate("/LoginAdmin");
+    navigate("/login-admin");
   };
 
 
@@ -99,9 +99,9 @@ const AdminLeftSidebar = () => {
         <nav>
 
           <button
-            onClick={() => handleNavigate("/admin-Dashboard")}
+            onClick={() => handleNavigate("/admin-dashboard")}
             className={`mt-3 group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-              window.location.pathname === "/admin-Dashboard"
+              window.location.pathname === "/admin-dashboard"
                 ? "text-[#7685fc]"
                 : "hover:text-[#7685fc] text-[#737373]"
             }`}
@@ -111,9 +111,9 @@ const AdminLeftSidebar = () => {
           </button>
 
           <button
-            onClick={() => handleNavigate("/DropRequests")}
+            onClick={() => handleNavigate("/drop_requests")}
             className={`mt-3 group flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 w-full text-center ${
-              window.location.pathname === "/DropRequests"
+              window.location.pathname === "/drop_requests"
                 ? "text-[#7685fc]"
                 : "hover:text-[#7685fc] text-[#737373]"
             }`}
@@ -158,7 +158,7 @@ const AdminLeftSidebar = () => {
             {academicsOpen && (
               <div className="mt-2 flex flex-col gap-2">
                 <button
-                  onClick={() => handleNavigate("/admin-Students")}
+                  onClick={() => handleNavigate("/admin-students")}
                   className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
                   <FaUserGraduate className="w-5 h-5 mb-2" />
@@ -172,14 +172,14 @@ const AdminLeftSidebar = () => {
                   Instructors
                 </button>
                 <button
-                  onClick={() => handleNavigate("/admin-Sections")}
+                  onClick={() => handleNavigate("/admin-sections")}
                   className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
                   <FaClipboardList className="w-5 h-5 mb-2" />
                   Sections
                 </button>
                 <button
-                  onClick={() => handleNavigate("/admin-Courses")}
+                  onClick={() => handleNavigate("/admin-courses")}
                   className="group flex flex-col items-center text-[10px] text-[#737373] hover:text-[#7685fc]"
                 >
                   <FaBookOpen className="w-5 h-5 mb-2" />

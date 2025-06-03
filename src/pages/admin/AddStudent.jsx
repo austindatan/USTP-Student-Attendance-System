@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ConfirmationModal from '../../components/ConfirmationModal';
+import ConfirmationModal from '../../components/confirmationmodal';
 import MessageModal from '../../components/MessageModal'; 
 
 export default function AddStudent() {
@@ -51,9 +51,9 @@ export default function AddStudent() {
 
     // Message Modal states
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-    const [MessageModalTitle, setMessageModalTitle] = useState('');
-    const [MessageModalMessage, setMessageModalMessage] = useState('');
-    const [MessageModalType, setMessageModalType] = useState('info'); 
+    const [messageModalTitle, setMessageModalTitle] = useState('');
+    const [messageModalMessage, setMessageModalMessage] = useState('');
+    const [messageModalType, setMessageModalType] = useState('info'); 
 
     const showMessageModal = useCallback((title, message, type = 'info') => {
         setMessageModalTitle(title);
@@ -80,12 +80,12 @@ export default function AddStudent() {
 
         try {
             const params = { year_level_id: yearLevelId, semester_id: semesterId };
-            const secRes = await axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/SectionDropdown.php', { params });
+            const secRes = await axios.get('http://localhost/ustp-student-attendance/api/admin-backend/section_dropdown.php', { params });
             const fetchedSections = secRes.data;
             setCachedSections(prevCached => ({ ...prevCached, [cacheKey]: fetchedSections }));
             return fetchedSections;
         } catch (error) {
-            console.error(`Error fetching Sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
+            console.error(`Error fetching sections for Year ${yearLevelId}, Semester ${semesterId}:`, error);
             showMessageModal('Error', `Failed to fetch classes for the selected academic period. Please try again.`, 'error');
             return [];
         }
@@ -97,9 +97,9 @@ export default function AddStudent() {
             setErrorDropdowns(null);
             try {
                 const [progRes, yearRes, semRes] = await Promise.all([
-                    axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/PdDropdown.php'),
-                    axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetYearLevels.php'),
-                    axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/GetSemesters.php'),
+                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/pd_dropdown.php'),
+                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_year_levels.php'),
+                    axios.get('http://localhost/ustp-student-attendance/api/admin-backend/get_semesters.php'),
                 ]);
 
                 setProgramDetails(progRes.data);
@@ -232,7 +232,7 @@ export default function AddStudent() {
 
     const handleCancel = () => {
         handleResetForm();
-        navigate('/admin-Students');
+        navigate('/admin-students');
     };
 
     const handleOpenAddStudentModal = (e) => {
@@ -286,7 +286,7 @@ export default function AddStudent() {
         submissionData.append('enrollments', JSON.stringify(enrollments));
         try {
             const res = await axios.post(
-                'http://localhost/ustp-student-attendance-system/api/admin-backend/StudentAddApi.php',
+                'http://localhost/ustp-student-attendance/api/admin-backend/student_add_api.php',
                 submissionData,
                 {
                     headers: {
@@ -297,7 +297,7 @@ export default function AddStudent() {
             setIsAddStudentModalOpen(false);
             handleResetForm();
             showMessageModal('Success!', 'Student added successfully!', 'success'); 
-            navigate('/admin-Students');
+            navigate('/admin-students');
         } catch (error) {
             console.error('Failed to add student:', error.response?.data || error.message);
             showMessageModal('Error Adding Student', `Failed to add student: ${error.response?.data?.message || 'Please check the console for details.'}`, 'error');
@@ -597,9 +597,9 @@ export default function AddStudent() {
             <MessageModal
                 isOpen={isMessageModalOpen}
                 onClose={closeMessageModal}
-                title={MessageModalTitle}
-                message={MessageModalMessage}
-                type={MessageModalType}
+                title={messageModalTitle}
+                message={messageModalMessage}
+                type={messageModalType}
             />
         </div>
     );

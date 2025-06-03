@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCheckCircle, FiXCircle, FiCalendar, FiBookOpen } from "react-icons/fi";
-import class_card from './components/class_card'; // Correct import for class_card
+import ClassCard from './components/class_card'; // Correct import for ClassCard
 import { format } from 'date-fns'; // Used for formatting date for navigation
 
 function DashboardCard({ icon, label, count }) {
@@ -20,8 +20,8 @@ function SkeletonCard() {
   return <div className="bg-gray-200 rounded-2xl h-20 animate-pulse w-full"></div>;
 }
 
-// Skeleton for the actual class_card component
-function Skeletonclass_card() {
+// Skeleton for the actual ClassCard component
+function SkeletonClassCard() {
   return (
     <div className="bg-gray-200 rounded-2xl p-5 shadow-lg flex flex-col gap-3 animate-pulse w-full">
       <div className="h-6 w-3/4 bg-gray-300 rounded mb-2"></div>
@@ -50,7 +50,7 @@ export default function StudentDashboard({ selectedDate }) {
   });
 
   const [messages, setMessages] = useState([]);
-  const [classes, setClasses] = useState([]); // State for Sections/classes
+  const [classes, setClasses] = useState([]); // State for sections/classes
 
   // Keep student state in sync with localStorage changes (even from other tabs)
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function StudentDashboard({ selectedDate }) {
 
   useEffect(() => {
     if (!student || !student.id) {
-      navigate("/LoginStudent");
+      navigate("/login-student");
       return;
     }
 
@@ -77,22 +77,22 @@ export default function StudentDashboard({ selectedDate }) {
 
     const attendanceEndpoints = [
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student-backend/GetYearlyPresentCount.php",
+        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_present_count.php",
         setter: setPresent,
         key: "total_present",
       },
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student-backend/GetYearlyAbsentCount.php",
+        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_absent_count.php",
         setter: setAbsent,
         key: "total_absent",
       },
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student-backend/GetYearlyExcusedCount.php",
+        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_excused_count.php",
         setter: setExcused,
         key: "total_excused",
       },
       {
-        url: "http://localhost/ustp-student-attendance-system/api/student-backend/GetYearlyLateCount.php",
+        url: "http://localhost/ustp-student-attendance/api/student_backend/get_yearly_late_count.php",
         setter: setMissed,
         key: "total_late",
       },
@@ -124,7 +124,7 @@ export default function StudentDashboard({ selectedDate }) {
 
     // New API call for classes, using GET and query parameter
     const fetchClassesData = fetch(
-      `http://localhost/ustp-student-attendance-system/api/student-backend/GetSections.php?student_id=${student.id}`
+      `http://localhost/ustp-student-attendance/api/student_backend/get_sections.php?student_id=${student.id}`
     )
       .then(async (res) => {
         if (!res.ok) {
@@ -133,7 +133,7 @@ export default function StudentDashboard({ selectedDate }) {
         return res.json();
       })
       .then((data) => {
-        setClasses(data); // Assuming data is directly the array of Sections
+        setClasses(data); // Assuming data is directly the array of sections
       })
       .catch((err) => {
         console.error('Error fetching classes:', err);
@@ -150,7 +150,7 @@ export default function StudentDashboard({ selectedDate }) {
         ]);
       })
       .catch((err) => {
-        setError(err.message || "Failed to fetch Dashboard data.");
+        setError(err.message || "Failed to fetch dashboard data.");
       })
       .finally(() => setLoading(false));
   }, [student, navigate]); // Depend on student and navigate
@@ -158,7 +158,7 @@ export default function StudentDashboard({ selectedDate }) {
   const handleLogout = () => {
     localStorage.removeItem("student");
     localStorage.removeItem("userRole");
-    navigate("/LoginStudent");
+    navigate("/login-student");
   };
 
   const handleSectionClick = (section) => {
@@ -229,12 +229,12 @@ export default function StudentDashboard({ selectedDate }) {
         <div className="mb-10 w-full">
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
-              [...Array(3)].map((_, i) => <Skeletonclass_card key={i} />)
+              [...Array(3)].map((_, i) => <SkeletonClassCard key={i} />)
             ) : error ? (
               <p className="text-red-600 font-medium col-span-full text-center">{error}</p>
             ) : classes.length > 0 ? (
               classes.map((section) => (
-                <class_card
+                <ClassCard
                   key={`${section.section_id}-${section.course_id}`}
                   isLoading={loading}
                   code={section.course_code}

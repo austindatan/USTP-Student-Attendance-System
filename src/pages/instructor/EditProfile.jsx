@@ -39,7 +39,7 @@ const EditProfile = () => {
     }
 
     fetch(
-      `http://localhost/ustp-student-attendance-system/api/GetInstructor.php?id=${storedInstructor.instructor_id}`
+      `http://localhost/ustp-student-attendance/api/get_instructor.php?id=${storedInstructor.instructor_id}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -48,8 +48,8 @@ const EditProfile = () => {
 
           const image = data.instructor.image;
           const resolvedURL = image.includes("uploads/")
-            ? `http://localhost/ustp-student-attendance-system/api/${image}`
-            : `http://localhost/ustp-student-attendance-system/api/uploads/${image}`;
+            ? `http://localhost/ustp-student-attendance/api/${image}`
+            : `http://localhost/ustp-student-attendance/api/uploads/${image}`;
 
           setPreviewURL(resolvedURL);
         } else {
@@ -101,7 +101,7 @@ const EditProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost/ustp-student-attendance-system/api/EditProfile.php",
+        "http://localhost/ustp-student-attendance/api/edit_profile.php",
         {
           method: "POST",
           body: formPayload,
@@ -111,7 +111,7 @@ const EditProfile = () => {
       const result = await res.json();
       if (result.success) {
         localStorage.setItem("instructor", JSON.stringify(result.instructor));
-        navigate("/teacher-Dashboard");
+        navigate("/teacher-dashboard");
       } else {
       }
     } catch (error) {
@@ -121,7 +121,7 @@ const EditProfile = () => {
   };
 
   const handleBack = () => {
-    navigate("/teacher-Dashboard");
+    navigate("/teacher-dashboard");
   };
 
   return (

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function Admin_Sections() {
-    const [Sections, setSections] = useState([]);
+    const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -24,24 +24,24 @@ export default function Admin_Sections() {
     };
 
     useEffect(() => {
-        axios.get('http://localhost/ustp-student-attendance-system/api/admin-backend/SectionWithDetails.php')
+        axios.get('http://localhost/ustp-student-attendance/api/admin-backend/section_with_details.php')
             .then(res => {
-                console.log("Fetched Sections data:", res.data);
-                if (res.data && res.data.success && Array.isArray(res.data.Sections)) {
-                    setSections(res.data.Sections);
+                console.log("Fetched sections data:", res.data);
+                if (res.data && res.data.success && Array.isArray(res.data.sections)) {
+                    setSections(res.data.sections);
                     setError(null);
                 } else {
                     setSections([]);
-                    console.warn("Unexpected data format or no Sections found:", res.data);
-                    setError(res.data ? (res.data.message || 'No Sections found or unexpected data format.') : 'Failed to fetch data from server.');
-                    showFloatingMessage(res.data ? (res.data.message || 'No Sections found or unexpected data format.') : 'Failed to fetch data from server.', true);
+                    console.warn("Unexpected data format or no sections found:", res.data);
+                    setError(res.data ? (res.data.message || 'No sections found or unexpected data format.') : 'Failed to fetch data from server.');
+                    showFloatingMessage(res.data ? (res.data.message || 'No sections found or unexpected data format.') : 'Failed to fetch data from server.', true);
                 }
             })
             .catch((err) => {
-                console.error("Error fetching Sections:", err);
+                console.error("Error fetching sections:", err);
                 setSections([]);
-                setError("Failed to fetch Sections. Please check your network or server.");
-                showFloatingMessage("Failed to fetch Sections. Please check your network or server.", true);
+                setError("Failed to fetch sections. Please check your network or server.");
+                showFloatingMessage("Failed to fetch sections. Please check your network or server.", true);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -52,14 +52,14 @@ export default function Admin_Sections() {
     };
 
     const confirmDelete = () => {
-        axios.post('http://localhost/ustp-student-attendance-system/api/admin-backend/DeleteSection.php', {
+        axios.post('http://localhost/ustp-student-attendance/api/admin-backend/delete_section.php', {
             _method: 'DELETE',
             section_id: selectedSection.section_id,
         })
             .then((res) => {
                 if (res.data.success) {
                     setIsModalOpen(false);
-                    setSections(Sections.filter(s => s.section_id !== selectedSection.section_id));
+                    setSections(sections.filter(s => s.section_id !== selectedSection.section_id));
                     showFloatingMessage("Section deleted successfully!", false);
                 } else {
                     console.error(res.data.message || "Failed to delete section.");
@@ -77,10 +77,10 @@ export default function Admin_Sections() {
     };
 
     const handleViewCourses = (sectionId) => {
-        navigate(`/Sections/${sectionId}/Courses`);
+        navigate(`/sections/${sectionId}/courses`);
     };
 
-    const filteredSections = Sections.filter(section =>
+    const filteredSections = sections.filter(section =>
         section.section_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (section.year_level_name && section.year_level_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (section.semester_name && section.semester_name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -130,13 +130,13 @@ export default function Admin_Sections() {
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input
                                 type="text"
-                                placeholder="Search Sections..."
+                                placeholder="Search sections..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-[250px]"
                             />
                             <button
-                                onClick={() => navigate("/admin-Sections/add")}
+                                onClick={() => navigate("/admin-sections/add")}
                                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 w-full sm:w-auto"
                             >
                                 + Add Section
@@ -144,7 +144,7 @@ export default function Admin_Sections() {
                         </div>
                     </div>
                     {loading ? (
-                        <p className="text-center text-gray-500">Loading Sections...</p>
+                        <p className="text-center text-gray-500">Loading sections...</p>
                     ) : error ? (
                         <p className="text-center text-red-500">{error}</p>
                     ) : (
@@ -162,7 +162,7 @@ export default function Admin_Sections() {
                                     {filteredSections.length === 0 ? (
                                         <tr>
                                             <td colSpan="4" className="px-4 py-6 text-center text-gray-500">
-                                                No Sections found.
+                                                No sections found.
                                             </td>
                                         </tr>
                                     ) : (

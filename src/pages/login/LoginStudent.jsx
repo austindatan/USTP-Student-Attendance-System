@@ -14,8 +14,8 @@ const LoginStudent = () => {
                 const userData = JSON.parse(storedUser);
 
                 if (userData && userData.id) {
-                    console.log("LoginStudent (useEffect): Student already logged in, redirecting to Dashboard.");
-                    navigate("/student-Dashboard", { replace: true });
+                    console.log("LoginStudent (useEffect): Student already logged in, redirecting to dashboard.");
+                    navigate("/student-dashboard", { replace: true });
                 }
             } catch (e) {
                 console.error("LoginStudent (useEffect): Error parsing stored 'student' data:", e);
@@ -30,7 +30,7 @@ const LoginStudent = () => {
         setError(""); 
 
         try {
-            const response = await fetch("http://localhost/ustp-student-attendance-system/api/auth/LoginStudent.php", {
+            const response = await fetch("http://localhost/ustp-student-attendance/api/auth/login-student.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -56,8 +56,8 @@ const LoginStudent = () => {
                 localStorage.setItem('userRole', 'student');
                 localStorage.setItem('student', JSON.stringify(data.user));
 
-                console.log("LoginStudent: Successfully stored student data in localStorage. Navigating to Dashboard.");
-                navigate("/student-Dashboard"); 
+                console.log("LoginStudent: Successfully stored student data in localStorage. Navigating to dashboard.");
+                navigate("/student-dashboard"); 
             } else {
                 setError(data.message || "Login failed. Please check your credentials.");
             }

@@ -10,14 +10,14 @@ const LoginInstructor = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem("instructor");
     if (storedUser) {
-      navigate("/teacher-Dashboard", { replace: true });
+      navigate("/teacher-dashboard", { replace: true });
     }
   }, [navigate]);
 
   const handleLogin = async e => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost/ustp-student-attendance-system/api/auth/LoginInstructor.php", {
+      const res = await fetch("http://localhost/ustp-student-attendance/api/auth/login-instructor.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -38,7 +38,7 @@ const LoginInstructor = () => {
       if (result.success) {
         localStorage.setItem("instructor", JSON.stringify(result.instructor));
         localStorage.setItem("userRole", "instructor");
-        navigate("/teacher-Dashboard");
+        navigate("/teacher-dashboard");
       } else {
         alert(result.message);
       }
@@ -129,7 +129,7 @@ const LoginInstructor = () => {
           Don't have an account?{" "}
           <span
             className="text-blue-500 cursor-pointer"
-            onClick={() => navigate('/LoginInstructor')}
+            onClick={() => navigate('/register-instructor')}
           >
             Register here
           </span>
